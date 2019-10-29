@@ -6,6 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -21,8 +22,10 @@ public class Main extends Application {
 
 
 
+
+
         primaryStage.setTitle("Hello World");
-        primaryStage.setScene(new Scene(root, 300, 275));
+        primaryStage.setScene(new Scene(root, 1000, 1275));
         primaryStage.show();
     }
 
