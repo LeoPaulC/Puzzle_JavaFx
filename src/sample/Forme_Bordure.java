@@ -9,6 +9,8 @@ import java.util.ArrayList;
 public class Forme_Bordure extends Shape {
 
     static final int NB_CERCLE_PAR_BORDURE = 7 ;
+    static int TAILLE_COTE_PIECE_HAUTEUR = 200;
+    static int TAILLE_COTE_PIECE_LONGUEUR = 200;
 
     ArrayList<Circle> liste_cercle ;
     ArrayList<Circle> liste_cercle_controle ;
