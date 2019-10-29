@@ -5,6 +5,33 @@ import javafx.scene.shape.*;
 
 import java.awt.image.AreaAveragingScaleFilter;
 import java.util.ArrayList;
+/**Contraintes
+ *   |o
+ *  o|_ _ _ _ _ _ _ >x
+ *   |
+ *   |
+ *   |
+ *   |
+ * y v
+ * liste des cercles d'une dent ou d'un creux = {c0, ..., c6} (ceux des courbes)
+ *  on place c0 et c6 en fonction de la piece
+ *  pour i = 0, ... , 6 , ci:(xi,yi)
+ *  pour i = 0 et i = 6 contrainte lié avec la position de la piece etc
+ *  donc x0,x6,y0,y6 fixé
+ *  min_taille creux/dents
+ *  limit_droite = x6-min_taille
+ *  limit_gauche = x0+min_taille
+ *  pour i = 1
+ *      x0 <= x1 < limit_droite , y1 < y0
+ *  pour i = 2
+ *      x1 <= x2 < limit_droite , y2 < y1
+ *  pour i = 3
+ *      x0 <= x3 <= x6 , y2 < y3
+ *  pour i = 4
+ *      x3 <= x4 , y3 < y4
+ *  pour i = 5
+ *      limit_gauche < x5 <= x4 , y4 < y5
+ * */
 
 public class Forme_Bordure extends Shape {
 
