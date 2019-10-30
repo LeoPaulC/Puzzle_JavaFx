@@ -36,8 +36,8 @@ import java.util.ArrayList;
 public class Forme_Bordure extends Shape {
 
     static final int NB_CERCLE_PAR_BORDURE = 7 ;
-    static int TAILLE_COTE_PIECE_HAUTEUR = 800;
-    static int TAILLE_COTE_PIECE_LONGUEUR = 800;
+    static int TAILLE_COTE_PIECE_HAUTEUR = 500;
+    static int TAILLE_COTE_PIECE_LONGUEUR = 500;
     static int MIN_TAILLE = 20 ; // taille minimale entre
 
     ArrayList<Circle> liste_cercle ;
