@@ -19,13 +19,15 @@ public class Main extends Application {
         Dents d = new Dents();
 
         d.liste_cercle.forEach( c -> root.getChildren().add(c));
+        d.liste_cercle_controle.forEach( c -> root.getChildren().add(c));
+        root.getChildren().add(d.notre_path);
 
 
 
 
 
         primaryStage.setTitle("Hello World");
-        primaryStage.setScene(new Scene(root, 1000, 1275));
+        primaryStage.setScene(new Scene(root, 1400, 1275));
         primaryStage.show();
     }
 

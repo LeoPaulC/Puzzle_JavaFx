@@ -2,6 +2,7 @@ package sample;
 
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
+import javafx.scene.text.Text;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -115,6 +116,47 @@ public class Dents extends Forme_Bordure {
                     // Inutile donc utile a mettre :)
                     break ;
             }
+
+        }
+        for (int i = 0; i < this.liste_cercle_controle.size(); i++) { // car le spoints de controle sont cree 2 à 2
+            switch (i) {
+                case 0:
+                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(i).getLayoutX());
+                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(i).getLayoutY());
+                    break;
+                case 1:
+                    tmp = rand.nextInt((int) (this.liste_cercle.get(1).getLayoutX() - this.liste_cercle.get(0).getLayoutX()));
+                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(1).getLayoutX() - tmp);
+                    tmp = rand.nextInt((int) (this.liste_cercle.get(0).getLayoutY() - this.liste_cercle.get(1).getLayoutY()));
+                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - tmp);
+                    break;
+                default:
+                    this.liste_cercle_controle.get(i).setLayoutX(rand.nextInt(1000));
+                    this.liste_cercle_controle.get(i).setLayoutY(rand.nextInt(1000));
+                    break;
+
+            }
+
+        }
+        for (int i = 0; i < this.liste_cubicCurveTo.size() ; i++) {
+
+            this.liste_cubicCurveTo.get(i).setX(this.liste_cercle.get(i).getLayoutX());
+            this.liste_cubicCurveTo.get(i).setY(this.liste_cercle.get(i).getLayoutY());
+
+            System.out.println("Size " + this.liste_cubicCurveTo.size() );
+            System.out.println("Size " + this.liste_cercle_controle.size() );
+
+            this.liste_cubicCurveTo.get(i).controlX1Property().bind(this.liste_cercle_controle.get(2*i).layoutXProperty() );
+            this.liste_cubicCurveTo.get(i).controlY1Property().bind(this.liste_cercle_controle.get(2*i).layoutYProperty());
+
+            this.liste_cubicCurveTo.get(i).controlX2Property().bind(this.liste_cercle_controle.get(2*i+1).layoutXProperty());
+            this.liste_cubicCurveTo.get(i).controlY2Property().bind(this.liste_cercle_controle.get(2*i+1).layoutYProperty());
+
+            this.liste_Moveto.get(i).setX(this.liste_cercle.get(i+1).getLayoutX());
+            this.liste_Moveto.get(i).setY(this.liste_cercle.get(i+1).getLayoutY());
+
+            notre_path.getElements().add(this.liste_Moveto.get(i));
+            notre_path.getElements().add(this.liste_cubicCurveTo.get(i));
 
         }
 

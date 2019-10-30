@@ -36,8 +36,8 @@ import java.util.ArrayList;
 public class Forme_Bordure extends Shape {
 
     static final int NB_CERCLE_PAR_BORDURE = 7 ;
-    static int TAILLE_COTE_PIECE_HAUTEUR = 200;
-    static int TAILLE_COTE_PIECE_LONGUEUR = 200;
+    static int TAILLE_COTE_PIECE_HAUTEUR = 800;
+    static int TAILLE_COTE_PIECE_LONGUEUR = 800;
     static int MIN_TAILLE = 20 ; // taille minimale entre
 
     ArrayList<Circle> liste_cercle ;
@@ -60,8 +60,8 @@ public class Forme_Bordure extends Shape {
             // Création de notre liste de cercle de controle
             liste_cercle_controle = new ArrayList<>();
             for (int i = 0; i < (NB_CERCLE_PAR_BORDURE - 1) * 2; i += 2) { // 12 points de controles
-                liste_cercle.add(new Circle(10, Color.BLUE)); // premier point de controle en bleu
-                liste_cercle.add(new Circle(10, Color.GREEN)); // deuxieme en vert
+                liste_cercle_controle.add(new Circle(10, Color.BLUE)); // premier point de controle en bleu
+                liste_cercle_controle.add(new Circle(10, Color.GREEN)); // deuxieme en vert
             }
             // creation de notre liste de cubicCurveTo
             liste_cubicCurveTo = new ArrayList<>();
