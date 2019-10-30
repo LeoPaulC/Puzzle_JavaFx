@@ -10,6 +10,9 @@ import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
+import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Transform;
+import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -33,16 +36,17 @@ public class Main extends Application {
         rect.setLayoutX(d.liste_cercle.get(0).getLayoutX());
         rect.setLayoutY(d.liste_cercle.get(0).getLayoutY());
 
-
+        Dents d2 = new Dents(d);
+        System.out.println(" mon layout X : "+d2.liste_cercle.get(0).getLayoutX());
         Shape s =  Shape.union(d.notre_path,rect);
-        d.notre_path.setFillRule(FillRule.EVEN_ODD);
-        d.notre_path.setFill(Color.RED);
 
+        //d.notre_path.setFillRule(FillRule.EVEN_ODD);
+        //d.notre_path.setFill(Color.RED);
+        //root.getChildren().addAll(d2);
 
+        //Shape ss = Path.union(d.notre_path,rect);
 
-        Shape ss = Path.union(d.notre_path,rect);
-
-        ss.setFill(Color.RED);
+        //ss.setFill(Color.RED);
 
         //s.setStroke(Color.BLUE);
 
@@ -52,8 +56,14 @@ public class Main extends Application {
         //d.notre_path.setFill(Color.RED);
 
         //s.setFill(Color.RED);
+        Dents d3 = new Dents(d);
+        Dents d4 = new Dents(d);
+        d2.notre_path.getTransforms().add(new Rotate(270, d.getListe_cercle().get(6).getLayoutX(), d.getListe_cercle().get(6).getLayoutY()));
+        d3.notre_path.getTransforms().add(new Rotate(90));
+        d3.notre_path.setTranslateY(Forme_Bordure.getTailleCotePieceHauteur());
+        d4.notre_path.getTransforms().add(new Rotate(90, d2.getListe_cercle().get(0).getLayoutX(), d.getListe_cercle().get(0).getLayoutY()));
 
-        root.getChildren().add(ss);
+        root.getChildren().addAll(d4.notre_path,d3.notre_path,d2.notre_path,d.notre_path);
 
 
 

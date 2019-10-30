@@ -44,11 +44,9 @@ public class Forme_Bordure extends Shape {
     ArrayList<Circle> liste_cercle_controle ;
     ArrayList<CubicCurveTo> liste_cubicCurveTo ;
     ArrayList<MoveTo> liste_Moveto ;
-    LineTo liste_plate ;
-
-    Boolean est_plat ;
-
     Path notre_path ;
+    LineTo liste_plate ;
+    Boolean est_plat ;
 
     Forme_Bordure(Boolean est_plat){
         if ( !est_plat ) { // coté avec creux et ou dents
@@ -80,5 +78,89 @@ public class Forme_Bordure extends Shape {
             liste_cercle.add(new Circle(10 ,Color.GOLD) ) ;
             liste_plate = new LineTo();
         }
+    }
+
+    public static int getTailleCotePieceHauteur() {
+        return TAILLE_COTE_PIECE_HAUTEUR;
+    }
+
+    public static void setTailleCotePieceHauteur(int tailleCotePieceHauteur) {
+        TAILLE_COTE_PIECE_HAUTEUR = tailleCotePieceHauteur;
+    }
+
+    public static int getTailleCotePieceLongueur() {
+        return TAILLE_COTE_PIECE_LONGUEUR;
+    }
+
+    public static void setTailleCotePieceLongueur(int tailleCotePieceLongueur) {
+        TAILLE_COTE_PIECE_LONGUEUR = tailleCotePieceLongueur;
+    }
+
+    public static int getMinTaille() {
+        return MIN_TAILLE;
+    }
+
+    public static void setMinTaille(int minTaille) {
+        MIN_TAILLE = minTaille;
+    }
+
+    public ArrayList<Circle> getListe_cercle() {
+        return liste_cercle;
+    }
+
+    public void setListe_cercle(ArrayList<Circle> liste_cercle) {
+        this.liste_cercle = liste_cercle;
+    }
+
+    public ArrayList<Circle> getListe_cercle_controle() {
+        return liste_cercle_controle;
+    }
+
+    public void setListe_cercle_controle(ArrayList<Circle> liste_cercle_controle) {
+        this.liste_cercle_controle = liste_cercle_controle;
+    }
+
+    public ArrayList<CubicCurveTo> getListe_cubicCurveTo() {
+        return liste_cubicCurveTo;
+    }
+
+    public void setListe_cubicCurveTo(ArrayList<CubicCurveTo> liste_cubicCurveTo) {
+        this.liste_cubicCurveTo = liste_cubicCurveTo;
+    }
+
+    public ArrayList<MoveTo> getListe_Moveto() {
+        return liste_Moveto;
+    }
+
+    public void setListe_Moveto(ArrayList<MoveTo> liste_Moveto) {
+        this.liste_Moveto = liste_Moveto;
+    }
+
+    public LineTo getListe_plate() {
+        return liste_plate;
+    }
+
+    public void setListe_plate(LineTo liste_plate) {
+        this.liste_plate = liste_plate;
+    }
+
+    public Boolean getEst_plat() {
+        return est_plat;
+    }
+
+    public void setEst_plat(Boolean est_plat) {
+        this.est_plat = est_plat;
+    }
+
+    public Path getNotre_path() {
+        return notre_path;
+    }
+
+    public void setNotre_path(Path notre_path) {
+        this.notre_path = notre_path;
+    }
+
+    public static int getNbCercleParBordure() {
+        return NB_CERCLE_PAR_BORDURE;
     }
 }
