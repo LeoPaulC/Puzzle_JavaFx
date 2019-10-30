@@ -20,8 +20,8 @@ public class Dents extends Forme_Bordure {
         /**
          * pour nos tets on va placer le premier point au coordonne 200,300
          */
-        this.liste_cercle.get(0).setLayoutX(100);
-        this.liste_cercle.get(0).setLayoutY(800);
+        this.liste_cercle.get(0).setLayoutX(TAILLE_COTE_PIECE_LONGUEUR);
+        this.liste_cercle.get(0).setLayoutY(TAILLE_COTE_PIECE_HAUTEUR);
         this.liste_cercle.get(0).setFill(Color.GOLD);
         /**
          * on place le 6eme cercle sur la meme ligne que le premier et decalé de "LA largeur d'une piece" .
@@ -152,6 +152,10 @@ public class Dents extends Forme_Bordure {
 
                     //this.liste_cercle_controle.get(i).setFill(Color.DARKCYAN);
                     break;
+                case 2 :
+                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX()+TAILLE_COTE_PIECE_LONGUEUR*0.43);
+                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - TAILLE_COTE_PIECE_HAUTEUR * 0.12);
+                    break ;
                 case 3 :
                     /**
                      * a gauche de controle 2 et en haut de controle 2
@@ -166,6 +170,11 @@ public class Dents extends Forme_Bordure {
 
                     break ;
 
+                case 4 :
+                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX()+TAILLE_COTE_PIECE_LONGUEUR*0.36);
+                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - TAILLE_COTE_PIECE_HAUTEUR * 0.34);
+                    break ;
+
                 case 5 :
                     //tmp = rand.nextInt((int) Math.abs(this.liste_cercle_controle.get(3).getLayoutX() - this.liste_cercle.get(2).getLayoutX()));
                     this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + TAILLE_COTE_PIECE_LONGUEUR * 0.42);
@@ -173,6 +182,12 @@ public class Dents extends Forme_Bordure {
                     this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(3).getLayoutY() );
 
                     break ;
+
+                case 6:
+                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX()+TAILLE_COTE_PIECE_LONGUEUR*0.58);
+                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - TAILLE_COTE_PIECE_HAUTEUR * 0.40);
+                    break ;
+
 
                 case 7 :
 //                    tmp = rand.nextInt((int) Math.abs(this.liste_cercle_controle.get(6).getLayoutX() - this.liste_cercle.get(4).getLayoutX()));
@@ -182,12 +197,20 @@ public class Dents extends Forme_Bordure {
                     this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(6).getLayoutY() - TAILLE_COTE_PIECE_HAUTEUR * 0.34);
 
                     break ;
+                case 8 :
+                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(6).getLayoutX() - TAILLE_COTE_PIECE_LONGUEUR*0.36);
+                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(6).getLayoutY() - TAILLE_COTE_PIECE_HAUTEUR * 0.16);
+                    break ;
                 case 9:
                     //tmp = rand.nextInt((int) Math.abs(this.liste_cercle_controle.get(3).getLayoutX() - this.liste_cercle.get(5).getLayoutX()));
                     this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(6).getLayoutX() - TAILLE_COTE_PIECE_LONGUEUR * 0.43);
 
                     //tmp = rand.nextInt((int) Math.abs(this.liste_cercle_controle.get(5).getLayoutY() - this.liste_cercle.get(4).getLayoutY()));
                     this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(6).getLayoutY() - TAILLE_COTE_PIECE_HAUTEUR * 0.12);
+                    break ;
+                case 10 :
+                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(6).getLayoutX() - TAILLE_COTE_PIECE_LONGUEUR*0.34);
+                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(6).getLayoutY() );
                     break ;
                 case 11 :
                     this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(6).getLayoutX()- TAILLE_COTE_PIECE_LONGUEUR*0.2);
@@ -220,11 +243,13 @@ public class Dents extends Forme_Bordure {
             this.liste_cubicCurveTo.get(i).setX(this.liste_cercle.get(i).getLayoutX());
             this.liste_cubicCurveTo.get(i).setY(this.liste_cercle.get(i).getLayoutY());
 
-            this.liste_cubicCurveTo.get(i).controlX1Property().bind(this.liste_cercle_controle.get(2*i).layoutXProperty() );
-            this.liste_cubicCurveTo.get(i).controlY1Property().bind(this.liste_cercle_controle.get(2*i).layoutYProperty());
+            this.liste_cubicCurveTo.get(i).controlX1Property().bind(this.liste_cercle_controle.get(2*i+1).layoutXProperty() );
+            this.liste_cubicCurveTo.get(i).controlY1Property().bind(this.liste_cercle_controle.get(2*i+1).layoutYProperty());
 
-            this.liste_cubicCurveTo.get(i).controlX2Property().bind(this.liste_cercle_controle.get(2*i+1).layoutXProperty());
-            this.liste_cubicCurveTo.get(i).controlY2Property().bind(this.liste_cercle_controle.get(2*i+1).layoutYProperty());
+            this.liste_cubicCurveTo.get(i).controlX2Property().bind(this.liste_cercle_controle.get(2*i).layoutXProperty());
+            this.liste_cubicCurveTo.get(i).controlY2Property().bind(this.liste_cercle_controle.get(2*i).layoutYProperty());
+
+
 
             this.liste_Moveto.get(i).setX(this.liste_cercle.get(i+1).getLayoutX());
             this.liste_Moveto.get(i).setY(this.liste_cercle.get(i+1).getLayoutY());
@@ -288,7 +313,7 @@ public class Dents extends Forme_Bordure {
 
         double xC2 = controle2.getLayoutX();
         double yC2 = controle2.getLayoutY();
-
+/*
         double diffX = ( xC1 - xRef) ;
         double diffY = ( yC1 - yRef) ;
 
@@ -311,6 +336,18 @@ public class Dents extends Forme_Bordure {
 
         liste_cercle_controle.get(i).setLayoutX(point_fixe.getLayoutX() + diffX);
         liste_cercle_controle.get(i).setLayoutY(point_fixe.getLayoutX() + diffY);
+
+ */
+        double abx = xRef - xC1;
+        double aby = yRef - yC1;
+        double dprim = Math.sqrt(Math.pow(xRef - xC2, 2) + Math.pow(yRef - yC2, 2));
+        abx /= dprim;
+        aby /= dprim;
+        double d = Math.sqrt(Math.pow(xRef - xC1, 2) + Math.pow(yRef - yC1, 2));
+        abx *= d;
+        aby *= d;
+        controle2.setLayoutX(xRef + abx);
+        controle2.setLayoutY(yRef + aby);
 
     }
 
