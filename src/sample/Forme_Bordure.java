@@ -165,3 +165,4 @@ public class Forme_Bordure extends Shape {
         return NB_CERCLE_PAR_BORDURE;
     }
 }
+///
