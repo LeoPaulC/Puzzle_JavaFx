@@ -59,11 +59,13 @@ public class Main extends Application {
         Dents d3 = new Dents(d);
         Dents d4 = new Dents(d);
         d2.notre_path.getTransforms().add(new Rotate(270, d.getListe_cercle().get(6).getLayoutX(), d.getListe_cercle().get(6).getLayoutY()));
-        d3.notre_path.getTransforms().add(new Rotate(90));
-        d3.notre_path.setTranslateY(Forme_Bordure.getTailleCotePieceHauteur());
+        //d3.notre_path.getTransforms().add(new Rotate(90));
+        d3.notre_path.getTransforms().add(new Translate(0,Forme_Bordure.getTailleCotePieceHauteur() ));
+        //d3.notre_path.setTranslateY(Forme_Bordure.getTailleCotePieceHauteur());
         d4.notre_path.getTransforms().add(new Rotate(90, d2.getListe_cercle().get(0).getLayoutX(), d.getListe_cercle().get(0).getLayoutY()));
 
         root.getChildren().addAll(d4.notre_path,d3.notre_path,d2.notre_path,d.notre_path);
+
 
 
 
