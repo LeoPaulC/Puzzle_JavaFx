@@ -40,6 +40,7 @@ public class Forme_Bordure extends Shape {
     static int TAILLE_COTE_PIECE_LONGUEUR = 300;
     static int MIN_TAILLE = 20 ; // taille minimale entre
 
+
     ArrayList<Circle> liste_cercle ;
     ArrayList<Circle> liste_cercle_controle ;
     ArrayList<CubicCurveTo> liste_cubicCurveTo ;

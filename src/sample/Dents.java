@@ -17,6 +17,7 @@ public class Dents extends Forme_Bordure {
         super(false);
         rand = new Random();
 
+
         /**
          * pour nos tets on va placer le premier point au coordonne 200,300
          */
