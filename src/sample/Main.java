@@ -22,7 +22,7 @@ public class Main extends Application {
         //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         BorderPane root = new BorderPane();
 
-        Dents d = new Dents();
+        //Dents d = new Dents();
 
         //d.liste_cercle.forEach( c -> root.getChildren().add(c));
         //d.liste_cercle_controle.forEach( c -> root.getChildren().add(c));
@@ -30,7 +30,7 @@ public class Main extends Application {
 
 
         // on ajoute un rectangle a une shape pour obtenir une semi-piece
-        Rectangle rect = new Rectangle();
+        /*Rectangle rect = new Rectangle();
         rect.setWidth(Forme_Bordure.TAILLE_COTE_PIECE_LONGUEUR);
         rect.setHeight(Forme_Bordure.TAILLE_COTE_PIECE_HAUTEUR);
         rect.setLayoutX(d.liste_cercle.get(0).getLayoutX());
@@ -64,9 +64,15 @@ public class Main extends Application {
         //d3.notre_path.setTranslateY(Forme_Bordure.getTailleCotePieceHauteur());
         d4.notre_path.getTransforms().add(new Rotate(90, d2.getListe_cercle().get(0).getLayoutX(), d.getListe_cercle().get(0).getLayoutY()));
 
+
+
         root.getChildren().addAll(d4.notre_path,d3.notre_path,d2.notre_path,d.notre_path);
 
+         */
 
+        Piece piece_test = new Piece();
+
+        root.getChildren().add(piece_test.forme);
 
 
 

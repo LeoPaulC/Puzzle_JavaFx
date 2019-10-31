@@ -352,9 +352,6 @@ public class Dents extends Forme_Bordure {
 
     }
 
-    Dents(Creux creux){ // Aléatoire complet
-        super(false);
-    }
     Dents(Dents dents){
         super(false);
         this.liste_cercle = dents.getListe_cercle();
