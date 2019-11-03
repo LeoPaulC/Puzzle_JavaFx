@@ -15,6 +15,8 @@ import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
+
 public class Main extends Application {
 
     @Override
@@ -69,12 +71,23 @@ public class Main extends Application {
         root.getChildren().addAll(d4.notre_path,d3.notre_path,d2.notre_path,d.notre_path);
 
          */
-
+/*
         Piece piece_test = new Piece();
 
-        root.getChildren().add(piece_test.forme);
+        //root.getChildren().add(piece_test.forme);
+        Dents d = new Dents();
+        Creux c = new Creux(d);
 
 
+        root.getChildren().addAll(d.notre_path, c.notre_path);
+        */
+        ArrayList<Forme_Bordure> list = new ArrayList<>();
+        list.add(null);list.add(null);list.add(null);list.add(null);
+        Piece p = new Piece(list);
+        setAllCircleOnPane(p,root);
+        root.getChildren().add(p.forme);
+       // root.getChildren().addAll(d.notre_path);
+        //setAllCircleOnPane(piece_test,root);
 
 
 
@@ -87,6 +100,26 @@ public class Main extends Application {
         primaryStage.show();
     }
 
+    private void setAllCircleOnPane(Piece p, BorderPane pane) {
+        for (Forme_Bordure forme_bordure : p.tab_bordure) {
+            forme_bordure.liste_cercle.forEach(circle -> {
+                pane.getChildren().add(circle);
+            });
+            forme_bordure.liste_cercle_controle.forEach(circle -> {
+                pane.getChildren().add(circle);
+            });
+        }
+        /*p.liste_bordure.forEach(forme_bordure -> {
+            forme_bordure.liste_cercle.forEach(circle -> {
+                pane.getChildren().add(circle);
+            });
+            forme_bordure.liste_cercle_controle.forEach(circle -> {
+                pane.getChildren().add(circle);
+            });
+        });
+
+         */
+    }
 
     public static void main(String[] args) {
         launch(args);

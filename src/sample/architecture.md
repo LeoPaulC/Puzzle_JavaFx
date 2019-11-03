@@ -1,3 +1,13 @@
+                                CLASSE "PIECE":
+ _liste de Forme_Bordure : indice 0 , 1, 2 , 3 == HAUT , DROITE , BAS ,  GAUCHE
+ 
+
+
+
+
+
+
+
 								CLASSE "FORME_BORDURE": 
 (classe englobante de DENTS,CREUX,BORDURE_PLATE)
 _Attributs de la classe :
@@ -11,7 +21,7 @@ _Attributs de la classe :
 	_Path : pour socker nos courbes (cubicCurvesTo + MoveTo)
 _Constructeurs:
 	_(1) boolean, sans contrainte tout en random
-	_(2) creux 
+	_(2) dents 
 
 
 
