@@ -1,10 +1,13 @@
 package sample;
 
+import javafx.animation.FillTransition;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
@@ -14,6 +17,7 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 
@@ -73,6 +77,10 @@ public class Main extends Application {
          */
 /*
         Piece piece_test = new Piece();
+        FillTransition fillTransition = new FillTransition(Duration.minutes(2),piece_test.forme,Color.RED,Color.RED);
+        fillTransition.setAutoReverse(true);
+        fillTransition.setCycleCount(5);
+        fillTransition.play();
 
         //root.getChildren().add(piece_test.forme);
         Dents d = new Dents();
@@ -84,10 +92,30 @@ public class Main extends Application {
         ArrayList<Forme_Bordure> list = new ArrayList<>();
         list.add(null);list.add(null);list.add(null);list.add(null);
         Piece p = new Piece(list);
-        setAllCircleOnPane(p,root);
-        root.getChildren().add(p.forme);
+        //setAllCircleOnPane(p,root);
+
+       // p.MAJ_Path();
+
+        p.getPath().setFillRule(FillRule.NON_ZERO);
+
+
+
+        Shape s = p.getPath();
+
+        s.setFill(Color.BLUE);
+
+
+        for (Circle c : p.circle)
+            root.getChildren().add(c);
+
+        for (Circle c : p.controle)
+            root.getChildren().add(c);
+
+        //root.getChildren().add(s);
+        //root.getChildren().add(gc.getCanvas());
        // root.getChildren().addAll(d.notre_path);
         //setAllCircleOnPane(piece_test,root);
+
 
 
 
