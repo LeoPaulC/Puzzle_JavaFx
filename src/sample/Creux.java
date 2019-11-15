@@ -47,7 +47,6 @@ public class Creux extends Forme_Bordure {
         //this.liste_cercle_controle = d.getListe_cercle_controle();
         inversion_Hauteur(d.liste_cercle,d.liste_cercle_controle);
         cercle_Vers_Courbe();
-
     }
     //cree des courbes a partir des 2 listes de cercles
     private void cercle_Vers_Courbe() {

@@ -1,28 +1,26 @@
 package sample;
 
-import javafx.animation.FillTransition;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.*;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.util.ArrayList;
 
 public class Main extends Application {
-
+    double oldX,oldY;
     @Override
     public void start(Stage primaryStage) throws Exception{
         //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
@@ -77,10 +75,6 @@ public class Main extends Application {
          */
 /*
         Piece piece_test = new Piece();
-        FillTransition fillTransition = new FillTransition(Duration.minutes(2),piece_test.forme,Color.RED,Color.RED);
-        fillTransition.setAutoReverse(true);
-        fillTransition.setCycleCount(5);
-        fillTransition.play();
 
         //root.getChildren().add(piece_test.forme);
         Dents d = new Dents();
@@ -89,37 +83,29 @@ public class Main extends Application {
 
         root.getChildren().addAll(d.notre_path, c.notre_path);
         */
+
         ArrayList<Forme_Bordure> list = new ArrayList<>();
         list.add(null);list.add(null);list.add(null);list.add(null);
         Piece p = new Piece(list);
-        //setAllCircleOnPane(p,root);
+        //p.path.setFillRule(FillRule.EVEN_ODD);
+        //p.path.setFill(new ImagePattern(new Image("file:index.jpeg"), 0,0,100,100,false));
+        //p.path.setFill(Color.GREEN);
+        setAllCircleOnPane(p,root);
+        p.setOnMousePressed(mouseEvent -> {
+            oldX = mouseEvent.getX();
+            oldY = mouseEvent.getY();
+        });
+        p.setOnMouseDragged(mouseEvent ->{
+            double x = mouseEvent.getX();
+            double y = mouseEvent.getY();
+            p.setTranslateY(y - oldY);
+            p.setTranslateX(x - oldX);
+        });
 
-       // p.MAJ_Path();
+        root.getChildren().add(   p.path);
 
-        p.getPath().setFillRule(FillRule.NON_ZERO);
-
-
-
-        Shape s = p.getPath();
-
-        s.setFill(Color.BLUE);
-
-
-        for (Circle c : p.circle)
-            root.getChildren().add(c);
-
-        for (Circle c : p.controle)
-            root.getChildren().add(c);
-
-        //root.getChildren().add(s);
-        //root.getChildren().add(gc.getCanvas());
        // root.getChildren().addAll(d.notre_path);
         //setAllCircleOnPane(piece_test,root);
-
-
-
-
-
 
 
 
@@ -137,16 +123,6 @@ public class Main extends Application {
                 pane.getChildren().add(circle);
             });
         }
-        /*p.liste_bordure.forEach(forme_bordure -> {
-            forme_bordure.liste_cercle.forEach(circle -> {
-                pane.getChildren().add(circle);
-            });
-            forme_bordure.liste_cercle_controle.forEach(circle -> {
-                pane.getChildren().add(circle);
-            });
-        });
-
-         */
     }
 
     public static void main(String[] args) {
