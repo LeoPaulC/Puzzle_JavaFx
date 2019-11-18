@@ -12,21 +12,56 @@ public class Dents extends Forme_Bordure {
     Shape c ;
     Random rand ;
     int tmp ;
-
+    double posX = DEFAULT_COORD_X;
+    double posY = DEFAULT_COORD_Y;
+    private final static Boolean est_plat = false;
+    public Dents(double x, double y) {
+        super(est_plat);
+        posX = x;
+        posY = y;
+        System.out.println("je suis dans dents x y !");
+        System.out.println("posX : " + x);
+        System.out.println("posY :" + y);
+        fill_liste_cercle();
+        fill_list_cercle_controle();
+    }
     Dents(){ // Aléatoire complet
-        super(false);
+        super(est_plat);
         rand = new Random();
+        System.out.println("posX : " + posX);
+        System.out.println("posY : " + posY);
+        fill_liste_cercle();
+        fill_list_cercle_controle();
+        for (int i = 0; i < this.liste_cubicCurveTo.size() ; i++) {
 
+            this.liste_cubicCurveTo.get(i).xProperty().bind(this.liste_cercle.get(i).layoutXProperty());
+            this.liste_cubicCurveTo.get(i).yProperty().bind(this.liste_cercle.get(i).layoutYProperty());
+
+            this.liste_cubicCurveTo.get(i).controlX1Property().bind(this.liste_cercle_controle.get(2*i+1).layoutXProperty() );
+            this.liste_cubicCurveTo.get(i).controlY1Property().bind(this.liste_cercle_controle.get(2*i+1).layoutYProperty());
+
+            this.liste_cubicCurveTo.get(i).controlX2Property().bind(this.liste_cercle_controle.get(2*i).layoutXProperty());
+            this.liste_cubicCurveTo.get(i).controlY2Property().bind(this.liste_cercle_controle.get(2*i).layoutYProperty());
+
+            this.liste_Moveto.get(i).xProperty().bind(this.liste_cercle.get(i+1).layoutXProperty());
+            this.liste_Moveto.get(i).yProperty().bind(this.liste_cercle.get(i+1).layoutYProperty());
+
+            notre_path.getElements().add(this.liste_Moveto.get(i));
+            notre_path.getElements().add(this.liste_cubicCurveTo.get(i));
+        }
+    }
+    //rempli la liiste de cercle en placatnt le premier point en fonction de posX et posY
+    private void fill_liste_cercle() {
         /**
          * pour nos test on va placer le premier point au coordonne 200,300
          */
-        this.liste_cercle.get(0).setLayoutX(TAILLE_COTE_PIECE_LONGUEUR);
-        this.liste_cercle.get(0).setLayoutY(TAILLE_COTE_PIECE_HAUTEUR);
+        this.liste_cercle.get(0).setLayoutX(posX);
+        this.liste_cercle.get(0).setLayoutY(posY);
         this.liste_cercle.get(0).setFill(Color.GOLD);
         /**
          * on place le 6eme cercle sur la meme ligne que le premier et decalé de "LA largeur d'une piece" .
          */
-        this.liste_cercle.get(6).setLayoutX(this.liste_cercle.get(0).getLayoutX() + this.TAILLE_COTE_PIECE_LONGUEUR );
+        this.liste_cercle.get(6).setLayoutX(this.liste_cercle.get(0).getLayoutX() + Forme_Bordure.getTailleCotePieceLongueur() );
         this.liste_cercle.get(6).setLayoutY(this.liste_cercle.get(0).getLayoutY() );
         this.liste_cercle.get(6).setFill(Color.GOLD);
         /**
@@ -70,6 +105,9 @@ public class Dents extends Forme_Bordure {
 
         }
 
+    }
+    //rempli la liste de cercle controle en fonction des cercle de la liste de cercle
+    private void fill_list_cercle_controle() {
         for (int i = 0; i < this.liste_cercle_controle.size(); i++) { // car les points de controle sont cree 2 à 2
             switch (i) {
                 case 0:
@@ -130,28 +168,8 @@ public class Dents extends Forme_Bordure {
                     break;
             }
         }
-        for (int i = 0; i < this.liste_cubicCurveTo.size() ; i++) {
-
-            //this.liste_cubicCurveTo.get(i).setX(this.liste_cercle.get(i).getLayoutX());
-            //this.liste_cubicCurveTo.get(i).setY(this.liste_cercle.get(i).getLayoutY());
-            this.liste_cubicCurveTo.get(i).xProperty().bind(this.liste_cercle.get(i).layoutXProperty());
-            this.liste_cubicCurveTo.get(i).yProperty().bind(this.liste_cercle.get(i).layoutYProperty());
-
-            this.liste_cubicCurveTo.get(i).controlX1Property().bind(this.liste_cercle_controle.get(2*i+1).layoutXProperty() );
-            this.liste_cubicCurveTo.get(i).controlY1Property().bind(this.liste_cercle_controle.get(2*i+1).layoutYProperty());
-
-            this.liste_cubicCurveTo.get(i).controlX2Property().bind(this.liste_cercle_controle.get(2*i).layoutXProperty());
-            this.liste_cubicCurveTo.get(i).controlY2Property().bind(this.liste_cercle_controle.get(2*i).layoutYProperty());
-
-            //this.liste_Moveto.get(i).setX(this.liste_cercle.get(i+1).getLayoutX());
-            //this.liste_Moveto.get(i).setY(this.liste_cercle.get(i+1).getLayoutY());
-            this.liste_Moveto.get(i).xProperty().bind(this.liste_cercle.get(i+1).layoutXProperty());
-            this.liste_Moveto.get(i).yProperty().bind(this.liste_cercle.get(i+1).layoutYProperty());
-
-            notre_path.getElements().add(this.liste_Moveto.get(i));
-            notre_path.getElements().add(this.liste_cubicCurveTo.get(i));
-        }
     }
+
     public void place_point(Circle controle1 , Circle point_fixe , Circle controle2 ) { // permet de placer controle 2 par rapport a point_fixe et de controle 1
 
         double xC1 = controle1.getLayoutX();
@@ -210,7 +228,7 @@ public class Dents extends Forme_Bordure {
     }
 
     public Dents(Dents d) {
-        super(false);
+        super(est_plat);
         //this.liste_cercle = d.liste_cercle;
         //this.liste_cercle_controle = d.getListe_cercle_controle();
         copie_Coordonnee(d.liste_cercle,d.liste_cercle_controle);

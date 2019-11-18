@@ -91,18 +91,21 @@ public class Main extends Application {
         //p.path.setFill(new ImagePattern(new Image("file:index.jpeg"), 0,0,100,100,false));
         //p.path.setFill(Color.GREEN);
         setAllCircleOnPane(p,root);
-        p.setOnMousePressed(mouseEvent -> {
+        p.forme.setFill(Color.TRANSPARENT);
+        p.forme.setStrokeWidth(10);
+        p.forme.setStroke(Color.BLACK);
+
+        p.forme.setOnMousePressed(mouseEvent -> {
             oldX = mouseEvent.getX();
             oldY = mouseEvent.getY();
         });
-        p.setOnMouseDragged(mouseEvent ->{
-            double x = mouseEvent.getX();
-            double y = mouseEvent.getY();
-            p.setTranslateY(y - oldY);
-            p.setTranslateX(x - oldX);
+        p.forme.setOnMouseDragged(mouseEvent ->{
+            double x = mouseEvent.getSceneX();
+            double y = mouseEvent.getSceneY();
+            p.forme.setTranslateX(x - oldX);
+            p.forme.setTranslateY(y - oldY);
         });
-
-        root.getChildren().add(   p.path);
+        root.getChildren().add( p.forme);
 
        // root.getChildren().addAll(d.notre_path);
         //setAllCircleOnPane(piece_test,root);

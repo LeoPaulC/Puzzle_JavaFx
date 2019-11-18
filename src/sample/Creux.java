@@ -16,17 +16,17 @@ import java.util.ArrayList;
 
 public class Creux extends Forme_Bordure {
     private Shape c ;
-/** faire Creux () , la juste pour faire piece pour l'instant*/
-    public Creux() {
-        super(false);
-
+    //pas de coord x et y ici pcq CREUX est instancié via une Dents
+    private final static Boolean est_plat = false;
+    public Creux() {// ici on genere notre propre "dents"
+        super(est_plat);
+        Dents d = new Dents();
+        new Creux(d);
     }
     public Creux(Creux c) {
-        super(false);
-        //this.liste_cercle = c.liste_cercle;
-        //this.liste_cercle_controle = d.getListe_cercle_controle();
+        super(est_plat);
         copie_Coordonnee(c.liste_cercle,c.liste_cercle_controle);
-        cercle_Vers_Courbe();
+        cercle_Vers_Courbe();//utile que pour les tests de desssinner la bordure
     }
     private void copie_Coordonnee(ArrayList<Circle> liste_cercle,ArrayList<Circle> liste_controleurs) {
         for (int i = 0; i < liste_cercle.size(); i++) {
@@ -42,9 +42,7 @@ public class Creux extends Forme_Bordure {
     }
 
     public Creux(Dents d) {
-        super(false);
-        //this.liste_cercle = d.liste_cercle;
-        //this.liste_cercle_controle = d.getListe_cercle_controle();
+        super(est_plat);
         inversion_Hauteur(d.liste_cercle,d.liste_cercle_controle);
         cercle_Vers_Courbe();
     }

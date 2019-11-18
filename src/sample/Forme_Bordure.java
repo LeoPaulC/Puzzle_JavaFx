@@ -34,7 +34,8 @@ import java.util.ArrayList;
  * */
 
 public class Forme_Bordure extends Shape {
-
+    final static double DEFAULT_COORD_X = 0;
+    final static double DEFAULT_COORD_Y = 0;
     static final int NB_CERCLE_PAR_BORDURE = 7 ;
     static int TAILLE_COTE_PIECE_HAUTEUR = 300;
     static int TAILLE_COTE_PIECE_LONGUEUR = 300;
@@ -46,11 +47,13 @@ public class Forme_Bordure extends Shape {
     ArrayList<CubicCurveTo> liste_cubicCurveTo ;
     ArrayList<MoveTo> liste_Moveto ;
     Path notre_path ;
-    LineTo liste_plate ;
-    Boolean est_plat ;
+    LineTo lineTo ;
+    Boolean est_plat;
 
-    Forme_Bordure(Boolean est_plat){
-        if ( !est_plat ) { // coté avec creux et ou dents
+    Forme_Bordure(Boolean est_plat) {
+        //si on ne precise pas les coord alors on les mets a 0 par defaut
+        this.est_plat = est_plat;
+        if (!est_plat) { // coté avec creux et ou dents
             // Création de notre liste de cercle
             liste_cercle = new ArrayList<>();
             for (int i = 0; i < NB_CERCLE_PAR_BORDURE; i++) { // 7 cercles
@@ -72,14 +75,14 @@ public class Forme_Bordure extends Shape {
                 liste_Moveto.add(new MoveTo());
             }
             notre_path = new Path();
-        }
-        else {
+        } else {
             liste_cercle = new ArrayList<>();
-            liste_cercle.add( new Circle(10,Color.GOLD) ) ;
-            liste_cercle.add(new Circle(10 ,Color.GOLD) ) ;
-            liste_plate = new LineTo();
+            liste_cercle.add(new Circle(10, Color.GOLD));
+            liste_cercle.add(new Circle(10, Color.GOLD));
+            lineTo = new LineTo();
         }
     }
+
 
     public static int getTailleCotePieceHauteur() {
         return TAILLE_COTE_PIECE_HAUTEUR;
@@ -138,17 +141,16 @@ public class Forme_Bordure extends Shape {
     }
 
     public LineTo getListe_plate() {
-        return liste_plate;
+        return lineTo;
     }
 
     public void setListe_plate(LineTo liste_plate) {
-        this.liste_plate = liste_plate;
+        this.lineTo = liste_plate;
     }
 
     public Boolean getEst_plat() {
         return est_plat;
     }
-
     public void setEst_plat(Boolean est_plat) {
         this.est_plat = est_plat;
     }
@@ -165,4 +167,3 @@ public class Forme_Bordure extends Shape {
         return NB_CERCLE_PAR_BORDURE;
     }
 }
-///
