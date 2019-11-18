@@ -68,7 +68,7 @@ public class Dents extends Forme_Bordure {
          * Il nous reste a disposer les 5 points restant , à savoir du 1 à 5 .
          */
         int a ;
-        for (int i = 1; i < NB_CERCLE_PAR_BORDURE-1 ; i++) {
+        for (int i = 1; i < Forme_Bordure.getNbCercleBordure()-1 ; i++) {
             switch (i){
                 case 1 :
                     // cercle N° 1
@@ -231,10 +231,28 @@ public class Dents extends Forme_Bordure {
         super(est_plat);
         //this.liste_cercle = d.liste_cercle;
         //this.liste_cercle_controle = d.getListe_cercle_controle();
+        affichage_coord_liste(d.getListe_cercle());
         copie_Coordonnee(d.liste_cercle,d.liste_cercle_controle);
-        cercle_Vers_Courbe();
+        affichage_coord_liste(d.getListe_cercle());
+        //cercle_Vers_Courbe();
 
     }
+    private void affichage_coord_liste(ArrayList<Circle> liste) {
+        int cpt = 0;
+        System.out.println("voy a affichar les coord de position morray");
+        for (Circle circle : liste) {
+            System.out.println("indice : "+ cpt++  +" coord X :" + circle.getCenterX() + " coordY : " + circle.getCenterY());
+        }
+    }
+
+
+
+
+
+
+
+
+
     //cree des courbes a partir des 2 listes de cercles
     private void cercle_Vers_Courbe() {
         for (int i = 0; i < this.liste_cubicCurveTo.size() ; i++) {
@@ -266,7 +284,7 @@ public class Dents extends Forme_Bordure {
         }
         for (int i = 0; i < liste_cercle_controle.size() ; i++) {
             Circle c = this.liste_cercle_controle.get(i);
-            c.setLayoutY(liste_cercle.get(i).getLayoutY());
+            c.setLayoutY(liste_controleurs.get(i).getLayoutY());
             c.setLayoutX(liste_controleurs.get(i).getLayoutX());
         }
     }

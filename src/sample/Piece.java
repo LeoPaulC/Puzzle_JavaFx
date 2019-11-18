@@ -49,76 +49,139 @@ public class Piece extends Shape {
     static final int TAB_INDICE_PIVOT[] = {0, 0, 0, 0};//on ne prend pas le 6eme pcq bordure plate n'a que 2 cercle
     static final int TAB_COEFFICIENT_TRANSLATION_X[] = {0, 1, 1, 0};
     static final int TAB_COEFFICIENT_TRANSLATION_Y[] = {0, 1, 1, 0};
+    static final int TAB_COEFFICIENT_TRANSLATION_X_PLAT[] = {0, 1, 1, 0};
+    static final int TAB_COEFFICIENT_TRANSLATION_Y_PLAT[] = {0, 0, 1, 1};
     static final int NOMBRE_COTE = 4;
+    private double posX = 0;
+    private double posY = 0;
 
     //utilisé uniquement dans les anciennes methodes morray
-    ArrayList<Forme_Bordure> liste_bordure;
     ArrayList<Circle> liste_cercle;
+    private int cpt_cercle = 0; //compteur sur la liste de cercle
     ArrayList<Circle> liste_cercle_controle;
+    private int cpt_cercle_controle = 0; //compteur sur la liste de cercle de controle
     ArrayList<CubicCurveTo> liste_courbe;
     Forme_Bordure[] tab_bordure;
     Rectangle rectangle;
     Shape forme;
     Path path;
-    int nb_courbe;
+    ArrayList<PathElement> liste_shape;
+
     //constructeur qui permet de placer la piece dans l'espace
     public Piece(ArrayList<Forme_Bordure> liste_bordure, double x, double y) {
+        posX = x;
+        posY = y;
         path = new Path();
         tab_bordure = new Forme_Bordure[NOMBRE_COTE];
-        liste_cercle = new ArrayList<Circle>();
         liste_cercle_controle = new ArrayList<Circle>();
+        liste_cercle = new ArrayList<Circle>();
         liste_courbe = new ArrayList<CubicCurveTo>();
+        liste_shape = new ArrayList<PathElement>();
         fill_tab_bordure(liste_bordure);
         Gestion_Placement_Bordure();
         fill_liste_cercle();
-        create_cubiCurveTo2();
+        create_shapes();
         forme = Shape.union(path, new Circle(0));
     }
-
+/**A gerer pcq moche pour les tests*/
     private void fill_tab_bordure(ArrayList<Forme_Bordure> liste_bordure) {
         for (int i = 0; i < NOMBRE_COTE; i++) {
             if (liste_bordure.get(i) == null) {
                 //si pas de contrainte alors on met une dent
                 // ou un creux mais pas de bordure plate --- pcq pas de bord
-                // Forme_Bordure forme_bordure= creation_Bordure();
+                // Forme_Bordure forme_bordure= random_Bordure();
                 //tab_bordure[i] = forme_bordure;
-                tab_bordure[i] = new Dents(20, 20);
+                //tab_bordure[i] = new Dents(20, 20);
                 //tab_bordure[i] = new Creux(new Dents(20,20));
-                //tab_bordure[i] = new Bordure_Plate(2);
-            }
-            else if (liste_bordure.get(i).getClass() == Dents.class) {
-                tab_bordure[i] = new Dents((Dents) liste_bordure.get(i));
-            }
-            else if (liste_bordure.get(i).getClass() == Creux.class) {
-                tab_bordure[i] = new Creux((Creux) liste_bordure.get(i));
-            }
-            else if (liste_bordure.get(i).getClass() == Bordure_Plate.class) {
-                tab_bordure[i] = new Bordure_Plate(i);
+                tab_bordure[i] = randoms_Bordure();
+                //tab_bordure[i] = new Bordure_Plate(i, posX ,posY);
+            } else if (liste_bordure.get(i).getClass() == Dents.class) {
+                tab_bordure[i] = new Dents(posX, posY);
+            } else if (liste_bordure.get(i).getClass() == Creux.class) {
+                tab_bordure[i] = new Creux(new Dents(posX,posY));
+            } else if (liste_bordure.get(i).getClass() == Bordure_Plate.class) {
+                tab_bordure[i] = new Bordure_Plate(i, posX ,posY);
                 //true pcq la bordure est plate
             }
         }
     }
+
     //prend en parametre une liste de Forme_Bordure précisant les contraintes de
     //chaque cote de la piece dans un puzzle==Plateau
     // si [ null , null , null, null ] alors aucune contrainte
     //si [ dent d, null , creux , Bordure_Plate b]
     // alors Haut s'adapte a d , Droite libre, Bas s'adapte a c et Gauche a b=ligne droite
     public Piece(ArrayList<Forme_Bordure> liste_bordure) {
-        //liste_bordure = new ArrayList<>();
         path = new Path();
         tab_bordure = new Forme_Bordure[NOMBRE_COTE];
-        fill_tab_bordure(liste_bordure);
-        liste_cercle = new ArrayList<Circle>();
         liste_cercle_controle = new ArrayList<Circle>();
+        liste_cercle = new ArrayList<Circle>();
         liste_courbe = new ArrayList<CubicCurveTo>();
+        liste_shape = new ArrayList<PathElement>();
+        fill_tab_bordure(liste_bordure);
         Gestion_Placement_Bordure();
         fill_liste_cercle();
-
-        //create_cubiCurveTo();
-        create_cubiCurveTo2();
+        create_shapes();
         forme = Shape.union(path, new Circle(0));
     }
 
+
+    //creer les shapes ( CubicCurveTo ou Lineto) en fonction des cercles de la liste de cercle
+    private void create_shapes() {
+        //affichage_coord_liste(this.liste_cercle);
+        doMoveTo();// creation du moveTo
+        for (int i = 0; i < NOMBRE_COTE; i++) { // creation des shapes correspondant aux bordures
+            if (tab_bordure[i].getEst_plat()) { // BOrdure_Plate
+                doLineTo_inShapes();// pas de cercle de controle
+                System.out.println("nombre de cercle pour cette bordure : " + tab_bordure[i].getListe_cercle().size());
+            }
+            else{ //si Creux ou Dents
+                System.out.println("nombre de cercle pour cette bordure : " + tab_bordure[i].getListe_cercle().size());
+                doCurve_inShapes();
+            }
+        }
+        doClosePath();
+    }
+
+    private void doClosePath() {
+        path.getElements().add(new ClosePath());
+        path.setFillRule(FillRule.EVEN_ODD);
+        path.setFill(new ImagePattern(new Image("file:index.jpeg"), Forme_Bordure.getTailleCotePieceLongueur(), Forme_Bordure.getTailleCotePieceHauteur(), Forme_Bordure.getTailleCotePieceLongueur(), Forme_Bordure.getTailleCotePieceHauteur(), false));
+    }
+    //cree le moveTo avec le tout premier cercle de la liste de cercle
+    private void doMoveTo() {
+        //cree les courbe de la piece
+        MoveTo moveTo = new MoveTo();
+        System.out.println("moveTo :"+cpt_cercle+" x : "+liste_cercle.get(cpt_cercle).getCenterX() + " y : "+ liste_cercle.get(cpt_cercle).getCenterY());
+        moveTo.xProperty().bind(this.liste_cercle.get(cpt_cercle).layoutXProperty());
+        moveTo.yProperty().bind(this.liste_cercle.get(cpt_cercle++).layoutYProperty());
+        this.liste_shape.add(moveTo);
+        path.getElements().add(moveTo);
+    }
+
+    private void doLineTo_inShapes() {
+        LineTo lineTo = new LineTo();
+        System.out.println("lineTo : coord x : " + liste_cercle.get(cpt_cercle).getLayoutX() + " coord y : " + liste_cercle.get(cpt_cercle).getLayoutY());
+        lineTo.xProperty().bind(this.liste_cercle.get(cpt_cercle).layoutXProperty());
+        lineTo.yProperty().bind(this.liste_cercle.get(cpt_cercle++).layoutYProperty());
+        this.liste_shape.add(lineTo);
+        path.getElements().add(lineTo);
+    }
+    // creer les shapes a partir des cercles des liste de la piece en fonctione du
+    private void doCurve_inShapes() {
+        for (int i = 1; i < Forme_Bordure.getNbCercleBordure() && 2 * (i - 1) < Forme_Bordure.getNbCercleControleBordure(); i++) {
+            CubicCurveTo c = new CubicCurveTo();
+            c.controlX1Property().bind(this.liste_cercle_controle.get(cpt_cercle_controle).layoutXProperty());
+            c.controlY1Property().bind(this.liste_cercle_controle.get(cpt_cercle_controle++).layoutYProperty());
+            c.controlX2Property().bind(this.liste_cercle_controle.get(cpt_cercle_controle).layoutXProperty());
+            c.controlY2Property().bind(this.liste_cercle_controle.get(cpt_cercle_controle++).layoutYProperty());
+            c.xProperty().bind(this.liste_cercle.get(cpt_cercle).layoutXProperty());
+            c.yProperty().bind(this.liste_cercle.get(cpt_cercle++).layoutYProperty());
+            this.liste_shape.add(c);
+            path.getElements().add(c);
+        }
+
+    }
     //cree les courbe de la piece
     private void create_cubiCurveTo2() {
         //cree les courbe de la piece
@@ -126,10 +189,10 @@ public class Piece extends Shape {
         moveTo.xProperty().bind(this.liste_cercle.get(0).layoutXProperty());
         moveTo.yProperty().bind(this.liste_cercle.get(0).layoutYProperty());
         path.getElements().add(moveTo);
-        for (int i = 1; i < this.liste_cercle.size() && 2 * (i-1) < this.liste_cercle_controle.size(); i++) {
+        for (int i = 1; i < this.liste_cercle.size() && 2 * (i - 1) < this.liste_cercle_controle.size(); i++) {
             CubicCurveTo c = new CubicCurveTo();
-            c.controlX1Property().bind(this.liste_cercle_controle.get(2 * (i - 1) ).layoutXProperty());
-            c.controlY1Property().bind(this.liste_cercle_controle.get(2 * (i - 1) ).layoutYProperty());
+            c.controlX1Property().bind(this.liste_cercle_controle.get(2 * (i - 1)).layoutXProperty());
+            c.controlY1Property().bind(this.liste_cercle_controle.get(2 * (i - 1)).layoutYProperty());
             c.controlX2Property().bind(this.liste_cercle_controle.get(2 * (i - 1) + 1).layoutXProperty());
             c.controlY2Property().bind(this.liste_cercle_controle.get(2 * (i - 1) + 1).layoutYProperty());
             c.xProperty().bind(this.liste_cercle.get(i).layoutXProperty());
@@ -139,7 +202,7 @@ public class Piece extends Shape {
         }
         path.getElements().add(new ClosePath());
         path.setFillRule(FillRule.EVEN_ODD);
-        path.setFill(new ImagePattern(new Image("file:index.jpeg"), Forme_Bordure.getTailleCotePieceLongueur(),Forme_Bordure.getTailleCotePieceHauteur(),Forme_Bordure.getTailleCotePieceLongueur(),Forme_Bordure.getTailleCotePieceHauteur(),false));
+        path.setFill(new ImagePattern(new Image("file:index.jpeg"), Forme_Bordure.getTailleCotePieceLongueur(), Forme_Bordure.getTailleCotePieceHauteur(), Forme_Bordure.getTailleCotePieceLongueur(), Forme_Bordure.getTailleCotePieceHauteur(), false));
 
     }
 
@@ -148,13 +211,13 @@ public class Piece extends Shape {
     private void setListOnList(Forme_Bordure forme_bordure) {
         ArrayList<Circle> listC = new ArrayList<Circle>(forme_bordure.getListe_cercle());
         //liste cercle
-        for (int i = 0; i < listC.size() - 1; i++) { //on ne met pas le dernier point pour eviter less doublons
+        System.out.println("!!!  coordX : " + listC.get(0).getCenterX() + " coordY : "+listC.get(0).getCenterY());
+        for (int i = 0; i < listC.size() - 1; i++) { //on ne met pas le dernier point pour eviter les doublons
             this.liste_cercle.add(listC.get(i));
         }
         if (!forme_bordure.getEst_plat()) {
             setListControleOnList(forme_bordure);
         }
-
     }
 
     private void setListControleOnList(Forme_Bordure forme_bordure) {
@@ -164,60 +227,20 @@ public class Piece extends Shape {
             this.liste_cercle_controle.add(listCC.get(i));
         }
     }
+
     // remplis les liste de cercle et cerlce de coontrole de la piece
     private void fill_liste_cercle() {
         for (int i = 0; i < NOMBRE_COTE; i++) {
             if (i == DROITE || i == GAUCHE) {
-                Collections.reverse(tab_bordure[i].liste_cercle);
-                Collections.reverse(tab_bordure[i].liste_cercle_controle);
+                if (!tab_bordure[i].getEst_plat()) {
+                    Collections.reverse(tab_bordure[i].liste_cercle);
+                    Collections.reverse(tab_bordure[i].liste_cercle_controle);
+                }
             }
             setListOnList(tab_bordure[i]);
         }
-        //dernier point == premier point
+        //dernier point == premier point donc ajoute le tout premier point en plus
         this.liste_cercle.add(this.liste_cercle.get(0));
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // inverse les elementes de la liste
-    private void inversion_list(ArrayList list) {
-        Collections.reverse(list);
     }
 
 
@@ -234,15 +257,16 @@ public class Piece extends Shape {
     }
 
     // creer une bordure sans contrainte de bordure precedente // d'ou l'absence de parametre
-    private Forme_Bordure creation_Bordure() {
+    private Forme_Bordure randoms_Bordure() {
         Forme_Bordure bordure;
-        /*if ( (Math.random()*2) == 0) {
-            bordure = new Dents();
+        Random random = new Random();
+        int r =random.nextInt(2+ 1);
+        if ( r%2 == 0) {
+            bordure = new Dents(posX, posY);
         }
         else{
-            bordure = new Creux();
-        }*/
-        bordure = new Dents();
+            bordure = new Creux(new Dents(posX, posY));
+        }
         return bordure;
     }
 
@@ -256,14 +280,15 @@ public class Piece extends Shape {
 
     // en fonction du cote on effectue une rotation a partir d'un point de la courbe en position HAUT
     private void placement_Bordure(int position) {
-        int angle = recup_Angle_Rotation(position);
-        Circle pivot = recup_Indice_Pivot(position);
-        Forme_Bordure forme_bordure = this.tab_bordure[position];
-        //forme_bordure.getListe_cercle().get(0).setFill(Color.DARKGREEN);
-        rotation(forme_bordure, angle, pivot);
-        int coefficient_x_translation = recup_Coefficient_X_Translation(position);
-        int coefficient_y_translation = recup_Coefficient_Y_Translation(position);
-        translation(forme_bordure, coefficient_x_translation, coefficient_y_translation);
+        if (!tab_bordure[position].getEst_plat()) {
+            int angle = recup_Angle_Rotation(position);
+            Circle pivot = recup_Indice_Pivot(position);
+            Forme_Bordure forme_bordure = this.tab_bordure[position];
+            rotation(forme_bordure, angle, pivot);
+            int coefficient_x_translation = recup_Coefficient_Translation(true,position, tab_bordure[position].getEst_plat());
+            int coefficient_y_translation = recup_Coefficient_Translation(false,position, tab_bordure[position].getEst_plat());
+            translation(forme_bordure, coefficient_x_translation, coefficient_y_translation);
+        }
     }
 
     // effectue une rotation de chaque cerlce de la Forme_Bordure en fonction du pivot et de l'angle
@@ -296,14 +321,12 @@ public class Piece extends Shape {
     //effectue une translation verticale et/ou horizontale
     private void translation(Forme_Bordure forme_bordure, int coefficient_X, int coefficient_Y) {
         for (int i = 0; i < forme_bordure.liste_cercle.size(); i++) {
-            // forme_bordure.liste_cercle.get(i).getTransforms().add(new Translate((coefficient_X * Forme_Bordure.getTailleCotePieceLongueur()), (coefficient_Y * Forme_Bordure.getTailleCotePieceHauteur())));
             Point p = calcul_translation(forme_bordure.liste_cercle.get(i), coefficient_X, coefficient_Y);
             forme_bordure.liste_cercle.get(i).setLayoutX(p.x);
             forme_bordure.liste_cercle.get(i).setLayoutY(p.y);
         }
         if (!forme_bordure.getEst_plat()) {
             for (int i = 0; i < forme_bordure.liste_cercle_controle.size(); i++) {
-                //forme_bordure.liste_cercle_controle.get(i).getTransforms().add(new Translate((coefficient_X*Forme_Bordure.getTailleCotePieceLongueur()),(coefficient_Y*Forme_Bordure.getTailleCotePieceHauteur())));
                 Point p = calcul_translation(forme_bordure.liste_cercle_controle.get(i), coefficient_X, coefficient_Y);
                 forme_bordure.liste_cercle_controle.get(i).setLayoutX(p.x);
                 forme_bordure.liste_cercle_controle.get(i).setLayoutY(p.y);
@@ -320,45 +343,33 @@ public class Piece extends Shape {
     }
 
     //renvoie la valeur du coef de translation horizontal x du cote POSITION
-    private int recup_Coefficient_X_Translation(int position) {
-        if (position == DROITE) {
-            return TAB_COEFFICIENT_TRANSLATION_X[DROITE];
-        } else if (position == BAS) {
-            return TAB_COEFFICIENT_TRANSLATION_X[BAS];
-        } else if (position == GAUCHE) {
-            return TAB_COEFFICIENT_TRANSLATION_X[GAUCHE];
+    private int recup_Coefficient_Translation(boolean x,int position, boolean plat) {
+        int []tab ;
+        if (x) {
+            tab = TAB_COEFFICIENT_TRANSLATION_X;
+        }else{
+            tab = TAB_COEFFICIENT_TRANSLATION_Y;
         }
-        return TAB_COEFFICIENT_TRANSLATION_X[HAUT];
-    }
-
-    //renvoie la valeur du coef de translation horizontal y du cote POSITION
-    private int recup_Coefficient_Y_Translation(int position) {
         if (position == DROITE) {
-            return TAB_COEFFICIENT_TRANSLATION_Y[DROITE];
+            return tab[DROITE];
         } else if (position == BAS) {
-            return TAB_COEFFICIENT_TRANSLATION_Y[BAS];
+            return tab[BAS];
         } else if (position == GAUCHE) {
-            return TAB_COEFFICIENT_TRANSLATION_Y[GAUCHE];
+            return tab[GAUCHE];
         }
-        return TAB_COEFFICIENT_TRANSLATION_Y[HAUT];
+        return tab[HAUT];
     }
-
     //renvoie l'indice du cercle devant etre utilisé comme pivot lors du placement de la bordure
     private Circle recup_Indice_Pivot(int position) {
         //on recupere la liste des points des courbes de la bordure du haut
         Forme_Bordure forme_bordure = tab_bordure[HAUT];
         ArrayList<Circle> liste = forme_bordure.liste_cercle;
-        if (!forme_bordure.getEst_plat()) {
-            if (position == DROITE) {
-                return liste.get(TAB_INDICE_PIVOT[DROITE]);
-            } else if (position == BAS) {
-                return liste.get(TAB_INDICE_PIVOT[BAS]);
-            } else if (position == GAUCHE) {
-                return liste.get(TAB_INDICE_PIVOT[GAUCHE]);
-            }
-        }
-        else {
-
+        if (position == DROITE) {
+            return liste.get(TAB_INDICE_PIVOT[DROITE]);
+        } else if (position == BAS) {
+            return liste.get(TAB_INDICE_PIVOT[BAS]);
+        } else if (position == GAUCHE) {
+            return liste.get(TAB_INDICE_PIVOT[GAUCHE]);
         }
         return liste.get(TAB_INDICE_PIVOT[HAUT]);
     }
@@ -375,39 +386,15 @@ public class Piece extends Shape {
         return TAB_ANGLE_ROTATION[HAUT];
     }
 
-
-    Piece() {
-        liste_bordure = new ArrayList<>();
-        liste_bordure.add(new Dents());// dents du haut
-
-        liste_bordure.add(new Dents()); // dents de droite
-        liste_bordure.get(DROITE).notre_path.getTransforms().add(new Rotate(270, liste_bordure.get(DROITE).getListe_cercle().get(6).getLayoutX(), liste_bordure.get(DROITE).getListe_cercle().get(6).getLayoutY()));
-        Mise_a_jour_point((Dents) liste_bordure.get(DROITE));
-
-        liste_bordure.add(new Dents()); // dents de bas
-        liste_bordure.get(BAS).notre_path.getTransforms().add(new Translate(0, Forme_Bordure.getTailleCotePieceHauteur()));
-        Mise_a_jour_point((Dents) liste_bordure.get(BAS));
-
-        liste_bordure.add(new Dents()); // dents de gauche
-        liste_bordure.get(GAUCHE).notre_path.getTransforms().add(new Rotate(90, liste_bordure.get(DROITE).getListe_cercle().get(0).getLayoutX(), liste_bordure.get(HAUT).getListe_cercle().get(0).getLayoutY()));
-        Mise_a_jour_point((Dents) liste_bordure.get(BAS));
-
-
-        for (int i = 0; i < liste_bordure.size(); i++) {
-            liste_bordure.get(i).notre_path.setFillRule(FillRule.NON_ZERO);
+    private void affichage_coord_liste(ArrayList<Circle> liste) {
+        int cpt = 0;
+        System.out.println("voy a affichar les coord de position morray");
+        for (Circle circle : liste) {
+            System.out.println("indice : "+ cpt++  +" coord X :" + circle.getCenterX() + " coordY : " + circle.getCenterY());
         }
-
-        forme = Shape.union(liste_bordure.get(HAUT).notre_path, liste_bordure.get(DROITE).notre_path);
-        forme = Shape.union(forme, liste_bordure.get(BAS).notre_path);
-        forme = Shape.union(forme, liste_bordure.get(GAUCHE).notre_path);
-
-        forme.setSmooth(true);
-        forme.setFill(Color.RED);
-
-        Ajouter_evenement(forme);
-
-
     }
+
+
 
     public void Ajouter_evenement(Shape forme) {
         forme.setOnMouseDragged(new EventHandler<MouseEvent>() {
@@ -484,6 +471,23 @@ public class Piece extends Shape {
 
     }
 
+    private void dessineLineto() {
+        MoveTo moveTo = new MoveTo();
+        moveTo.setX(tab_bordure[0].getListe_cercle().get(0).getCenterX());
+        moveTo.setY(tab_bordure[0].getListe_cercle().get(0).getCenterY());
+        path.getElements().add(moveTo);
+        for (int i = 1; i < NOMBRE_COTE; i++) {
+            LineTo lineTo = new LineTo();
+            lineTo.setX(tab_bordure[i].getListe_cercle().get(0).getCenterX());
+            lineTo.setY(tab_bordure[i].getListe_cercle().get(0).getCenterY());
+            path.getElements().add(lineTo);
+        }
+        LineTo lineTo = new LineTo();
+        lineTo.setX(tab_bordure[HAUT].getListe_cercle().get(0).getCenterX());
+        lineTo.setY(tab_bordure[HAUT].getListe_cercle().get(0).getCenterY());
+        path.getElements().add(lineTo);
+        path.getElements().add(new ClosePath());
+    }
     public static int getHAUT() {
         return HAUT;
     }
@@ -510,14 +514,6 @@ public class Piece extends Shape {
 
     public static int getNombreCote() {
         return NOMBRE_COTE;
-    }
-
-    public ArrayList<Forme_Bordure> getListe_bordure() {
-        return liste_bordure;
-    }
-
-    public void setListe_bordure(ArrayList<Forme_Bordure> liste_bordure) {
-        this.liste_bordure = liste_bordure;
     }
 
     public Forme_Bordure[] getTab_bordure() {

@@ -85,7 +85,8 @@ public class Main extends Application {
         */
 
         ArrayList<Forme_Bordure> list = new ArrayList<>();
-        list.add(null);list.add(null);list.add(null);list.add(null);
+       // list.add(null);list.add(new Dents(20,20));list.add(new Dents(20,20));list.add(new Creux(new Dents(20,20)));
+        list.add(null); list.add(null); list.add(null); list.add(null);
         Piece p = new Piece(list);
         //p.path.setFillRule(FillRule.EVEN_ODD);
         //p.path.setFill(new ImagePattern(new Image("file:index.jpeg"), 0,0,100,100,false));
@@ -122,9 +123,11 @@ public class Main extends Application {
             forme_bordure.liste_cercle.forEach(circle -> {
                 pane.getChildren().add(circle);
             });
-            forme_bordure.liste_cercle_controle.forEach(circle -> {
-                pane.getChildren().add(circle);
-            });
+            if (!forme_bordure.getEst_plat()) {
+                forme_bordure.liste_cercle_controle.forEach(circle -> {
+                    pane.getChildren().add(circle);
+                });
+            }
         }
     }
 

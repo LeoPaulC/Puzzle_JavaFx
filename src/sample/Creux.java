@@ -50,8 +50,6 @@ public class Creux extends Forme_Bordure {
     private void cercle_Vers_Courbe() {
         for (int i = 0; i < this.liste_cubicCurveTo.size() ; i++) {
 
-            //this.liste_cubicCurveTo.get(i).setX(this.liste_cercle.get(i).getLayoutX());
-            //this.liste_cubicCurveTo.get(i).setY(this.liste_cercle.get(i).getLayoutY());
             this.liste_cubicCurveTo.get(i).xProperty().bind(this.liste_cercle.get(i).layoutXProperty());
             this.liste_cubicCurveTo.get(i).yProperty().bind(this.liste_cercle.get(i).layoutYProperty());
 
@@ -61,8 +59,6 @@ public class Creux extends Forme_Bordure {
             this.liste_cubicCurveTo.get(i).controlX2Property().bind(this.liste_cercle_controle.get(2*i).layoutXProperty());
             this.liste_cubicCurveTo.get(i).controlY2Property().bind(this.liste_cercle_controle.get(2*i).layoutYProperty());
 
-            //this.liste_Moveto.get(i).setX(this.liste_cercle.get(i+1).getLayoutX());
-            //this.liste_Moveto.get(i).setY(this.liste_cercle.get(i+1).getLayoutY());
             this.liste_Moveto.get(i).xProperty().bind(this.liste_cercle.get(i+1).layoutXProperty());
             this.liste_Moveto.get(i).yProperty().bind(this.liste_cercle.get(i+1).layoutYProperty());
 
