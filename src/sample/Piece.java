@@ -83,22 +83,20 @@ public class Piece extends Shape {
         create_shapes();
         forme = Shape.union(path, new Circle(0));
     }
-/**A gerer pcq moche pour les tests*/
+/**A gerer pcq moche pour les tests et FONCTIONNENT PAS SANS VARIABLE BRUTES !!! */
     private void fill_tab_bordure(ArrayList<Forme_Bordure> liste_bordure) {
         for (int i = 0; i < NOMBRE_COTE; i++) {
             if (liste_bordure.get(i) == null) {
                 //si pas de contrainte alors on met une dent
                 // ou un creux mais pas de bordure plate --- pcq pas de bord
-                // Forme_Bordure forme_bordure= random_Bordure();
-                //tab_bordure[i] = forme_bordure;
-                //tab_bordure[i] = new Dents(20, 20);
-                //tab_bordure[i] = new Creux(new Dents(20,20));
                 tab_bordure[i] = randoms_Bordure();
                 //tab_bordure[i] = new Bordure_Plate(i, posX ,posY);
             } else if (liste_bordure.get(i).getClass() == Dents.class) {
-                tab_bordure[i] = new Dents(posX, posY);
-            } else if (liste_bordure.get(i).getClass() == Creux.class) {
                 tab_bordure[i] = new Creux(new Dents(posX,posY));
+                //tab_bordure[i] = new Creux((Dents)liste_bordure.get(i));
+            } else if (liste_bordure.get(i).getClass() == Creux.class) {
+                tab_bordure[i] = new Dents(posX,posY);
+                //tab_bordure[i] = new Dents((Creux)liste_bordure.get(i));
             } else if (liste_bordure.get(i).getClass() == Bordure_Plate.class) {
                 tab_bordure[i] = new Bordure_Plate(i, posX ,posY);
                 //true pcq la bordure est plate
@@ -133,10 +131,8 @@ public class Piece extends Shape {
         for (int i = 0; i < NOMBRE_COTE; i++) { // creation des shapes correspondant aux bordures
             if (tab_bordure[i].getEst_plat()) { // BOrdure_Plate
                 doLineTo_inShapes();// pas de cercle de controle
-                System.out.println("nombre de cercle pour cette bordure : " + tab_bordure[i].getListe_cercle().size());
             }
             else{ //si Creux ou Dents
-                System.out.println("nombre de cercle pour cette bordure : " + tab_bordure[i].getListe_cercle().size());
                 doCurve_inShapes();
             }
         }
@@ -152,7 +148,6 @@ public class Piece extends Shape {
     private void doMoveTo() {
         //cree les courbe de la piece
         MoveTo moveTo = new MoveTo();
-        System.out.println("moveTo :"+cpt_cercle+" x : "+liste_cercle.get(cpt_cercle).getCenterX() + " y : "+ liste_cercle.get(cpt_cercle).getCenterY());
         moveTo.xProperty().bind(this.liste_cercle.get(cpt_cercle).layoutXProperty());
         moveTo.yProperty().bind(this.liste_cercle.get(cpt_cercle++).layoutYProperty());
         this.liste_shape.add(moveTo);
@@ -161,7 +156,6 @@ public class Piece extends Shape {
 
     private void doLineTo_inShapes() {
         LineTo lineTo = new LineTo();
-        System.out.println("lineTo : coord x : " + liste_cercle.get(cpt_cercle).getLayoutX() + " coord y : " + liste_cercle.get(cpt_cercle).getLayoutY());
         lineTo.xProperty().bind(this.liste_cercle.get(cpt_cercle).layoutXProperty());
         lineTo.yProperty().bind(this.liste_cercle.get(cpt_cercle++).layoutYProperty());
         this.liste_shape.add(lineTo);
@@ -211,7 +205,6 @@ public class Piece extends Shape {
     private void setListOnList(Forme_Bordure forme_bordure) {
         ArrayList<Circle> listC = new ArrayList<Circle>(forme_bordure.getListe_cercle());
         //liste cercle
-        System.out.println("!!!  coordX : " + listC.get(0).getCenterX() + " coordY : "+listC.get(0).getCenterY());
         for (int i = 0; i < listC.size() - 1; i++) { //on ne met pas le dernier point pour eviter les doublons
             this.liste_cercle.add(listC.get(i));
         }
@@ -519,6 +512,17 @@ public class Piece extends Shape {
     public Forme_Bordure[] getTab_bordure() {
         return tab_bordure;
     }
+    // renvoie la bordure de cote indice = { HAUT | DROITE | BAS | GAUCHE }
+    public Forme_Bordure getBordure(int indice) {
+        if (indice == DROITE) {
+            return tab_bordure[DROITE];
+        } else if (indice == BAS) {
+            return tab_bordure[BAS];
+        } else if (indice == GAUCHE) {
+            return tab_bordure[GAUCHE];
+        }
+        return tab_bordure[HAUT];
+    }
 
     public void setTab_bordure(Forme_Bordure[] tab_bordure) {
         this.tab_bordure = tab_bordure;
@@ -541,6 +545,21 @@ public class Piece extends Shape {
     }
 
 
+    public double getPosX() {
+        return posX;
+    }
+
+    public void setPosX(double posX) {
+        this.posX = posX;
+    }
+
+    public double getPosY() {
+        return posY;
+    }
+
+    public void setPosY(double posY) {
+        this.posY = posY;
+    }
 }
 /*private void create_cubiCurveTo() {
         init_Liste_Courbe();

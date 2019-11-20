@@ -19,7 +19,7 @@ public class Bordure_Plate extends Forme_Bordure {
     }
     //rempli la liste de cercle pour le lineTo
     private void fill_liste_cercle(int indice) {
-        System.out.println("val indice : "+indice);
+        //System.out.println("val indice : "+indice);
         if (indice > Piece.GAUCHE) {
             System.out.println("indice de bordure plate INCORRECTE");
             return ;

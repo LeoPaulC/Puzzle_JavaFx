@@ -19,17 +19,12 @@ public class Dents extends Forme_Bordure {
         super(est_plat);
         posX = x;
         posY = y;
-        System.out.println("je suis dans dents x y !");
-        System.out.println("posX : " + x);
-        System.out.println("posY :" + y);
         fill_liste_cercle();
         fill_list_cercle_controle();
     }
     Dents(){ // Aléatoire complet
         super(est_plat);
         rand = new Random();
-        System.out.println("posX : " + posX);
-        System.out.println("posY : " + posY);
         fill_liste_cercle();
         fill_list_cercle_controle();
         for (int i = 0; i < this.liste_cubicCurveTo.size() ; i++) {
@@ -231,9 +226,16 @@ public class Dents extends Forme_Bordure {
         super(est_plat);
         //this.liste_cercle = d.liste_cercle;
         //this.liste_cercle_controle = d.getListe_cercle_controle();
-        affichage_coord_liste(d.getListe_cercle());
+        //affichage_coord_liste(d.getListe_cercle());
         copie_Coordonnee(d.liste_cercle,d.liste_cercle_controle);
-        affichage_coord_liste(d.getListe_cercle());
+        //affichage_coord_liste(d.getListe_cercle());
+        //cercle_Vers_Courbe();
+
+    }
+
+    public Dents(Creux c) {
+        super(est_plat);
+        inversion_Hauteur(c.liste_cercle,c.liste_cercle_controle);
         //cercle_Vers_Courbe();
 
     }
@@ -244,7 +246,27 @@ public class Dents extends Forme_Bordure {
             System.out.println("indice : "+ cpt++  +" coord X :" + circle.getCenterX() + " coordY : " + circle.getCenterY());
         }
     }
-
+    // on inverse la hauteur de chaque point par rapport a
+    // la hauteur des points cercle 0 et 6 de liste_cercle
+    // == symetrie verticale par rapport a l'axe c0;c6
+    private void inversion_Hauteur(ArrayList<Circle> liste_cercle,ArrayList<Circle> liste_controleurs) {
+        for (int i = 0; i < liste_cercle.size(); i++) {
+            Circle c = this.liste_cercle.get(i);
+            //on addittionne 2 fois la difference entre le y de c0 et le y de i
+            // pour effectuer une symetrie verticale de ci avec l'axe c0;c6
+            c.setLayoutY(liste_cercle.get(i).getLayoutY() + 2 * (liste_cercle.get(0).getLayoutY() - liste_cercle.get(i).getLayoutY()));
+            //on affecte la psition en x sans la changer
+            c.setLayoutX(liste_cercle.get(i).getLayoutX());
+        }
+        for (int i = 0; i < liste_cercle_controle.size() ; i++) {
+            Circle c = this.liste_cercle_controle.get(i);
+            //on addittionne 2 fois la difference entre le y de c0 et le y de i
+            // pour effectuer une symetrie verticale de ci avec l'axe c0;c6
+            c.setLayoutY(liste_controleurs.get(i).getLayoutY()+2*(liste_cercle.get(0).getLayoutY()-liste_controleurs.get(i).getLayoutY()));
+            //on affecte la psition en x sans la changer
+            c.setLayoutX(liste_controleurs.get(i).getLayoutX());
+        }
+    }
 
 
 
@@ -278,14 +300,12 @@ public class Dents extends Forme_Bordure {
     //cercles des listes passées en parametre
     private void copie_Coordonnee(ArrayList<Circle> liste_cercle,ArrayList<Circle> liste_controleurs) {
         for (int i = 0; i < liste_cercle.size(); i++) {
-            Circle c = this.liste_cercle.get(i);
-            c.setLayoutY(liste_cercle.get(i).getLayoutY());
-            c.setLayoutX(liste_cercle.get(i).getLayoutX());
+            this.liste_cercle.get(i).setLayoutY(liste_cercle.get(i).getLayoutY());
+            this.liste_cercle.get(i).setLayoutX(liste_cercle.get(i).getLayoutX());
         }
         for (int i = 0; i < liste_cercle_controle.size() ; i++) {
-            Circle c = this.liste_cercle_controle.get(i);
-            c.setLayoutY(liste_controleurs.get(i).getLayoutY());
-            c.setLayoutX(liste_controleurs.get(i).getLayoutX());
+            this.liste_cercle_controle.get(i).setLayoutY(liste_controleurs.get(i).getLayoutY());
+            this.liste_cercle_controle.get(i).setLayoutX(liste_controleurs.get(i).getLayoutX());
         }
     }
 

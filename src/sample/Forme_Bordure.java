@@ -39,8 +39,8 @@ public class Forme_Bordure extends Shape {
 
     private final static int NB_CERCLE_BORDURE = 7;
     private final static int NB_CERCLE_CONTROLE_BORDURE = (NB_CERCLE_BORDURE-1)*2;
-    static int TAILLE_COTE_PIECE_HAUTEUR = 300;
-    static int TAILLE_COTE_PIECE_LONGUEUR = 300;
+    static int TAILLE_COTE_PIECE_HAUTEUR = 50;
+    static int TAILLE_COTE_PIECE_LONGUEUR = 50;
     static int MIN_TAILLE = 20 ; // taille minimale entre
 
 
@@ -84,6 +84,7 @@ public class Forme_Bordure extends Shape {
             lineTo = new LineTo();
         }
     }
+
 
 
     public static int getTailleCotePieceHauteur() {

@@ -85,15 +85,18 @@ public class Main extends Application {
         */
 
         ArrayList<Forme_Bordure> list = new ArrayList<>();
-       // list.add(null);list.add(new Dents(20,20));list.add(new Dents(20,20));list.add(new Creux(new Dents(20,20)));
-        list.add(null); list.add(null); list.add(null); list.add(null);
-        Piece p = new Piece(list);
+        list.add(new Bordure_Plate(0,20,20));list.add(new Dents(20,20));list.add(new Dents(20,20));list.add(new Creux(new Dents(20,20)));
+        //list.add(null); list.add(null); list.add(null); list.add(null);
+        Piece p = new Piece(list, 20, 20);
+        ArrayList<Forme_Bordure> list2 = new ArrayList<>();
+        list2.add(new Bordure_Plate(0,20,20));list2.add(null);list2.add(null);list2.add(new Creux(new Dents(20,20)));
+        Piece p2 = new Piece(list2, 320, 20);
         //p.path.setFillRule(FillRule.EVEN_ODD);
         //p.path.setFill(new ImagePattern(new Image("file:index.jpeg"), 0,0,100,100,false));
         //p.path.setFill(Color.GREEN);
         setAllCircleOnPane(p,root);
         p.forme.setFill(Color.TRANSPARENT);
-        p.forme.setStrokeWidth(10);
+        p.forme.setStrokeWidth(5);
         p.forme.setStroke(Color.BLACK);
 
         p.forme.setOnMousePressed(mouseEvent -> {
@@ -106,13 +109,29 @@ public class Main extends Application {
             p.forme.setTranslateX(x - oldX);
             p.forme.setTranslateY(y - oldY);
         });
-        root.getChildren().add( p.forme);
+        //root.getChildren().add( p.forme);
 
        // root.getChildren().addAll(d.notre_path);
         //setAllCircleOnPane(piece_test,root);
 
+        Plateau plateau = new Plateau(10, 15,50,50 );
+        Piece tab[][] = new Piece[plateau.getNb_ligne()][plateau.getNb_colonne()];
+        System.out.println("colonne : " + plateau.getNb_colonne() + " et ligne : " + plateau.getNb_ligne());
+        for (int j = 0; j < plateau.getNb_colonne(); j++) {
+            for (int i = 0; i < plateau.getNb_ligne() ; i++) {
+                //System.out.println("i :"+i);
 
+                root.getChildren().add(plateau.getTab()[i][j].forme);
+            }
+        }
+        /*for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 3; j++) {
+                System.out.print("0");
+            }
+            System.out.println();
+        }*/
 
+        //root.getChildren().add(p.forme);
         primaryStage.setTitle("Hello World");
         primaryStage.setScene(new Scene(root, 1400, 1275));
         primaryStage.show();

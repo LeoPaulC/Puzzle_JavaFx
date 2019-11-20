@@ -44,7 +44,7 @@ public class Creux extends Forme_Bordure {
     public Creux(Dents d) {
         super(est_plat);
         inversion_Hauteur(d.liste_cercle,d.liste_cercle_controle);
-        cercle_Vers_Courbe();
+        //cercle_Vers_Courbe();
     }
     //cree des courbes a partir des 2 listes de cercles
     private void cercle_Vers_Courbe() {
