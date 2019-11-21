@@ -7,15 +7,15 @@ import java.util.ArrayList;
 public class Plateau {
     private int nb_ligne;
     private int nb_colonne;
-    private double largeur;
-    private double hauteur;
+    private int longueur;
+    private int hauteur;
     private Piece tab[][];
     private double oldX, oldY;
 
-    public Plateau(int ligne,int col, double largeur, double hauteur) {
+    public Plateau(int ligne,int col, int longueur, int hauteur) {
         nb_ligne = ligne;
         nb_colonne = col;
-        this.largeur = largeur;
+        this.longueur = longueur;
         this.hauteur = hauteur;
         tab = new Piece[ligne][col];
         create_plateau();
@@ -23,11 +23,12 @@ public class Plateau {
 
     // rempli le tableau de piece
     private void create_plateau() {
+        System.out.println("hauteur : "+hauteur+" longueur : "+longueur);
         for (int i = 0; i < nb_ligne; i++) {
             for (int j = 0; j < nb_colonne; j++) {
                 ArrayList<Forme_Bordure> liste = new ArrayList<Forme_Bordure>();
                 recup_bordure_contrainte(i, j, liste);
-                Piece piece = new Piece(liste, j * hauteur, i * largeur);
+                Piece piece = new Piece(liste, j * longueur, i * hauteur, hauteur, longueur);
                 piece.forme.setFill(Color.TRANSPARENT);
                 piece.forme.setStrokeWidth(2);
                 piece.forme.setStroke(Color.BLACK);
@@ -64,7 +65,7 @@ public class Plateau {
     //renvoie la bordure de contrainte DROITE de notre piece == bordure plate ou GAUCHE de la piece en j+1
     private Forme_Bordure gestion_bordure_DROITE(int i, int j) {
         if (j == nb_colonne -1) {
-            return new Bordure_Plate(Piece.DROITE, i * hauteur, j * largeur);
+            return new Bordure_Plate(Piece.DROITE, i * hauteur, j * longueur, hauteur, longueur);
         } else {
             return null ; // choix libre pcq piece a droite vide
         }
@@ -72,7 +73,7 @@ public class Plateau {
     //renvoie la bordure de contrainte GAUCHE de notre piece == bordure plate ou DROITE de la piece en j-1
     private Forme_Bordure gestion_bordure_GAUCHE(int i, int j) {
         if (j == 0) {
-            return new Bordure_Plate(Piece.GAUCHE, i * hauteur, j * largeur);
+            return new Bordure_Plate(Piece.GAUCHE, i * hauteur, j * longueur, hauteur, longueur);
         } else {
             return tab[i][j - 1].getBordure(Piece.DROITE);
         }
@@ -81,7 +82,7 @@ public class Plateau {
     //renvoie la bordure de contrainte BAS de notre piece ==  bordure plate ou HAUT de la piece au dessus i+1
     private Forme_Bordure gestion_bordure_BAS(int i, int j) {
         if (i == nb_ligne -1) {
-            return new Bordure_Plate(Piece.BAS, i * hauteur, j * largeur);
+            return new Bordure_Plate(Piece.BAS, i * hauteur, j * longueur, hauteur, longueur);
         } else { // on ne la pas encore cree donc random mec !
             return null;
         }
@@ -89,7 +90,7 @@ public class Plateau {
     //renvoie la bordure de contrainte HAUT de notre piece ==  bordure plate ou BAs de la piece au dessus i-1
     private Forme_Bordure gestion_bordure_HAUT(int i, int j) {
         if (i == 0) {
-            return new Bordure_Plate(Piece.HAUT, i * hauteur, j * largeur);
+            return new Bordure_Plate(Piece.HAUT, i * hauteur, j * longueur, hauteur, longueur);
         } else {
             return tab[i - 1][j].getBordure(Piece.BAS);
         }
@@ -120,18 +121,18 @@ public class Plateau {
     }
 
     public double getLargeur() {
-        return largeur;
+        return longueur;
     }
 
-    public void setLargeur(double largeur) {
-        this.largeur = largeur;
+    public void setLargeur(int longueur) {
+        this.longueur = longueur;
     }
 
     public double getHauteur() {
         return hauteur;
     }
 
-    public void setHauteur(double hauteur) {
+    public void setHauteur(int hauteur) {
         this.hauteur = hauteur;
     }
 }

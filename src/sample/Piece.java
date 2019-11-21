@@ -66,39 +66,45 @@ public class Piece extends Shape {
     Shape forme;
     Path path;
     ArrayList<PathElement> liste_shape;
+    int hauteur;
+    int longueur;
 
     //constructeur qui permet de placer la piece dans l'espace
-    public Piece(ArrayList<Forme_Bordure> liste_bordure, double x, double y) {
+    public Piece(ArrayList<Forme_Bordure> liste_bordure, double x, double y, int hauteur, int longueur) {
         posX = x;
         posY = y;
+        this.hauteur = hauteur;
+        this.longueur = longueur;
         path = new Path();
         tab_bordure = new Forme_Bordure[NOMBRE_COTE];
         liste_cercle_controle = new ArrayList<Circle>();
         liste_cercle = new ArrayList<Circle>();
         liste_courbe = new ArrayList<CubicCurveTo>();
         liste_shape = new ArrayList<PathElement>();
-        fill_tab_bordure(liste_bordure);
+        fill_tab_bordure(liste_bordure , hauteur, longueur);
         Gestion_Placement_Bordure();
         fill_liste_cercle();
         create_shapes();
         forme = Shape.union(path, new Circle(0));
     }
 /**A gerer pcq moche pour les tests et FONCTIONNENT PAS SANS VARIABLE BRUTES !!! */
-    private void fill_tab_bordure(ArrayList<Forme_Bordure> liste_bordure) {
+    private void fill_tab_bordure(ArrayList<Forme_Bordure> liste_bordure, int hauteur, int longueur) {
         for (int i = 0; i < NOMBRE_COTE; i++) {
             if (liste_bordure.get(i) == null) {
                 //si pas de contrainte alors on met une dent
                 // ou un creux mais pas de bordure plate --- pcq pas de bord
-                tab_bordure[i] = randoms_Bordure();
+                //tab_bordure[i] = randoms_Bordure();
+                tab_bordure[i] = randoms_Bordure(i, hauteur , longueur);
                 //tab_bordure[i] = new Bordure_Plate(i, posX ,posY);
             } else if (liste_bordure.get(i).getClass() == Dents.class) {
-                tab_bordure[i] = new Creux(new Dents(posX,posY));
+                //tab_bordure[i] = new Dents(i, posX,posY, hauteur, longueur);
+                tab_bordure[i] = new Creux(new Dents(i,posX,posY, hauteur, longueur));
                 //tab_bordure[i] = new Creux((Dents)liste_bordure.get(i));
             } else if (liste_bordure.get(i).getClass() == Creux.class) {
-                tab_bordure[i] = new Dents(posX,posY);
+                tab_bordure[i] = new Dents(i, posX,posY, hauteur, longueur);
                 //tab_bordure[i] = new Dents((Creux)liste_bordure.get(i));
             } else if (liste_bordure.get(i).getClass() == Bordure_Plate.class) {
-                tab_bordure[i] = new Bordure_Plate(i, posX ,posY);
+                tab_bordure[i] = new Bordure_Plate(i, posX ,posY, hauteur, longueur);
                 //true pcq la bordure est plate
             }
         }
@@ -116,7 +122,7 @@ public class Piece extends Shape {
         liste_cercle = new ArrayList<Circle>();
         liste_courbe = new ArrayList<CubicCurveTo>();
         liste_shape = new ArrayList<PathElement>();
-        fill_tab_bordure(liste_bordure);
+        ///////////////////////////////////////////////////////////////////////////////////fill_tab_bordure(liste_bordure);
         Gestion_Placement_Bordure();
         fill_liste_cercle();
         create_shapes();
@@ -249,6 +255,20 @@ public class Piece extends Shape {
         Ajouter_evenement(forme);
     }
 
+    private Forme_Bordure randoms_Bordure(int i ,int hauteur , int longueur) {
+        Forme_Bordure bordure;
+        Random random = new Random();
+        int r =random.nextInt(2+ 1);
+        if ( r%2 == 0) {
+            bordure = new Dents(i,posX, posY,hauteur,longueur);
+        }
+        else{
+           // bordure = new Dents(i,posX, posY,hauteur,longueur);
+            bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur));
+        }
+        return bordure;
+    }
+
     // creer une bordure sans contrainte de bordure precedente // d'ou l'absence de parametre
     private Forme_Bordure randoms_Bordure() {
         Forme_Bordure bordure;
@@ -329,9 +349,9 @@ public class Piece extends Shape {
 
     //renvoie les nouvelles coordonnées du point apres translation en x et en y
     private Point calcul_translation(Circle c, int coef_x, int coef_y) {
-        double x, y;
-        x = c.getLayoutX() + (coef_x * Forme_Bordure.getTailleCotePieceLongueur());
-        y = c.getLayoutY() + (coef_y * Forme_Bordure.getTailleCotePieceHauteur());
+        double x, y;/**ne pas utiliser la  hauteur de la bordure mais de la piece MORRAY !!!! */
+        x = c.getLayoutX() + (coef_x * longueur);
+        y = c.getLayoutY() + (coef_y * hauteur);
         return new Point((int) x, (int) y);
     }
 
@@ -397,6 +417,12 @@ public class Piece extends Shape {
                 forme.setLayoutY(mouseEvent.getY());
             }
         });
+       /* forme.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                forme.getTransforms().add(new Rotate(90));
+            }
+        });*/
     }
 
 

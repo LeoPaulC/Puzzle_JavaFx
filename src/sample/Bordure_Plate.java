@@ -6,11 +6,13 @@ public class Bordure_Plate extends Forme_Bordure {
     private final static Boolean est_plat = true;
 
 
-    public Bordure_Plate(int indice, double posX, double posY) {
+    public Bordure_Plate(int indice, double posX, double posY, int hauteur, int longueur) {
         super(est_plat);
         //System.out.println("je suis dans bordure plate ind x y ");
         this.posX = posX;
         this.posY = posY;
+        setTailleCotePieceHauteur(hauteur);
+        setTailleCotePieceLongueur(longueur);
         fill_liste_cercle(indice);
     }
     Bordure_Plate(int indice) {// indice correspondant a HAUT DROITE BAS GAUCHE
