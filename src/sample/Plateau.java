@@ -1,18 +1,30 @@
 package sample;
 
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.shape.Shape;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 
 public class Plateau {
+    private final static String DEFAULT_FILE = "./image/shingeki.jpg";
+    private int posX;
+    private int posY;
     private int nb_ligne;
     private int nb_colonne;
     private int longueur;
     private int hauteur;
+    private Image image;
     private Piece tab[][];
+    private ArrayList<Shape> liste_piece;
     private double oldX, oldY;
 
     public Plateau(int ligne,int col, int longueur, int hauteur) {
+        image = new Image("file:" + DEFAULT_FILE);//met une image par defaut
         nb_ligne = ligne;
         nb_colonne = col;
         this.longueur = longueur;
@@ -20,7 +32,35 @@ public class Plateau {
         tab = new Piece[ligne][col];
         create_plateau();
     }
+    public Plateau(int x, int y,int ligne,int col, int longueur, int hauteur, File file) {
+        this.posX = x; // a ajouter dans create plateau aux coord des != piece MORRAY
+        this.posY = y;
+        this.liste_piece = new ArrayList<Shape>();
+        image = new Image("file:"+file);
+        nb_ligne = ligne;
+        nb_colonne = col;
+        this.longueur = longueur;
+        this.hauteur = hauteur;
+        tab = new Piece[ligne][col];
+        create_plateau();
+        ajout_piece_liste();
+    }
 
+    public ArrayList<Shape> getListe_piece() {
+        return liste_piece;
+    }
+
+    public void setListe_piece(ArrayList<Shape> liste_piece) {
+        this.liste_piece = liste_piece;
+    }
+
+    private void ajout_piece_liste() {
+        for (Piece[] pieces : tab) {
+            for (Piece piece : pieces) {
+                this.liste_piece.add(piece.forme);
+            }
+        }
+    }
     // rempli le tableau de piece
     private void create_plateau() {
         System.out.println("hauteur : "+hauteur+" longueur : "+longueur);
@@ -33,12 +73,15 @@ public class Plateau {
                 piece.forme.setStrokeWidth(2);
                 piece.forme.setStroke(Color.BLACK);
                 add_evenement(piece);
-
+                gestion_Image(piece);
                 tab[i][j] = piece;
             }
         }
     }
 
+    private void gestion_Image(Piece p) {
+       p.forme.setFill(new ImagePattern(this.image,0,0,this.longueur*nb_colonne,this.hauteur*nb_ligne,false));
+    }
     private void add_evenement(Piece p) {
         p.forme.setOnMousePressed(mouseEvent -> {
             oldX = mouseEvent.getX();
@@ -95,6 +138,13 @@ public class Plateau {
             return tab[i - 1][j].getBordure(Piece.BAS);
         }
     }
+    public int getLongueur() {
+        return longueur;
+    }
+
+    public void setLongueur(int longueur) {
+        this.longueur = longueur;
+    }
 
     public int getNb_ligne() {
         return nb_ligne;
@@ -135,4 +185,28 @@ public class Plateau {
     public void setHauteur(int hauteur) {
         this.hauteur = hauteur;
     }
+    public int getPosX() {
+        return posX;
+    }
+
+    public void setPosX(int posX) {
+        this.posX = posX;
+    }
+
+    public int getPosY() {
+        return posY;
+    }
+
+    public void setPosY(int posY) {
+        this.posY = posY;
+    }
+
+    public Image getImage() {
+        return image;
+    }
+
+    public void setImage(Image image) {
+        this.image = image;
+    }
+
 }

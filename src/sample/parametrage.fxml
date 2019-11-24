@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.collections.FXCollections?>
+
+<?import javafx.geometry.Insets?>
+<?import com.sun.javafx.scene.control.IntegerField?>
+<?import javafx.scene.text.Font?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="sample.Controller_Fenetre" style="-fx-background-color: #b4c89e;">
+    <padding>
+        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+    </padding>
+    <children>
+        <Label fx:id="txt_titre" style="-fx-background-color: #e4f5b5;" layoutX="70" layoutY="80" underline="true">
+            Choisissez les styles et les parametre de votre puzzle :
+            <font>
+                <Font size="20.0"/>
+            </font>
+        </Label>
+
+        <Label fx:id="txt_image" layoutY="130" layoutX="130">Image : </Label>
+        <Label fx:id="path_image" layoutX="200" layoutY="130"></Label>
+        <Button text="image" fx:id="bouton_image" onAction="#chooseImage" layoutY="150" layoutX="150"></Button>
+
+        <Label fx:id="max_colonne" maxWidth="-Infinity" maxHeight="-Infinity"></Label>
+        <Label fx:id="max_ligne" maxWidth="-Infinity" maxHeight="-Infinity"></Label>
+
+        <Label layoutY="190" layoutX="130" >Nombre de ligne dans le puzzle : </Label>
+        <Spinner fx:id="spinner_ligne" layoutY="210" layoutX="150"></Spinner>
+
+        <Label layoutY="240" layoutX="130">Nombre de colonne dans le puzzle : </Label>
+        <Spinner fx:id="spinner_colonne"   layoutY="260" layoutX="150" ></Spinner>
+
+
+        <Label layoutY="290" layoutX="130">Dimension du puzzle : (</Label>
+        <Label fx:id="nb_ligne" layoutY="290" layoutX="295" > </Label>
+        <Label layoutY="290" layoutX="320" > x </Label>
+        <Label fx:id="nb_colonne" layoutY="290" layoutX="340"></Label>
+        <Label layoutY="290" layoutX="370"> )</Label>
+        <Label layoutY="290" layoutX="390"> (lignes de pieces) x (colonnes de pieces)</Label>
+
+        <Label layoutX="130" layoutY="320">Niveau de difficulté : </Label>
+        <Label fx:id="txt_niveau" layoutX="300" layoutY="320"></Label>
+        <!--<HBox alignment="CENTER" layoutX="21.0" layoutY="207.0" prefHeight="50.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">-->
+        <HBox alignment="CENTER" layoutY="350" layoutX="180" style="-fx-background-color: #ddb0ed" >
+            <children>
+                <fx:define>
+                    <ToggleGroup fx:id="group"/>
+                </fx:define>
+
+                <RadioButton fx:id="radioButton" text="1" toggleGroup="$group" onMouseClicked="#on_radio">
+                    <HBox.margin>
+                        <Insets left="30.0" />
+                    </HBox.margin>
+                </RadioButton>
+
+                <RadioButton fx:id="radioButton2" text="2" toggleGroup="$group" onMouseClicked="#on_radio">
+                    <HBox.margin>
+                        <Insets left="30.0" />
+                    </HBox.margin>
+                </RadioButton>
+                <RadioButton fx:id="radioButton3" text="3" toggleGroup="$group" onMouseClicked="#on_radio">
+                    <HBox.margin>
+                        <Insets left="30.0" />
+                    </HBox.margin>
+                </RadioButton>
+                <RadioButton fx:id="radioButton4" text="4" toggleGroup="$group" onMouseClicked="#on_radio">
+                    <HBox.margin>
+                        <Insets left="30.0"/>
+                    </HBox.margin>
+                </RadioButton>
+            </children>
+        </HBox>
+
+        <ButtonBar style="-fx-background-color: #ac7ed7" layoutY="410" layoutX="180" minWidth="250" prefHeight="50" >
+            <buttons>
+                <Button style="-fx-background-color: #ddb0ed" text="Reset" fx:id="reset" onAction="#reset_onAction" ButtonBar.buttonData="LEFT">
+                </Button>
+                <Button style="-fx-background-color: #ddb0ed" text="Valider" fx:id="valider" onAction="#valider_onAction" ButtonBar.buttonData="RIGHT">
+                </Button>
+            </buttons>
+        </ButtonBar>
+    </children>
+</AnchorPane>

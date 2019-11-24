@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="sample.Controller_Fenetre"   >
+    <top>
+        <MenuBar>
+            <Menu text="File" fx:id="File">
+                <MenuItem text="New" fx:id="new_puzzle" onAction="#fill_new"></MenuItem>
+                <MenuItem text="Open" fx:id="open" onAction="#fill_open"></MenuItem>
+                <MenuItem text="Save as" fx:id="save_as" onAction="#fill_save_as"></MenuItem>
+                <MenuItem text="Quit" fx:id="quit" onAction="#fill_quit"></MenuItem>
+            </Menu>
+        </MenuBar>
+    </top>
+
+</BorderPane>

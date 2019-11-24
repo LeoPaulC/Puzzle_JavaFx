@@ -52,6 +52,8 @@ public class Piece extends Shape {
     static final int TAB_COEFFICIENT_TRANSLATION_X_PLAT[] = {0, 1, 1, 0};
     static final int TAB_COEFFICIENT_TRANSLATION_Y_PLAT[] = {0, 0, 1, 1};
     static final int NOMBRE_COTE = 4;
+    static final int MIN_LONGUEUR = 30;
+    static final int MIN_HAUTEUR = 30;
     private double posX = 0;
     private double posY = 0;
 
@@ -116,6 +118,8 @@ public class Piece extends Shape {
     //si [ dent d, null , creux , Bordure_Plate b]
     // alors Haut s'adapte a d , Droite libre, Bas s'adapte a c et Gauche a b=ligne droite
     public Piece(ArrayList<Forme_Bordure> liste_bordure) {
+        this.longueur = MIN_LONGUEUR;
+        this.hauteur = MIN_HAUTEUR;
         path = new Path();
         tab_bordure = new Forme_Bordure[NOMBRE_COTE];
         liste_cercle_controle = new ArrayList<Circle>();
@@ -417,6 +421,7 @@ public class Piece extends Shape {
                 forme.setLayoutY(mouseEvent.getY());
             }
         });
+        //forme.setFill(new ImagePattern());
        /* forme.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
