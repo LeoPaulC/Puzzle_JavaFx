@@ -31,10 +31,10 @@
         <Label fx:id="max_ligne" maxWidth="-Infinity" maxHeight="-Infinity"></Label>
 
         <Label layoutY="190" layoutX="130" >Nombre de ligne dans le puzzle : </Label>
-        <Spinner fx:id="spinner_ligne" layoutY="210" layoutX="150"></Spinner>
+        <Spinner fx:id="spinner_ligne" layoutY="210" layoutX="150" visible="false"></Spinner>
 
         <Label layoutY="240" layoutX="130">Nombre de colonne dans le puzzle : </Label>
-        <Spinner fx:id="spinner_colonne"   layoutY="260" layoutX="150" ></Spinner>
+        <Spinner fx:id="spinner_colonne"   layoutY="260" layoutX="150" visible="false"></Spinner>
 
 
         <Label layoutY="290" layoutX="130">Dimension du puzzle : (</Label>

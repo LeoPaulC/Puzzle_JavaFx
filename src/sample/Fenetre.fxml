@@ -6,8 +6,10 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import javafx.scene.text.Font?>
 <BorderPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="sample.Controller_Fenetre"   >
+            fx:controller="sample.Controller_Fenetre" style="-fx-background-color: #ddb0ed" >
+
     <top>
         <MenuBar>
             <Menu text="File" fx:id="File">
@@ -16,7 +18,38 @@
                 <MenuItem text="Save as" fx:id="save_as" onAction="#fill_save_as"></MenuItem>
                 <MenuItem text="Quit" fx:id="quit" onAction="#fill_quit"></MenuItem>
             </Menu>
+            <Menu text="Navigate" fx:id="Navigate">
+                <MenuItem text="puzzle" fx:id="wiki_puzzle" onAction="#fill_wiki_puzzle"></MenuItem>
+            </Menu>
+            <Menu text="Help" fx:id="Help">
+                <MenuItem text="énouncé" fx:id="enonce" onAction="#fill_enonce"></MenuItem>
+            </Menu>
         </MenuBar>
     </top>
+    <center>
+        <AnchorPane visible="true"  maxWidth="850" maxHeight="550" >
+            <children>
+                <Label fx:id="label_bienvenue" underline="true" style=" -fx-background-color: darkcyan;"  >
+                                          Bienvenue dans le Jeu du Puzzle
+                    <font>
+                        <Font size="25.0"></Font>
+                    </font>
+                </Label>
+            </children>
+        </AnchorPane>
+
+    </center>
+    <!--
+    <center>
+        <BorderPane fx:id="pane_contour" style="-fx-background-color: #ccccff" maxWidth="850" maxHeight="550" visible="false" >
+            <center>
+                <Pane fx:id="pane_assemblabe" visible="false">
+
+                </Pane>
+            </center>
+        </BorderPane>
+    </center>
+    -->
+
 
 </BorderPane>
