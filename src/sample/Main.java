@@ -20,50 +20,53 @@ import javafx.stage.Stage;
 
 import javax.swing.border.Border;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class Main extends Application {
     double oldX,oldY;
     static Stage primary_Stage;
+    static int width_plateau = 800;
+    static int height_plateau = 500;
+
+    static final int DEFAULT_NIVEAU = 1;
+    static int niveau = DEFAULT_NIVEAU;
+
+    static int nombre_ligne;
+    static int nombre_colonne;
+    static Plateau plateau;
+    static Image image;
+    static Consumer<String> consumer = e -> System.out.println(e);
 
     @Override
     public void start(Stage primaryStage) throws Exception{
         this.primary_Stage = primaryStage;
-        Parent root = FXMLLoader.load(getClass().getResource("Fenetre.fxml"));
-        primaryStage.setTitle("Jeu du Puzzle");
-        primaryStage.setScene(new Scene(root, 800, 600));
-        primaryStage.show();
-        /*test_Piece(root);
+
+        // programme principal
+        //puzzle_principale();
+
+        // test divers
+        puzzle_test_divers();
+
+    }
+
+    private void puzzle_test_divers() {
+        BorderPane root = new BorderPane();
+        //test_Piece(root);
         test_piece2(root);
         //test_Plateau(root);
-        primaryStage.setTitle("Hello World");
-        primaryStage.setScene(new Scene(root, 1400, 1275));
-       // primaryStage.show();
-        new Fenetre();*/
+        this.primary_Stage.setTitle("Hello World");
+        this.primary_Stage.setScene(new Scene(root, 1400, 1275));
+        this.primary_Stage.show();
+        //new Fenetre();
     }
-    public double getOldX() {
-        return oldX;
-    }
-
-    public void setOldX(double oldX) {
-        this.oldX = oldX;
-    }
-
-    public double getOldY() {
-        return oldY;
-    }
-
-    public void setOldY(double oldY) {
-        this.oldY = oldY;
-    }
-
-    public static Stage getPrimary_Stage() {
-        return primary_Stage;
-    }
-
-    public static void setPrimary_Stage(Stage primary_Stage) {
-        Main.primary_Stage = primary_Stage;
+    private void puzzle_principale() throws IOException {
+        Parent root = FXMLLoader.load(getClass().getResource("Fenetre.fxml"));
+        this.primary_Stage.setTitle("Jeu du Puzzle");
+        this.primary_Stage.setScene(new Scene(root, 800, 600));
+        this.primary_Stage.show();
     }
     private void test_Plateau(BorderPane root) {
         Plateau plateau = new Plateau(10, 10,100,60 );
@@ -73,14 +76,22 @@ public class Main extends Application {
                 root.getChildren().add(plateau.getTab()[i][j].forme);
             }
         }
-       // root.getChildren().addAll(plateau.getListe_piece());
     }
 
     private void test_piece2(BorderPane root) {
+        ArrayList<Forme_Bordure> list1 = new ArrayList<>();
+        list1.add(null);list1.add(null);list1.add(null);list1.add(null);
+        //list.add(new Bordure_Plate(0, 220, 220,270,270));list.add(new Bordure_Plate(1, 220, 220,270,27));list.add(new Bordure_Plate(2, 220, 220,270,270));list.add(new Bordure_Plate(3, 220, 220,270,270));
+        Piece p1 = new Piece(list1, 220, 220, 300 , 400,3);
         ArrayList<Forme_Bordure> list = new ArrayList<>();
-        list.add(null);list.add(new Dents(1,220,220,300,400));list.add(null);list.add(null);
-        Piece p = new Piece(list, 220+400, 220, 300 , 400);
+        //list.add(null);list.add(new Dents(1,220,220,300,400));list.add(null);list.add(null);
+        list.add(null);
+        list.add(null);
+        list.add(null);
+        list.add(p1.getTab_bordure()[1]); // on prend le DROITE de p1 pour faire le gAUCHE de p
+        Piece p = new Piece(list, 220+400, 220, 300 , 400,3);
         File file = new File("./image/shingeki.jpg");
+        // gestion p
         p.forme.setFill(new ImagePattern(new Image("file:"+file), 220, 220, p.longueur*2, p.hauteur, false));
         p.forme.setStrokeWidth(2);
         p.forme.setStroke(Color.BLACK);
@@ -94,14 +105,29 @@ public class Main extends Application {
             p.forme.setTranslateX(x - oldX);
             p.forme.setTranslateY(y - oldY);
         });
-        root.getChildren().add( p.forme);
+        // gestion p1
+        p1.forme.setFill(new ImagePattern(new Image("file:"+file), p1.getPosY(), p1.getPosY(), p1.longueur*2, p1.hauteur, false));
+        // p.forme.setFill(Color.TRANSPARENT);
+        p1.forme.setStrokeWidth(2);
+        p1.forme.setStroke(Color.BLACK);
+        p1.forme.setOnMousePressed(mouseEvent -> {
+            oldX = mouseEvent.getX();
+            oldY = mouseEvent.getY();
+        });
+        p1.forme.setOnMouseDragged(mouseEvent ->{
+            double x = mouseEvent.getSceneX();
+            double y = mouseEvent.getSceneY();
+            p1.forme.setTranslateX(x - oldX);
+            p1.forme.setTranslateY(y - oldY);
+        });
+        root.getChildren().addAll(p.forme,p1.forme);
     }
     private void test_Piece(BorderPane root) {
         ArrayList<Forme_Bordure> list = new ArrayList<>();
         //list.add(new Bordure_Plate(0, 20, 20));list.add(new Dents(20,20));list.add(new Dents(20,20));list.add(new Creux(new Dents(20,20)));
-        list.add(null);list.add(new Dents(1,220,220,300,400));list.add(null);list.add(null);
+        list.add(null);list.add(new Dents(1,220,220,300,500,3));list.add(null);list.add(null);
         //list.add(new Bordure_Plate(0, 220, 220,270,270));list.add(new Bordure_Plate(1, 220, 220,270,27));list.add(new Bordure_Plate(2, 220, 220,270,270));list.add(new Bordure_Plate(3, 220, 220,270,270));
-        Piece p = new Piece(list, 220, 220, 300 , 400);
+        Piece p = new Piece(list, 220, 220, 300 , 500,3);
         //setAllCircleOnPane(p,root);
         File file = new File("./image/shingeki.jpg");
         p.forme.setFill(new ImagePattern(new Image("file:"+file), p.getPosY(), p.getPosY(), p.longueur*2, p.hauteur, false));
@@ -138,6 +164,30 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+    public double getOldX() {
+        return oldX;
+    }
+
+    public void setOldX(double oldX) {
+        this.oldX = oldX;
+    }
+
+    public double getOldY() {
+        return oldY;
+    }
+
+    public void setOldY(double oldY) {
+        this.oldY = oldY;
+    }
+
+    public static Stage getPrimary_Stage() {
+        return primary_Stage;
+    }
+
+    public static void setPrimary_Stage(Stage primary_Stage) {
+        Main.primary_Stage = primary_Stage;
+    }
+
 }
 /*
 Pane root = new Pane();

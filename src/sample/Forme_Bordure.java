@@ -43,6 +43,8 @@ public class Forme_Bordure extends Shape {
     static int TAILLE_COTE_PIECE_LONGUEUR = 50;
     static int MIN_TAILLE = 20 ; // taille minimale entre
 
+    private double longueur_appendice;
+    private double hauteur_appendice;
 
     ArrayList<Circle> liste_cercle ;
     ArrayList<Circle> liste_cercle_controle ;
@@ -51,6 +53,7 @@ public class Forme_Bordure extends Shape {
     Path notre_path ;
     LineTo lineTo ;
     Boolean est_plat;
+
 
     Forme_Bordure(Boolean est_plat) {
         //si on ne precise pas les coord alors on les mets a 0 par defaut
@@ -173,4 +176,20 @@ public class Forme_Bordure extends Shape {
     public static int getNbCercleControleBordure() {
         return NB_CERCLE_CONTROLE_BORDURE;
     }
+    public double getLongueur_appendice() {
+        return longueur_appendice;
+    }
+
+    public void setLongueur_appendice(double longueur_appendice) {
+        this.longueur_appendice = longueur_appendice;
+    }
+
+    public double getHauteur_appendice() {
+        return hauteur_appendice;
+    }
+
+    public void setHauteur_appendice(double hauteur_appendice) {
+        this.hauteur_appendice = hauteur_appendice;
+    }
+
 }

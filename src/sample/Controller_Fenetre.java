@@ -7,6 +7,9 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
@@ -16,8 +19,10 @@ import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
+import javafx.scene.transform.Translate;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -27,25 +32,33 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.function.Consumer;
+
+import static sample.Main.*;
 
 public class Controller_Fenetre  {
-    private static int width_plateau = 800;
-    private static int height_plateau = 500;
-    private static final int DEFAULT_NIVEAU = 0;
+
+    // attribut "GLOBAL"
+
+    private static final int DECALAGE_PLATEAU_ASSEMBLAGE = 25;
     private Stage stage;
     private Scene scene;
-    private Image image;
+    private static final int min_longueur = Piece.getMinLongueur();
+    private static final int min_hauteur = Piece.getMinHauteur();
+    private boolean accueil = true;
+    private Consumer<String> consumer = e -> System.out.println(e);
+    private double oldX;
+    private double oldY;
 
-    private Plateau plateau;
-
-    private static final int min_longueur = Piece.MIN_LONGUEUR;
-    private static final int min_hauteur = Piece.MIN_HAUTEUR;
-    private int niveau=DEFAULT_NIVEAU;
+    // page principale
     @FXML private MenuItem open;
+    @FXML private MenuItem lancement;
     @FXML private MenuItem quit;
     @FXML private MenuItem save_as;
     @FXML private MenuItem new_puzzle;
-
+    @FXML private HBox box_contour;
+    @FXML private Label label_bienvenue;
+    @FXML private AnchorPane pane_assemblage;
     //parametrage
     @FXML private Button bouton_image;
     @FXML private Spinner<Integer> spinner_colonne;
@@ -64,24 +77,96 @@ public class Controller_Fenetre  {
     public Controller_Fenetre() {
         this.stage = Main.getPrimary_Stage();
     }
-
-
-    private void create_Plateau() {
-        this.plateau = new Plateau(Integer.valueOf(nb_ligne.getText().toString()),
-                                Integer.valueOf(nb_colonne.getText().toString()),
-                                width_plateau,
-                                height_plateau);
+    @FXML
+    private void fill_lancement() {
+        lancement();
+    }
+    //lance un puzzle a partir du plateau etc ...
+    private void lancement() {
+        hide_titre();
+        create_Plateau();
+        set_plateau_on_pane();
+        gestion_evenement_plateau();
     }
 
-    private void set_plateau_on_pane() {
-        Pane pane = new Pane();
-        /*
-        for (int j = 0; j < plateau.getNb_colonne(); j++) {
-            for (int i = 0; i < plateau.getNb_ligne() ; i++) {
-                root.getChildren().add(plateau.getTab()[i][j].forme);
+    //ajoute des evenement aux pieces du plateau
+    private void gestion_evenement_plateau() {
+        Piece[][] tab = plateau.getTab();
+        for (int i = 0; i < tab.length ; i++) {
+            for (int j = 0; j <tab[0].length ; j++) {
+                ajout_event_piece(i,j);
             }
         }
-        */
+    }
+    // ajoute des event a une piece
+    private void ajout_event_piece(int i, int j) {
+        //consumer.accept("dans ajout event piece i : "+ i+" j :"+j);
+        plateau.getTab()[i][j].forme.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                consumer.accept("dans onCilicked de piece ");
+                oldX = mouseEvent.getSceneX();
+                oldY = mouseEvent.getSceneY();
+                consumer.accept("oldX : "+oldX);
+                consumer.accept("oldY : "+oldY);
+            }
+        });
+        plateau.getTab()[i][j].forme.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                consumer.accept("dans on dragged de piece");
+                plateau.getTab()[i][j].forme.setTranslateX(mouseEvent.getSceneX() - oldX);
+                plateau.getTab()[i][j].forme.setTranslateY(mouseEvent.getSceneY() - oldY);
+            }
+        });
+
+    }
+
+
+    private void hide_titre() {
+        this.label_bienvenue.setVisible(false);
+    }
+    //cree notre plateau en fonction des données entrées par l'user
+    private void create_Plateau() {
+        plateau = new Plateau(
+                0,
+                0,
+                nombre_ligne,
+                nombre_colonne,
+                calcul_longueur_piece(),
+                calcul_hauteur_piece(),
+                image,
+                niveau
+        );
+    }
+    // renvoie la longueur d'une piece en fonction du nombre de
+    // colonne et de la longueur du plateau
+    private int calcul_longueur_piece() {
+        int res =0;
+        res = width_plateau / nombre_colonne;
+        return res;
+    }
+    // renvoie la hauteur d'une piece en fonction du nombre de
+    // lignes et de la hauteur du plateau
+    private int calcul_hauteur_piece() {
+        int res=0;
+        res = height_plateau / nombre_ligne;
+        return res;
+    }
+
+
+    // met notre plateau dans l'affichage
+    private void set_plateau_on_pane() {
+        positionnement_plateau_assemblage();
+        for (int j = 0; j < plateau.getNb_colonne(); j++) {
+            for (int i = 0; i < plateau.getNb_ligne() ; i++) {
+                pane_assemblage.getChildren().add(plateau.getTab()[i][j].forme);
+            }
+        }
+    }
+
+    private void positionnement_plateau_assemblage() {
+        pane_assemblage.getTransforms().add(new Translate(25,25));
     }
     @FXML
     private void fill_new() throws IOException {
@@ -97,7 +182,7 @@ public class Controller_Fenetre  {
         // Création de la scène
         if (root2 != null) {
             System.out.println("root2 n'est pas null");
-            Scene scene2 = new Scene(root2, 800, 600);
+            Scene scene2 = new Scene(root2, stage.getWidth(), stage.getHeight());
             this.stage.setScene(scene2);
         }
     }
@@ -135,20 +220,20 @@ public class Controller_Fenetre  {
     @FXML
     private void on_radio() {
         if (radioButton.isSelected()) {
-            this.niveau = 1;
+            niveau = 1;
         } else if (radioButton2.isSelected()) {
-            this.niveau = 2;
+            niveau = 2;
         } else if (radioButton3.isSelected()) {
-            this.niveau = 3;
+            niveau = 3;
         } else if(radioButton4.isSelected()) {
-            this.niveau = 4;
+            niveau = 4;
         }
         txt_niveau.setText(String.valueOf(niveau));
     }
 
     @FXML
     private void reset_onAction() {
-        this.image = null;
+        image = null;
         this.path_image.setText("");
         set_element_hide();
         this.spinner_ligne.setValueFactory(null);
@@ -159,6 +244,8 @@ public class Controller_Fenetre  {
     private void valider_onAction() throws IOException {
         System.out.println("dans valider on action");
         if (check_parametrage()) {
+            // mise a jour des attribut du main
+            MAJ_attribut();
             //TODO : retour a la fenetre principale et debut du jeu
             final URL url = getClass().getResource("Fenetre.fxml");
             // Création du loader
@@ -171,11 +258,15 @@ public class Controller_Fenetre  {
             // Création de la scène
             if (root != null) {
                 System.out.println("root n'est pas null");
-                this.stage.setScene(new Scene(root, 800, 600));
+                this.stage.setScene(new Scene(root, stage.getWidth(), stage.getHeight()));
             }
         }
     }
-
+    //met a jour les attribut de la classe main pour faire notre puzzle
+    private void MAJ_attribut() {
+        nombre_colonne = Integer.valueOf(nb_colonne.getText().toString());
+        nombre_ligne = Integer.valueOf(nb_ligne.getText().toString());
+    }
     //verifie si tout les champs du paarametrage dd'un nouveau puzzle sont bien remplie
     private boolean check_parametrage() {
         boolean res = false;
@@ -188,7 +279,7 @@ public class Controller_Fenetre  {
     }
 
     private boolean check_image() {
-        if (this.image != null) {
+        if (image != null) {
             return true;
         }
         return false;
@@ -218,21 +309,33 @@ public class Controller_Fenetre  {
     // init les spinner en fonction de la resolution de l'image choisi
     private void init_spinner() {
         set_element_Visible();
-        int h = (int) image.getHeight();
-        int max_li = (int) (h / min_hauteur);// pas besoin des max ??????????
-        int w = (int) image.getWidth();
-        int max_col = (int) (w / min_longueur);
-        System.out.println("w: "+w+" min_longueur: "+min_longueur+" == max_col : "+max_col);
-        System.out.println("h: "+h+" min_hauteur: "+min_hauteur+" == max_li : "+max_li);
+        System.out.println("w: " + image.getWidth() + " min_longueur: " + min_longueur + " == max_col : " + calcul_max_colonne());
+        System.out.println("h: " + image.getHeight() + " min_hauteur: " + min_hauteur + " == max_li : " + calcul_max_ligne());
         SpinnerValueFactory<Integer> valueFactory =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(5, max_col, 5);
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, calcul_max_colonne(), 1);
         spinner_colonne.setValueFactory(valueFactory);
 
         SpinnerValueFactory<Integer> valueFactory2 =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(5, max_li, 5);
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, calcul_max_ligne(), 1);
         spinner_ligne.setValueFactory(valueFactory2);
         nb_ligne.textProperty().bind(StringProperty.stringExpression(spinner_ligne.valueProperty()));
         nb_colonne.textProperty().bind(StringProperty.stringExpression(spinner_colonne.valueProperty()));
+    }
+
+    // renvoie le nombre de colonnes que l'utilisateur peut choisir au maximum
+    // pour son puzzle
+    private int calcul_max_colonne() {
+        int res = 0;
+        res = Math.min(((int) image.getWidth() / min_longueur), (width_plateau / min_longueur));
+        return res;
+    }
+
+    // renvoie le nombre de lignes que l'utilisateur peut choisir au maximum
+    // pour son puzzle
+    private int calcul_max_ligne() {
+        int res =0;
+        res = Math.min(((int) image.getHeight() / min_hauteur), (height_plateau / min_hauteur));
+        return res;
     }
 
     private void event1() {

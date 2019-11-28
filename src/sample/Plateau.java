@@ -11,7 +11,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class Plateau {
-    private final static String DEFAULT_FILE = "./image/shingeki.jpg";
+    private final static String DEFAULT_FILE = "./image/roronoa.jpg";
     private int posX;
     private int posY;
     private int nb_ligne;
@@ -22,6 +22,9 @@ public class Plateau {
     private Piece tab[][];
     private ArrayList<Shape> liste_piece;
     private double oldX, oldY;
+    private static final int DEFAULT_NIVEAU = 1;
+    private int niveau = DEFAULT_NIVEAU;
+
 
     public Plateau(int ligne,int col, int longueur, int hauteur) {
         image = new Image("file:" + DEFAULT_FILE);//met une image par defaut
@@ -32,16 +35,31 @@ public class Plateau {
         tab = new Piece[ligne][col];
         create_plateau();
     }
-    public Plateau(int x, int y,int ligne,int col, int longueur, int hauteur, File file) {
+    public Plateau(int x, int y,int ligne,int col, int longueur, int hauteur, Image image) {
         this.posX = x; // a ajouter dans create plateau aux coord des != piece MORRAY
         this.posY = y;
         this.liste_piece = new ArrayList<Shape>();
-        image = new Image("file:"+file);
+        this.image = image;
         nb_ligne = ligne;
         nb_colonne = col;
         this.longueur = longueur;
         this.hauteur = hauteur;
         tab = new Piece[ligne][col];
+        create_plateau();
+        ajout_piece_liste();
+    }
+    public Plateau(int x, int y,int ligne,int col, int longueur, int hauteur, Image image, int niveau) {
+        Main.consumer.accept(" dans plateau avec niveau");
+        this.posX = x; // a ajouter dans create plateau aux coord des != piece MORRAY
+        this.posY = y;
+        this.liste_piece = new ArrayList<Shape>();
+        this.image = image;
+        nb_ligne = ligne;
+        nb_colonne = col;
+        this.longueur = longueur;
+        this.hauteur = hauteur;
+        tab = new Piece[ligne][col];
+        this.niveau = niveau;
         create_plateau();
         ajout_piece_liste();
     }
@@ -68,11 +86,11 @@ public class Plateau {
             for (int j = 0; j < nb_colonne; j++) {
                 ArrayList<Forme_Bordure> liste = new ArrayList<Forme_Bordure>();
                 recup_bordure_contrainte(i, j, liste);
-                Piece piece = new Piece(liste, j * longueur, i * hauteur, hauteur, longueur);
+                Piece piece = new Piece(liste, j * longueur, i * hauteur, hauteur, longueur,niveau);
                 piece.forme.setFill(Color.TRANSPARENT);
-                piece.forme.setStrokeWidth(2);
+                piece.forme.setStrokeWidth(1);
                 piece.forme.setStroke(Color.BLACK);
-                add_evenement(piece);
+                //add_evenement(piece); //faire l'ajout d'evenment dans le controller
                 gestion_Image(piece);
                 tab[i][j] = piece;
             }
@@ -84,14 +102,21 @@ public class Plateau {
     }
     private void add_evenement(Piece p) {
         p.forme.setOnMousePressed(mouseEvent -> {
-            oldX = mouseEvent.getX();
-            oldY = mouseEvent.getY();
+            oldX = mouseEvent.getSceneX();
+            oldY = mouseEvent.getSceneY();
+
+            Main.consumer.accept(" pressed oldX :"+oldX);
+            Main.consumer.accept("pressed oldY :"+oldY);
         });
         p.forme.setOnMouseDragged(mouseEvent ->{
-            double x = mouseEvent.getSceneX();
-            double y = mouseEvent.getSceneY();
-            p.forme.setTranslateX(x - oldX);
-            p.forme.setTranslateY(y - oldY);
+            p.forme.setTranslateX(mouseEvent.getSceneX() - oldX);
+            p.forme.setTranslateY(mouseEvent.getSceneY() - oldY);
+        });
+        p.forme.setOnMouseReleased(mouseEvent -> {
+            //oldX = mouseEvent.getSceneX();
+            //oldY = mouseEvent.getSceneY();
+            Main.consumer.accept("released oldX :"+oldX);
+            Main.consumer.accept("resleased oldY :"+oldY);
         });
     }
 

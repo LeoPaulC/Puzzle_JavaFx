@@ -83,7 +83,7 @@ public class Creux extends Forme_Bordure {
             Circle c = this.liste_cercle_controle.get(i);
             //on addittionne 2 fois la difference entre le y de c0 et le y de i
             // pour effectuer une symetrie verticale de ci avec l'axe c0;c6
-            c.setLayoutY(liste_controleurs.get(i).getLayoutY()+2*(liste_cercle.get(0).getLayoutY()-liste_controleurs.get(i).getLayoutY()));
+            c.setLayoutY(liste_controleurs.get(i).getLayoutY() + 2 * (liste_cercle.get(0).getLayoutY() - liste_controleurs.get(i).getLayoutY()));
             //on affecte la psition en x sans la changer
             c.setLayoutX(liste_controleurs.get(i).getLayoutX());
         }

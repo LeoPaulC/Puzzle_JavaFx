@@ -8,15 +8,42 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Dents extends Forme_Bordure {
+    private static final int DEFAULT_COTE = 0;
+    private final static Boolean est_plat = false;
+    private static final int DEFAULT_NIVEAU = 1;
+    private static final double DEFAULT_DECALAGE = 0; // double pcq coef
+    private static final double DEFAULT_MARGE_HAUTEUR = 0.10;
+    // eviter la supperposition de deux creux sur deux cote contigu d'une piece
+    private static final double DEFAULT_MARGE_HAUTEUR_CONTROLE = 0.05; // meme chose qu'au dessus mais ne sert uniquement au premier et derner cercle de controle d'une bordure
+    // ceux qui snt de bas en hauteur 0.0 // evite le croisement des lignes entre divers cotee contigu d'une piece
+
+    // matrices de positionnement des cercles
+    private static double tab_coef_longeur[] = {0.4, 0.36, 0.50, 0.64, 0.60};
+    private static double tab_coef_hauteur[] = {0.08, 0.26, 0.40, 0.26, 0.08};
+    private static double tab_coef_longeur_controle[] = {0.25, 0.34, 0.43, 0.36, 0.36, 0.42, 0.58, 0.64, 0.64, 0.57, 0.66, 0.75};
+    private static double tab_coef_hauteur_controle[] = {0.0, 0.0, 0.12, 0.14, 0.34, 0.40, 0.40, 0.34, 0.16, 0.12, 0.0, 0.0};
+
+    private static double tab_coef_longueur_appendice[] = {-0.1, -0.14, 0.0, 0.14, 0.1};
+    private static double tab_coef_hauteur_appendice[] = {0.08, 0.26, 0.40, 0.26, 0.08};
+    private static double tab_coef_longueur_controle_appendice[] = {-0.3, -0.16, -0.07, -0.14, -0.14, -0.08, 0.08, 0.14, 0.14, 0.07, 0.16, 0.3};
+    private static double tab_coef_hauteur_controle_appendice[] =  {0.0, 0.0, 0.12, 0.14, 0.34, 0.40, 0.40, 0.34, 0.16, 0.12, 0.0, 0.0};
+    //matrice de positionnement appendice
 
     Shape c;
     Random rand;
     int tmp;
     double posX = DEFAULT_COORD_X;
     double posY = DEFAULT_COORD_Y;
-    private static final int DEFAULT_COTE = 0;
     private int cote = DEFAULT_COTE;
-    private final static Boolean est_plat = false;
+    private int niveau = DEFAULT_NIVEAU;
+
+    private static final double MARGE_DECALAGE = 0.05;
+    private double MARGE_HAUTEUR = DEFAULT_MARGE_HAUTEUR; // marge sur la hauteur d'un appendice
+    private double MARGE_HAUTEUR_CONTROLE = DEFAULT_MARGE_HAUTEUR_CONTROLE; // meme chose qu'au dessus mais ne sert uniquement au premier et derner cercle de controle d'une bordure
+
+    private double decalage = DEFAULT_DECALAGE;
+    private boolean est_decalable = false;
+    private  double min_taille ; //= Math.min(TAILLE_COTE_PIECE_HAUTEUR, TAILLE_COTE_PIECE_LONGUEUR);
 
     public Dents(int cote, double x, double y, int hauteur, int longueur) {
         super(est_plat);
@@ -25,9 +52,32 @@ public class Dents extends Forme_Bordure {
         this.cote = cote;
         setTailleCotePieceHauteur(hauteur);
         setTailleCotePieceLongueur(longueur);
+        init_MinTaille(hauteur,longueur);
+        //setHauteur_appendice(Math.min(hauteur, longueur));
+        //setLongueur_appendice(Math.min(hauteur, longueur));
         gestion_dimension_bordure();
         fill_liste_cercle();
         fill_list_cercle_controle();
+        ajout_decalage();
+    }
+    public Dents(int cote, double x, double y, int hauteur, int longueur, int niveau) {
+        super(est_plat);
+        Main.consumer.accept("dans Dents avec niveau");
+        posY = y;
+        posX = x;
+        this.cote = cote;
+        this.niveau = niveau;
+        setTailleCotePieceHauteur(hauteur);
+        setTailleCotePieceLongueur(longueur);
+        init_MinTaille(hauteur,longueur);
+        Main.consumer.accept("init_MinTaille() : " + min_taille);
+        //setHauteur_appendice(Math.min(hauteur, longueur));
+        //setLongueur_appendice(Math.min(hauteur, longueur));
+        gestion_niveau();
+        gestion_dimension_bordure();
+        fill_liste_cercle();
+        fill_list_cercle_controle();
+        ajout_decalage();
     }
 
     public Dents(double x, double y) {
@@ -36,6 +86,7 @@ public class Dents extends Forme_Bordure {
         posY = y;
         fill_liste_cercle();
         fill_list_cercle_controle();
+        ajout_decalage();
     }
 
     Dents() { // Aléatoire complet
@@ -43,6 +94,7 @@ public class Dents extends Forme_Bordure {
         rand = new Random();
         fill_liste_cercle();
         fill_list_cercle_controle();
+        ajout_decalage();
         for (int i = 0; i < this.liste_cubicCurveTo.size(); i++) {
 
             this.liste_cubicCurveTo.get(i).xProperty().bind(this.liste_cercle.get(i).layoutXProperty());
@@ -62,6 +114,140 @@ public class Dents extends Forme_Bordure {
         }
     }
 
+    private void init_MinTaille(int hauteur, int longueur) {
+        this.min_taille =Math.min(hauteur, longueur);
+    }
+
+    private void ajout_decalage(){
+        if (!est_decalable) {
+            return;
+        }
+        gestion_decalage();
+        // on ne decale que les cercles de l'appendice et non le 0 et le 6
+        for (int i = 1; i < this.liste_cercle.size() -1 ; i++) {
+            this.liste_cercle.get(i).setLayoutX(this.liste_cercle.get(i).getLayoutX() + this.decalage);
+        }
+        // on ne decale que les cercles de l'appendice et non le 0 et le 6
+        for (int i = 0; i < this.liste_cercle_controle.size() ; i++) {
+            this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle_controle.get(i).getLayoutX() + this.decalage);
+        }
+    }
+    // --- gestion des deformations
+
+    private void gestion_niveau() {
+        if (this.niveau == 1) {// si niveau == 1
+            // alors les conitions de deformations restes à ceux par defauts
+            this.MARGE_HAUTEUR = 0;
+            this.MARGE_HAUTEUR_CONTROLE = 0;
+        }else if (this.niveau == 2) { // niveau 2 -> deformation de cadre
+            //alors on laisse les marges a default
+
+        } else if (this.niveau == 3) { // niveau 3 -> deportation de l'axe
+            est_decalable = true;
+            this.MARGE_HAUTEUR = 0;
+            this.MARGE_HAUTEUR_CONTROLE = 0;
+        } else if (this.niveau == 4) { // niveau 4 -> approximation de la position des cercles
+
+        }
+    }
+
+    private void gestion_decalage() {
+        int signe = rand_signe(); // signe == 1 || signe  == -1
+        this.decalage = (signe * (calcul_decalage() ));//- marge_decalage));
+        //Main.consumer.accept("Marge de decalage : "+ marge_decalage);
+        Main.consumer.accept("valeur du coef de decalage : "+ this.decalage);
+    }
+
+    // calcul la distance de decalage
+    private double calcul_decalage() {
+
+        int indice_min = get_indice_min_tab_coef_longeur();
+        Main.consumer.accept("indice_min : "+indice_min);
+        double minimum = this.liste_cercle.get(indice_min).getLayoutX();
+        Main.consumer.accept("minimum : "+minimum);
+        double diff_min = minimum - this.liste_cercle.get(0).getLayoutX();
+
+        int indice_max = get_indice_max_tab_coef_longeur();
+        double maximum = this.liste_cercle.get(indice_max).getLayoutX();
+        Main.consumer.accept("maximum : " + maximum+" indice du max : "+ indice_max);
+        double diff_max = this.liste_cercle.get(6).getLayoutX() - maximum;
+
+        double hauteur_appendice = calcul_hauteur_appendice_contigu();
+        Main.consumer.accept("hauteur_appendice : "+hauteur_appendice);
+
+        // ordre de grandeur : hauteur_appendice < minimum et maximum < ( 1 -hauteur_appendice )
+        double max_distance = Math.min(diff_min, diff_max) - hauteur_appendice;
+        //double max_distance = calcul_marge_decalage();
+        double distance = 0;
+        //TODO: faire le random sur decalage
+        double random = new Random().nextDouble();
+        distance = random * max_distance;
+        Main.consumer.accept("max_distance : " + max_distance);
+        Main.consumer.accept("distance : " + distance);
+        return distance;
+    }
+
+    // calcul la distance maximale de decalage  d'axe d'un appendice en fonction de l'appendice de  ses cote contigu
+    private double calcul_hauteur_appendice_contigu() {
+        double res = 0;
+        //res = TAILLE_COTE_PIECE_HAUTEUR * (get_max_tab_coef_hauteur() - this.MARGE_HAUTEUR);
+        // -> y0 - y3 = posY - (posY - TAILLZ_COTE_PIECE_HAUTEUR * tab_coef_hauteur[3] -this.MARGE_HAUTEUR )
+        // == position du cercle 0 en Y - formule de positionnement du cercle 3 en Y
+
+        //res = this.liste_cercle.get(0).getLayoutY() - this.liste_cercle.get(indice).getLayoutY();
+        res = min_taille * (this.tab_coef_hauteur[get_indice_max_tab_coef_hauteur()] - MARGE_DECALAGE);
+        Main.consumer.accept("min-taille :"+ min_taille+" max tab coef hauteur : "+this.tab_coef_hauteur[get_indice_max_tab_coef_hauteur()]);
+        // coef de cercle 0 en Y est 0.0
+        //res = 0.0 -
+        return res;
+    }
+
+    private int get_indice_max_tab_coef_hauteur() {
+        int indice_max = 0; // 1 est le max des coef pcq coef == ratio sur 1
+        for (int i = 0; i < tab_coef_hauteur.length; i++) {
+            if (tab_coef_hauteur[i] > tab_coef_hauteur[indice_max]) {
+                indice_max = i ;
+            }
+        }
+        return indice_max;
+
+    }
+
+    private int get_indice_max_tab_coef_longeur() {
+        int indice_max = 0; // 1 est le max des coef pcq coef == ratio sur 1
+        for (int i = 0; i < tab_coef_longeur.length; i++) {
+            if (tab_coef_longeur[i] > tab_coef_longeur[indice_max]) {
+                indice_max = i;
+            }
+        }
+        return indice_max;
+    }
+    private int get_indice_min_tab_coef_longeur() {
+        int indice_min = 0; // 1 est le max des coef pcq coef == ratio sur 1
+        for (int i = 0; i < tab_coef_longeur.length; i++) {
+            if (tab_coef_longeur[i] < tab_coef_longeur[indice_min]) {
+                indice_min = i;
+            }
+        }
+        return indice_min;
+    }
+    private int rand_signe() {
+        int neg = (int)Math.random() * 2;
+        int signe = 0;
+        if (neg == 1) { // alors decalage negatif
+            //signe = -1;
+            signe = 1;
+        } else if (neg == 0) { // alors decalage positif
+            signe = 1;
+        }
+        return signe;
+    }
+
+    // ----- //
+
+
+
+
     // s'occupe de d'échanger a hauteur et a largeur en fonction du cote ou se
     // situe notre bordure sur la piece
     private void gestion_dimension_bordure() {
@@ -78,127 +264,73 @@ public class Dents extends Forme_Bordure {
             setTailleCotePieceHauteur(longueur);
         }
     }
+
     //rempli la liiste de cercle en placatnt le premier point en fonction de posX et posY
     private void fill_liste_cercle() {
         /**
-         * pour nos test on va placer le premier point au coordonne 200,300
+         * on va placer le premier point au coordonne posX posY passé dans le constructeur
          */
         this.liste_cercle.get(0).setLayoutX(posX);
         this.liste_cercle.get(0).setLayoutY(posY);
-        this.liste_cercle.get(0).setFill(Color.GOLD);
         /**
-         * on place le 6eme cercle sur la meme ligne que le premier et decalé de "LA largeur d'une piece" .
+         * on place le 6eme cercle sur la meme ligne que le premier et decalé de "LA longueur d'une piece" .
          */
         this.liste_cercle.get(6).setLayoutX(this.liste_cercle.get(0).getLayoutX() + TAILLE_COTE_PIECE_LONGUEUR);
         this.liste_cercle.get(6).setLayoutY(this.liste_cercle.get(0).getLayoutY());
-        this.liste_cercle.get(6).setFill(Color.GOLD);
         /**
          * Il nous reste a disposer les 5 points restant , à savoir du 1 à 5 .
          */
         int a;
-        for (int i = 1; i < Forme_Bordure.getNbCercleBordure() - 1; i++) {
-            switch (i) {
-                case 1:
-                    // cercle N° 1
-                    this.liste_cercle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + TAILLE_COTE_PIECE_LONGUEUR * 0.4); // on decale la position x1 de la piece 1 de ''tmp'' par rapport a x0
-                    this.liste_cercle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - TAILLE_COTE_PIECE_HAUTEUR * 0.08);
-                    this.liste_cercle.get(i).setFill(Color.ORANGE);
-                    break;
-                case 2:
-                    this.liste_cercle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + TAILLE_COTE_PIECE_LONGUEUR * 0.36);
-                    this.liste_cercle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - TAILLE_COTE_PIECE_HAUTEUR * 0.26);
-                    this.liste_cercle.get(i).setFill(Color.RED);
-                    break;
-                case 3:
-                    // On fixe le x3
-                    this.liste_cercle.get(i).setLayoutX(liste_cercle.get(0).getLayoutX() + ((liste_cercle.get(6).getLayoutX() - liste_cercle.get(0).getLayoutX()) / 2));
-                    this.liste_cercle.get(i).setLayoutY(liste_cercle.get(0).getLayoutY() - TAILLE_COTE_PIECE_HAUTEUR * 0.4);
-                    this.liste_cercle.get(i).setFill(Color.PINK);
-                    break;
-                case 4:
-                    this.liste_cercle.get(i).setLayoutX(liste_cercle.get(6).getLayoutX() - TAILLE_COTE_PIECE_LONGUEUR * 0.36);
-                    this.liste_cercle.get(i).setLayoutY(this.liste_cercle.get(6).getLayoutY() - TAILLE_COTE_PIECE_HAUTEUR * 0.26);
-                    this.liste_cercle.get(i).setFill(Color.PURPLE);
-                    break;
-                case 5:
-                    this.liste_cercle.get(i).setLayoutX(liste_cercle.get(6).getLayoutX() - TAILLE_COTE_PIECE_LONGUEUR * 0.4);
-                    this.liste_cercle.get(i).setLayoutY(this.liste_cercle.get(6).getLayoutY() - TAILLE_COTE_PIECE_HAUTEUR * 0.08);
-                    this.liste_cercle.get(i).setFill(Color.DARKBLUE);
+        for (int i = 1; i < Forme_Bordure.getNbCercleBordure() - 1; i++) { // on ne s'occcupe ni du cercle 0 ni du 6
+            // i - 1 pcq la matrice commencent avec les coef du point 1
 
-                    break;
-                default:
-                    // Inutile donc utile a mettre :)
-                    break;
-            }
+            this.liste_cercle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + (TAILLE_COTE_PIECE_LONGUEUR * tab_coef_longeur[i - 1]));
+            this.liste_cercle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - min_taille * (tab_coef_hauteur[i - 1] - this.MARGE_HAUTEUR));
 
+            //this.liste_cercle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + (TAILLE_COTE_PIECE_LONGUEUR/2) + tab_coef_longueur_appendice[i - 1]* getLongueur_appendice() );
+            //this.liste_cercle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - getHauteur_appendice() * tab_coef_longueur_appendice[i - 1] - this.MARGE_HAUTEUR));
         }
+        //coloration des cercles pour nos tests de visualisations
+        ajout_couleur_cercle();
+    }
 
+    // coloris les cercles de lacourbe ---> utile pour nos tests
+    private void ajout_couleur_cercle() {
+        this.liste_cercle.get(0).setFill(Color.GOLD);
+        this.liste_cercle.get(1).setFill(Color.ORANGE);
+        this.liste_cercle.get(2).setFill(Color.RED);
+        this.liste_cercle.get(3).setFill(Color.PINK);
+        this.liste_cercle.get(4).setFill(Color.PURPLE);
+        this.liste_cercle.get(5).setFill(Color.DARKBLUE);
+        this.liste_cercle.get(6).setFill(Color.GOLD);
     }
 
     //rempli la liste de cercle controle en fonction des cercle de la liste de cercle
     private void fill_list_cercle_controle() {
         for (int i = 0; i < this.liste_cercle_controle.size(); i++) { // car les points de controle sont cree 2 à 2
-            switch (i) {
-                case 0:
-                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(i).getLayoutX() + TAILLE_COTE_PIECE_LONGUEUR * 0.2);
-                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(i).getLayoutY());
-                    break;
-                case 1:
-                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + TAILLE_COTE_PIECE_LONGUEUR * 0.34);
-                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY());
-                    break;
-                case 2:
-                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + TAILLE_COTE_PIECE_LONGUEUR * 0.43);
-                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - TAILLE_COTE_PIECE_HAUTEUR * 0.12);
-                    break;
-                case 3:
-                    /**
-                     * a gauche de controle 2 et en haut de controle 2
-                     */
-                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + TAILLE_COTE_PIECE_LONGUEUR * 0.36);
-                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - TAILLE_COTE_PIECE_HAUTEUR * 0.14);
-                    break;
-                case 4:
-                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + TAILLE_COTE_PIECE_LONGUEUR * 0.36);
-                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - TAILLE_COTE_PIECE_HAUTEUR * 0.34);
-                    break;
-                case 5:
-                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + TAILLE_COTE_PIECE_LONGUEUR * 0.42);
-                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(3).getLayoutY());
-                    break;
-                case 6:
-                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + TAILLE_COTE_PIECE_LONGUEUR * 0.58);
-                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - TAILLE_COTE_PIECE_HAUTEUR * 0.40);
-                    break;
-                case 7:
-                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(6).getLayoutX() - TAILLE_COTE_PIECE_LONGUEUR * 0.36);
-                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(6).getLayoutY() - TAILLE_COTE_PIECE_HAUTEUR * 0.34);
-                    break;
-                case 8:
-                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(6).getLayoutX() - TAILLE_COTE_PIECE_LONGUEUR * 0.36);
-                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(6).getLayoutY() - TAILLE_COTE_PIECE_HAUTEUR * 0.16);
-                    break;
-                case 9:
-                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(6).getLayoutX() - TAILLE_COTE_PIECE_LONGUEUR * 0.43);
-                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(6).getLayoutY() - TAILLE_COTE_PIECE_HAUTEUR * 0.12);
-                    break;
-                case 10:
-                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(6).getLayoutX() - TAILLE_COTE_PIECE_LONGUEUR * 0.34);
-                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(6).getLayoutY());
-                    break;
-                case 11:
-                    this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(6).getLayoutX() - TAILLE_COTE_PIECE_LONGUEUR * 0.2);
-                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(6).getLayoutY());
-                    break;
-                default:
-                    System.out.println("i : " + i);
-                    this.Place_Point_Symetriquement(liste_cercle_controle.get(i - 1), liste_cercle.get(i / 2), this.liste_cercle_controle.get(i), i);
-                    this.liste_cercle_controle.get(i).setFill(Color.BLACK);
-                    break;
+            this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + (TAILLE_COTE_PIECE_LONGUEUR * tab_coef_longeur_controle[i]));
+            gestion_x_controle(i);
+            if (i == 0 || i == this.liste_cercle_controle.size() - 1) { //premier et dernier point de controle
+                Main.consumer.accept("dans le if de marge hauteur controle premier et derniner");
+                this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - min_taille * (tab_coef_hauteur_controle[i] - this.MARGE_HAUTEUR_CONTROLE));
+            } else {
+                this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - min_taille * (tab_coef_hauteur_controle[i]- this.MARGE_HAUTEUR));
             }
         }
     }
 
+    // verifie que la position en x d'un cercle de controle soit valide meme avec le decalage
+    private void gestion_x_controle(int indice) {
+        if (this.liste_cercle_controle.get(indice).getLayoutX() < this.liste_cercle.get(0).getLayoutX()) {
+            //si xn < x0 alors xn == x0
+            this.liste_cercle_controle.get(indice).setLayoutX(this.liste_cercle.get(0).getLayoutX());
+        }
+        else if (this.liste_cercle_controle.get(indice).getLayoutX() > this.liste_cercle.get(6).getLayoutX()) {
+            // si xn > x6 alors xn == x6
+            this.liste_cercle_controle.get(indice).setLayoutX(this.liste_cercle.get(6).getLayoutX());
+        }
+
+    }
     public void place_point(Circle controle1, Circle point_fixe, Circle controle2) { // permet de placer controle 2 par rapport a point_fixe et de controle 1
 
         double xC1 = controle1.getLayoutX();

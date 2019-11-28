@@ -7,6 +7,7 @@
 <?import javafx.scene.layout.*?>
 
 <?import javafx.scene.text.Font?>
+<?import javafx.geometry.Insets?>
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="sample.Controller_Fenetre" style="-fx-background-color: #ddb0ed" >
 
@@ -14,6 +15,7 @@
         <MenuBar>
             <Menu text="File" fx:id="File">
                 <MenuItem text="New" fx:id="new_puzzle" onAction="#fill_new"></MenuItem>
+                <MenuItem text="Lancement" fx:id="lancement" onAction="#fill_lancement"></MenuItem>
                 <MenuItem text="Open" fx:id="open" onAction="#fill_open"></MenuItem>
                 <MenuItem text="Save as" fx:id="save_as" onAction="#fill_save_as"></MenuItem>
                 <MenuItem text="Quit" fx:id="quit" onAction="#fill_quit"></MenuItem>
@@ -27,17 +29,16 @@
         </MenuBar>
     </top>
     <center>
-        <AnchorPane visible="true"  maxWidth="850" maxHeight="550" >
+        <HBox fx:id="box_contour" maxWidth="850" maxHeight="550" style=" -fx-background-color: green;">
             <children>
-                <Label fx:id="label_bienvenue" underline="true" style=" -fx-background-color: darkcyan;"  >
-                                          Bienvenue dans le Jeu du Puzzle
+                <AnchorPane fx:id="pane_assemblage" ></AnchorPane>
+                <Label fx:id="label_bienvenue" underline="true" style=" -fx-background-color: darkcyan;"  text="Bienvenue dans le Jeu du Puzzle" visible="true">
                     <font>
-                        <Font size="25.0"></Font>
+                        <Font size="35.0"></Font>
                     </font>
                 </Label>
             </children>
-        </AnchorPane>
-
+        </HBox>
     </center>
     <!--
     <center>

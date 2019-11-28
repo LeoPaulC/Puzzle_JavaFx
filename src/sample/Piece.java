@@ -56,6 +56,8 @@ public class Piece extends Shape {
     static final int MIN_HAUTEUR = 30;
     private double posX = 0;
     private double posY = 0;
+    private static final int DEFAULT_NIVEAU = 1;
+    private int niveau = DEFAULT_NIVEAU;
 
     //utilisé uniquement dans les anciennes methodes morray
     ArrayList<Circle> liste_cercle;
@@ -89,27 +91,26 @@ public class Piece extends Shape {
         create_shapes();
         forme = Shape.union(path, new Circle(0));
     }
-/**A gerer pcq moche pour les tests et FONCTIONNENT PAS SANS VARIABLE BRUTES !!! */
-    private void fill_tab_bordure(ArrayList<Forme_Bordure> liste_bordure, int hauteur, int longueur) {
-        for (int i = 0; i < NOMBRE_COTE; i++) {
-            if (liste_bordure.get(i) == null) {
-                //si pas de contrainte alors on met une dent
-                // ou un creux mais pas de bordure plate --- pcq pas de bord
-                //tab_bordure[i] = randoms_Bordure();
-                tab_bordure[i] = randoms_Bordure(i, hauteur , longueur);
-                //tab_bordure[i] = new Bordure_Plate(i, posX ,posY);
-            } else if (liste_bordure.get(i).getClass() == Dents.class) {
-                //tab_bordure[i] = new Dents(i, posX,posY, hauteur, longueur);
-                tab_bordure[i] = new Creux(new Dents(i,posX,posY, hauteur, longueur));
-                //tab_bordure[i] = new Creux((Dents)liste_bordure.get(i));
-            } else if (liste_bordure.get(i).getClass() == Creux.class) {
-                tab_bordure[i] = new Dents(i, posX,posY, hauteur, longueur);
-                //tab_bordure[i] = new Dents((Creux)liste_bordure.get(i));
-            } else if (liste_bordure.get(i).getClass() == Bordure_Plate.class) {
-                tab_bordure[i] = new Bordure_Plate(i, posX ,posY, hauteur, longueur);
-                //true pcq la bordure est plate
-            }
-        }
+
+    //constructeur qui permet de placer la piece dans l'espace
+    public Piece(ArrayList<Forme_Bordure> liste_bordure, double x, double y, int hauteur, int longueur, int niveau) {
+        Main.consumer.accept("dans piece avec niveau");
+        posX = x;
+        posY = y;
+        this.hauteur = hauteur;
+        this.longueur = longueur;
+        path = new Path();
+        tab_bordure = new Forme_Bordure[NOMBRE_COTE];
+        liste_cercle_controle = new ArrayList<Circle>();
+        liste_cercle = new ArrayList<Circle>();
+        liste_courbe = new ArrayList<CubicCurveTo>();
+        liste_shape = new ArrayList<PathElement>();
+        this.niveau = niveau;
+        fill_tab_bordure(liste_bordure, hauteur, longueur);
+        Gestion_Placement_Bordure();
+        fill_liste_cercle();
+        create_shapes();
+        forme = Shape.union(path, new Circle(0));
     }
 
     //prend en parametre une liste de Forme_Bordure précisant les contraintes de
@@ -131,6 +132,26 @@ public class Piece extends Shape {
         fill_liste_cercle();
         create_shapes();
         forme = Shape.union(path, new Circle(0));
+    }
+
+
+    /** Gerer la prise en compte des bordure de contraintes !!!! */
+    private void fill_tab_bordure(ArrayList<Forme_Bordure> liste_bordure, int hauteur, int longueur) {
+        for (int i = 0; i < NOMBRE_COTE; i++) {
+            if (liste_bordure.get(i) == null) {
+                //si pas de contrainte alors on met une dent
+                // ou un creux mais pas de bordure plate --- pcq pas de bord
+                tab_bordure[i] = randoms_Bordure(i, hauteur , longueur);
+            } else if (liste_bordure.get(i).getClass() == Dents.class) {
+                tab_bordure[i] = new Creux((Dents)liste_bordure.get(i));// passer en parametre le cote pour faire une inversion soit sur les X soit les Y
+                //tab_bordure[i] = new Creux(new Dents(i,posX,posY, hauteur, longueur));
+            } else if (liste_bordure.get(i).getClass() == Creux.class) {
+                tab_bordure[i] = new Dents(i, posX,posY, hauteur, longueur);// passer en parametre le cote pour faire une inversion soit sur les X soit les Y
+            } else if (liste_bordure.get(i).getClass() == Bordure_Plate.class) {
+                tab_bordure[i] = new Bordure_Plate(i, posX ,posY, hauteur, longueur);
+                //true pcq la bordure est plate
+            }
+        }
     }
 
 
@@ -246,43 +267,17 @@ public class Piece extends Shape {
         this.liste_cercle.add(this.liste_cercle.get(0));
     }
 
-
-    // associe a notre Shape forme l'union des differents boredure de la piece
-    private void gestion_Forme() {
-        forme = Shape.union(tab_bordure[HAUT].notre_path, tab_bordure[DROITE].notre_path);
-        forme = Shape.union(forme, tab_bordure[BAS].notre_path);
-        forme = Shape.union(forme, tab_bordure[GAUCHE].notre_path);
-
-        forme.setSmooth(true);
-        forme.setFill(Color.RED);
-
-        Ajouter_evenement(forme);
-    }
-
     private Forme_Bordure randoms_Bordure(int i ,int hauteur , int longueur) {
+        Main.consumer.accept("dans randoms_bordure");
         Forme_Bordure bordure;
         Random random = new Random();
-        int r =random.nextInt(2+ 1);
+        int r =random.nextInt(2+ 1); // random entre
         if ( r%2 == 0) {
-            bordure = new Dents(i,posX, posY,hauteur,longueur);
+            //bordure = new Dents(i,posX, posY,hauteur,longueur,niveau);
+            bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau));
         }
         else{
-           // bordure = new Dents(i,posX, posY,hauteur,longueur);
-            bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur));
-        }
-        return bordure;
-    }
-
-    // creer une bordure sans contrainte de bordure precedente // d'ou l'absence de parametre
-    private Forme_Bordure randoms_Bordure() {
-        Forme_Bordure bordure;
-        Random random = new Random();
-        int r =random.nextInt(2+ 1);
-        if ( r%2 == 0) {
-            bordure = new Dents(posX, posY);
-        }
-        else{
-            bordure = new Creux(new Dents(posX, posY));
+            bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau));
         }
         return bordure;
     }
@@ -414,13 +409,15 @@ public class Piece extends Shape {
 
 
     public void Ajouter_evenement(Shape forme) {
-        forme.setOnMouseDragged(new EventHandler<MouseEvent>() {
+        /*forme.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
                 forme.setLayoutX(mouseEvent.getX());
                 forme.setLayoutY(mouseEvent.getY());
             }
         });
+
+         */
         //forme.setFill(new ImagePattern());
        /* forme.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
@@ -553,6 +550,14 @@ public class Piece extends Shape {
             return tab_bordure[GAUCHE];
         }
         return tab_bordure[HAUT];
+    }
+
+    public static int getMinLongueur() {
+        return MIN_LONGUEUR;
+    }
+
+    public static int getMinHauteur() {
+        return MIN_HAUTEUR;
     }
 
     public void setTab_bordure(Forme_Bordure[] tab_bordure) {

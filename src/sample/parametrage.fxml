@@ -53,23 +53,23 @@
                     <ToggleGroup fx:id="group"/>
                 </fx:define>
 
-                <RadioButton fx:id="radioButton" text="1" toggleGroup="$group" onMouseClicked="#on_radio">
+                <RadioButton fx:id="radioButton" text="1" toggleGroup="$group" onAction="#on_radio">
                     <HBox.margin>
                         <Insets left="30.0" />
                     </HBox.margin>
                 </RadioButton>
 
-                <RadioButton fx:id="radioButton2" text="2" toggleGroup="$group" onMouseClicked="#on_radio">
+                <RadioButton fx:id="radioButton2" text="2" toggleGroup="$group" onAction="#on_radio">
                     <HBox.margin>
                         <Insets left="30.0" />
                     </HBox.margin>
                 </RadioButton>
-                <RadioButton fx:id="radioButton3" text="3" toggleGroup="$group" onMouseClicked="#on_radio">
+                <RadioButton fx:id="radioButton3" text="3" toggleGroup="$group" onAction="#on_radio">
                     <HBox.margin>
                         <Insets left="30.0" />
                     </HBox.margin>
                 </RadioButton>
-                <RadioButton fx:id="radioButton4" text="4" toggleGroup="$group" onMouseClicked="#on_radio">
+                <RadioButton fx:id="radioButton4" text="4" toggleGroup="$group"  onAction="#on_radio">
                     <HBox.margin>
                         <Insets left="30.0"/>
                     </HBox.margin>
