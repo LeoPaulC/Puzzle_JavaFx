@@ -45,6 +45,11 @@ public class Dents extends Forme_Bordure {
     private boolean est_decalable = false;
     private  double min_taille ; //= Math.min(TAILLE_COTE_PIECE_HAUTEUR, TAILLE_COTE_PIECE_LONGUEUR);
 
+    /*public Dents(ArrayList<Circle> liste_c , ArrayList<Circle> list_c_c, int hauteur, int largeur) {
+        super(est_plat);
+        setTailleCotePieceHauteur(hauteur);
+        setTailleCotePieceLongueur(longueur);
+    }*/
     public Dents(int cote, double x, double y, int hauteur, int longueur) {
         super(est_plat);
         posY = y;
@@ -79,6 +84,12 @@ public class Dents extends Forme_Bordure {
         fill_list_cercle_controle();
         ajout_decalage();
     }
+    // creer un creux a partir des cercle d'une dents de la piece voisine sans aucune operation desssus
+    public Dents(ArrayList<Circle> liste1, ArrayList<Circle> liste2) {
+        super(est_plat);
+        this.liste_cercle = liste1;
+        this.liste_cercle_controle = liste2;
+    }// pas besoin de faire des transformation pour le placer dans la piece
 
     public Dents(double x, double y) {
         super(est_plat);
@@ -133,6 +144,14 @@ public class Dents extends Forme_Bordure {
         }
     }
     // --- gestion des deformations
+
+    public int getNiveau() {
+        return niveau;
+    }
+
+    public void setNiveau(int niveau) {
+        this.niveau = niveau;
+    }
 
     private void gestion_niveau() {
         if (this.niveau == 1) {// si niveau == 1
@@ -235,8 +254,7 @@ public class Dents extends Forme_Bordure {
         int neg = (int)Math.random() * 2;
         int signe = 0;
         if (neg == 1) { // alors decalage negatif
-            //signe = -1;
-            signe = 1;
+            signe = -1;
         } else if (neg == 0) { // alors decalage positif
             signe = 1;
         }

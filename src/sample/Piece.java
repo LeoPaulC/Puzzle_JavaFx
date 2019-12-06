@@ -86,7 +86,7 @@ public class Piece extends Shape {
         liste_courbe = new ArrayList<CubicCurveTo>();
         liste_shape = new ArrayList<PathElement>();
         fill_tab_bordure(liste_bordure , hauteur, longueur);
-        Gestion_Placement_Bordure();
+        ///Gestion_Placement_Bordure();
         fill_liste_cercle();
         create_shapes();
         forme = Shape.union(path, new Circle(0));
@@ -107,7 +107,7 @@ public class Piece extends Shape {
         liste_shape = new ArrayList<PathElement>();
         this.niveau = niveau;
         fill_tab_bordure(liste_bordure, hauteur, longueur);
-        Gestion_Placement_Bordure();
+        //Gestion_Placement_Bordure();
         fill_liste_cercle();
         create_shapes();
         forme = Shape.union(path, new Circle(0));
@@ -142,13 +142,36 @@ public class Piece extends Shape {
                 //si pas de contrainte alors on met une dent
                 // ou un creux mais pas de bordure plate --- pcq pas de bord
                 tab_bordure[i] = randoms_Bordure(i, hauteur , longueur);
+                gestion_placement(tab_bordure[i],i);
             } else if (liste_bordure.get(i).getClass() == Dents.class) {
-                tab_bordure[i] = new Creux((Dents)liste_bordure.get(i));// passer en parametre le cote pour faire une inversion soit sur les X soit les Y
-                //tab_bordure[i] = new Creux(new Dents(i,posX,posY, hauteur, longueur));
+                Main.consumer.accept("listebordure.get(i).class == Dents");
+                ArrayList<Circle> liste1 = liste_bordure.get(i).getListe_cercle();
+                ArrayList<Circle> liste2 = liste_bordure.get(i).getListe_cercle_controle();
+                if (i == BAS || i == HAUT) {
+                    Collections.reverse(liste1);
+                    Collections.reverse(liste2);
+                }
+                tab_bordure[i]= new Creux(liste1,liste2); // pas besoin de la placer normalement
+
+                //tab_bordure[i] = new Creux((Dents)liste_bordure.get(i),i );// passer en parametre le cote pour faire une inversion soit sur les X soit les Y
+                System.out.println("tab_bordure i :" + i + " cote : "+i);
+                //Dents d = new Dents((Dents) liste_bordure.get(i),niveau);
+                //gestion_placement(tab_bordure[i],i);
+                //tab_bordure[i] = new Creux(new Dents(i,posX,posY, hauteur, longueur, niveau));
             } else if (liste_bordure.get(i).getClass() == Creux.class) {
-                tab_bordure[i] = new Dents(i, posX,posY, hauteur, longueur);// passer en parametre le cote pour faire une inversion soit sur les X soit les Y
+                Main.consumer.accept("listebordure.get(i).class == Creux");
+                ArrayList<Circle> liste1 = liste_bordure.get(i).getListe_cercle();
+                ArrayList<Circle> liste2 = liste_bordure.get(i).getListe_cercle_controle();
+                if (i == BAS || i == HAUT) {
+                    Collections.reverse(liste1);
+                    Collections.reverse(liste2);
+                }
+                tab_bordure[i]= new Dents(liste1, liste2);
+                //tab_bordure[i] = new Dents(i, posX,posY, hauteur, longueur,niveau);// passer en parametre le cote pour faire une inversion soit sur les X soit les Y
+                //gestion_placement(tab_bordure[i],i);
             } else if (liste_bordure.get(i).getClass() == Bordure_Plate.class) {
                 tab_bordure[i] = new Bordure_Plate(i, posX ,posY, hauteur, longueur);
+                gestion_placement(tab_bordure[i],i);
                 //true pcq la bordure est plate
             }
         }
@@ -273,8 +296,8 @@ public class Piece extends Shape {
         Random random = new Random();
         int r =random.nextInt(2+ 1); // random entre
         if ( r%2 == 0) {
-            //bordure = new Dents(i,posX, posY,hauteur,longueur,niveau);
-            bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau));
+            bordure = new Dents(i,posX, posY,hauteur,longueur,niveau);
+            //bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau));
         }
         else{
             bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau));
@@ -286,6 +309,18 @@ public class Piece extends Shape {
     private void Gestion_Placement_Bordure() {
         for (int i = 0; i < NOMBRE_COTE; i++) {
             placement_Bordure(i);
+        }
+    }
+
+    // s'occupe de placer une Formes_Bordure sur la piece en fonction du cote
+    private void gestion_placement(Forme_Bordure forme_bordure, int cote) {
+        if (!forme_bordure.getEst_plat()) {
+            int angle = recup_Angle_Rotation(cote);
+            Circle pivot = recup_Indice_Pivot(cote);
+            rotation(forme_bordure, angle, pivot);
+            int coefficient_x_translation = recup_Coefficient_Translation(true,cote, forme_bordure.getEst_plat());
+            int coefficient_y_translation = recup_Coefficient_Translation(false,cote, forme_bordure.getEst_plat());
+            translation(forme_bordure, coefficient_x_translation, coefficient_y_translation);
         }
     }
 

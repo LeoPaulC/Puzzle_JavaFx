@@ -176,20 +176,6 @@ public class Forme_Bordure extends Shape {
     public static int getNbCercleControleBordure() {
         return NB_CERCLE_CONTROLE_BORDURE;
     }
-    public double getLongueur_appendice() {
-        return longueur_appendice;
-    }
 
-    public void setLongueur_appendice(double longueur_appendice) {
-        this.longueur_appendice = longueur_appendice;
-    }
-
-    public double getHauteur_appendice() {
-        return hauteur_appendice;
-    }
-
-    public void setHauteur_appendice(double hauteur_appendice) {
-        this.hauteur_appendice = hauteur_appendice;
-    }
 
 }

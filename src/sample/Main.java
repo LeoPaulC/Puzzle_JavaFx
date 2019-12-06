@@ -45,23 +45,34 @@ public class Main extends Application {
         this.primary_Stage = primaryStage;
 
         // programme principal
-        //puzzle_principale();
+        puzzle_principale();
 
         // test divers
-        puzzle_test_divers();
+        //puzzle_test_divers();
 
     }
 
     private void puzzle_test_divers() {
         BorderPane root = new BorderPane();
         //test_Piece(root);
-        test_piece2(root);
+        //test_piece2(root);
+        test_bordure(root);
         //test_Plateau(root);
         this.primary_Stage.setTitle("Hello World");
         this.primary_Stage.setScene(new Scene(root, 1400, 1275));
         this.primary_Stage.show();
         //new Fenetre();
     }
+
+    private void test_bordure(BorderPane root) {
+        //Dents dents = new Dents(0, 100, 100, 200, 100, 1);
+        Dents dents = new Dents();
+
+        root.getChildren().addAll(dents.notre_path);
+    }
+
+
+
     private void puzzle_principale() throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("Fenetre.fxml"));
         this.primary_Stage.setTitle("Jeu du Puzzle");

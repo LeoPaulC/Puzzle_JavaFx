@@ -41,10 +41,26 @@ public class Creux extends Forme_Bordure {
         }
     }
 
+    // creer un creux a partir des cercle d'une dents de la piece voisine sans aucune operation desssus
+    public Creux(ArrayList<Circle> liste1, ArrayList<Circle> liste2) {
+        super(est_plat);
+        this.liste_cercle = liste1;
+        this.liste_cercle_controle = liste2;
+    }// pas besoin de faire des transformation pour le placer dans la piece
+
+    public Creux(Dents d, int cote) {
+        super(est_plat);
+        if (cote == Piece.HAUT || cote == Piece.BAS) {
+            inversion_Hauteur(d.liste_cercle,d.liste_cercle_controle);
+
+        }else{
+            inversion_Hauteur2(d.liste_cercle,d.liste_cercle_controle);
+        }
+    }
     public Creux(Dents d) {
         super(est_plat);
         inversion_Hauteur(d.liste_cercle,d.liste_cercle_controle);
-        //cercle_Vers_Courbe();
+
     }
     //cree des courbes a partir des 2 listes de cercles
     private void cercle_Vers_Courbe() {
@@ -64,6 +80,25 @@ public class Creux extends Forme_Bordure {
 
             notre_path.getElements().add(this.liste_Moveto.get(i));
             notre_path.getElements().add(this.liste_cubicCurveTo.get(i));
+        }
+    }
+
+    private void inversion_Hauteur2(ArrayList<Circle> liste_cercle,ArrayList<Circle> liste_controleurs) {
+        for (int i = 0; i < liste_cercle.size(); i++) {
+            Circle c = this.liste_cercle.get(i);
+            //on addittionne 2 fois la difference entre le y de c0 et le y de i
+            // pour effectuer une symetrie verticale de ci avec l'axe c0;c6
+            c.setLayoutX(liste_cercle.get(i).getLayoutX() + 2 * (liste_cercle.get(0).getLayoutX() - liste_cercle.get(i).getLayoutX()));
+            //on affecte la psition en x sans la changer
+            c.setLayoutY(liste_cercle.get(i).getLayoutY());
+        }
+        for (int i = 0; i < liste_cercle_controle.size() ; i++) {
+            Circle c = this.liste_cercle_controle.get(i);
+            //on addittionne 2 fois la difference entre le y de c0 et le y de i
+            // pour effectuer une symetrie verticale de ci avec l'axe c0;c6
+            c.setLayoutX(liste_controleurs.get(i).getLayoutX() + 2 * (liste_cercle.get(0).getLayoutX() - liste_controleurs.get(i).getLayoutX()));
+            //on affecte la psition en x sans la changer
+            c.setLayoutY(liste_controleurs.get(i).getLayoutY());
         }
     }
 
