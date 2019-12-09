@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -17,11 +18,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Translate;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -43,8 +43,8 @@ public class Controller_Fenetre  {
     private static final int DECALAGE_PLATEAU_ASSEMBLAGE = 25;
     private Stage stage;
     private Scene scene;
-    private static final int min_longueur = Piece.getMinLongueur();
-    private static final int min_hauteur = Piece.getMinHauteur();
+    private static final double min_longueur = Piece.getMinLongueur();
+    private static final double min_hauteur = Piece.getMinHauteur();
     private boolean accueil = true;
     private Consumer<String> consumer = e -> System.out.println(e);
     private double oldX;
@@ -85,10 +85,47 @@ public class Controller_Fenetre  {
     private void lancement() {
         hide_titre();
         create_Plateau();
-        set_plateau_on_pane();
+        Rectangle rectangle = create_Rectangle();
+        pane_assemblage.getChildren().add(rectangle);
+        gestion_affichage_box();
+        Plateau p = new Plateau(plateau);
+        set_plateau_on_pane(p);
+        //gestion_plateau_transparent();
+        //positionnement_plateau_assemblage();
+        set_plateau_on_pane(plateau);
         gestion_evenement_plateau();
     }
 
+    private void gestion_affichage_box() {
+        box_contour.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY)));
+        box_contour.setMaxHeight(plateau.getNb_ligne() * plateau.getHauteur());
+        box_contour.setMaxWidth(plateau.getNb_colonne() * plateau.getLongueur());
+
+    }
+
+    private Rectangle create_Rectangle() {
+        Rectangle rectangle = new Rectangle();
+        rectangle.setX(0);
+        rectangle.setY(0);
+        rectangle.setFill(Color.WHITE);
+        rectangle.setHeight(plateau.getNb_ligne() * plateau.getHauteur());
+        rectangle.setWidth(plateau.getNb_colonne() * plateau.getLongueur());
+        rectangle.setStrokeWidth(3.5);
+        rectangle.setStroke(Color.BLACK);
+        return rectangle;
+    }
+    private void gestion_plateau_transparent() {
+
+        // rectangle qui fait le cadre du plateau transparent
+        Rectangle rectangle = new Rectangle();
+        rectangle.setX(plateau.getPosX());
+        rectangle.setY(plateau.getPosY());
+        rectangle.setHeight(height_plateau);
+        rectangle.setWidth(width_plateau);
+        Plateau p = new Plateau(plateau);
+        pane_assemblage.getChildren().add(rectangle);
+        set_plateau_on_pane(p);
+    }
     //ajoute des evenement aux pieces du plateau
     private void gestion_evenement_plateau() {
         Piece[][] tab = plateau.getTab();
@@ -104,17 +141,17 @@ public class Controller_Fenetre  {
         plateau.getTab()[i][j].forme.setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                consumer.accept("dans onCilicked de piece ");
+                //consumer.accept("dans onCilicked de piece ");
                 oldX = mouseEvent.getSceneX();
                 oldY = mouseEvent.getSceneY();
-                consumer.accept("oldX : "+oldX);
-                consumer.accept("oldY : "+oldY);
+                //consumer.accept("oldX : "+oldX);
+                //consumer.accept("oldY : "+oldY);
             }
         });
         plateau.getTab()[i][j].forme.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                consumer.accept("dans on dragged de piece");
+                //consumer.accept("dans on dragged de piece");
                 plateau.getTab()[i][j].forme.setTranslateX(mouseEvent.getSceneX() - oldX);
                 plateau.getTab()[i][j].forme.setTranslateY(mouseEvent.getSceneY() - oldY);
             }
@@ -128,6 +165,12 @@ public class Controller_Fenetre  {
     }
     //cree notre plateau en fonction des données entrées par l'user
     private void create_Plateau() {
+        plateau = null;
+        try {
+            clear_pane_plateau();
+        } catch (NullPointerException e) {
+            consumer.accept("panneau non netoyer");
+        }
         plateau = new Plateau(
                 0,
                 0,
@@ -139,35 +182,52 @@ public class Controller_Fenetre  {
                 niveau
         );
     }
+
+    private void clear_pane_plateau() {
+//        if (plateau.tab != null) {
+        pane_assemblage.getChildren().removeAll();
+       // }
+    }
     // renvoie la longueur d'une piece en fonction du nombre de
     // colonne et de la longueur du plateau
     private int calcul_longueur_piece() {
         int res =0;
-        res = width_plateau / nombre_colonne;
+        res = (int)box_contour.getMaxWidth() / nombre_colonne;
+        consumer.accept("calcul longueur piece "+box_contour.getMaxWidth() + " x "+ nombre_colonne + " = "+res);
         return res;
     }
     // renvoie la hauteur d'une piece en fonction du nombre de
     // lignes et de la hauteur du plateau
-    private int calcul_hauteur_piece() {
+    private int  calcul_hauteur_piece() {
         int res=0;
-        res = height_plateau / nombre_ligne;
+        res = (int) box_contour.getMaxHeight() / nombre_ligne;
+        consumer.accept("calcul hauteur piece "+box_contour.getMaxHeight() + " x "+ nombre_ligne + " = "+res);
         return res;
     }
 
 
     // met notre plateau dans l'affichage
-    private void set_plateau_on_pane() {
-        positionnement_plateau_assemblage();
-        for (int j = 0; j < plateau.getNb_colonne(); j++) {
-            for (int i = 0; i < plateau.getNb_ligne() ; i++) {
+    private void set_plateau_on_pane(Plateau plateau) {
+        //positionnement_plateau_assemblage();
+        consumer.accept("taille du plateau : "+plateau.getTab().length+" x "+plateau.getTab()[0].length);
+        /*for (int j = 0; j < plateau.getTab().length; j++) {
+            for (int i = 0; i < plateau.getTab()[0].length ; i++) {
+                consumer.accept("i "+ i +" j "+j);
+                pane_assemblage.getChildren().add(plateau.getTab()[i][j].forme);
+            }
+        }*/
+        for (int i = 0; i < plateau.getTab().length; i++) {
+            for (int j = 0; j < plateau.getTab()[0].length; j++) {
                 pane_assemblage.getChildren().add(plateau.getTab()[i][j].forme);
             }
         }
     }
 
-    private void positionnement_plateau_assemblage() {
+    /*private void positionnement_plateau_assemblage() {
         pane_assemblage.getTransforms().add(new Translate(25,25));
     }
+
+     */
     @FXML
     private void fill_new() throws IOException {
         System.out.println("Dans fill_new");
@@ -267,7 +327,7 @@ public class Controller_Fenetre  {
         nombre_colonne = Integer.valueOf(nb_colonne.getText().toString());
         nombre_ligne = Integer.valueOf(nb_ligne.getText().toString());
     }
-    //verifie si tout les champs du paarametrage dd'un nouveau puzzle sont bien remplie
+    //verifie si tout les champs du parametrage dd'un nouveau puzzle sont bien remplie
     private boolean check_parametrage() {
         boolean res = false;
         if (check_image()) {
@@ -326,7 +386,7 @@ public class Controller_Fenetre  {
     // pour son puzzle
     private int calcul_max_colonne() {
         int res = 0;
-        res = Math.min(((int) image.getWidth() / min_longueur), (width_plateau / min_longueur));
+        res = Math.min(((int) image.getWidth() / (int) min_longueur), (width_plateau / (int) min_longueur));
         return res;
     }
 
@@ -334,7 +394,7 @@ public class Controller_Fenetre  {
     // pour son puzzle
     private int calcul_max_ligne() {
         int res =0;
-        res = Math.min(((int) image.getHeight() / min_hauteur), (height_plateau / min_hauteur));
+        res = Math.min(((int) image.getHeight() / (int) min_hauteur), (height_plateau / (int)  min_hauteur));
         return res;
     }
 

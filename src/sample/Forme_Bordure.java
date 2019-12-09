@@ -39,9 +39,9 @@ public class Forme_Bordure extends Shape {
 
     private final static int NB_CERCLE_BORDURE = 7;
     private final static int NB_CERCLE_CONTROLE_BORDURE = (NB_CERCLE_BORDURE-1)*2;
-    static int TAILLE_COTE_PIECE_HAUTEUR = 50;
-    static int TAILLE_COTE_PIECE_LONGUEUR = 50;
-    static int MIN_TAILLE = 20 ; // taille minimale entre
+    static double TAILLE_COTE_PIECE_HAUTEUR = 50;
+    static double TAILLE_COTE_PIECE_LONGUEUR = 50;
+    static double MIN_TAILLE = 20 ; // taille minimale entre
 
     private double longueur_appendice;
     private double hauteur_appendice;
@@ -90,27 +90,27 @@ public class Forme_Bordure extends Shape {
 
 
 
-    public static int getTailleCotePieceHauteur() {
+    public static double getTailleCotePieceHauteur() {
         return TAILLE_COTE_PIECE_HAUTEUR;
     }
 
-    public static void setTailleCotePieceHauteur(int tailleCotePieceHauteur) {
+    public static void setTailleCotePieceHauteur(double tailleCotePieceHauteur) {
         TAILLE_COTE_PIECE_HAUTEUR = tailleCotePieceHauteur;
     }
 
-    public static int getTailleCotePieceLongueur() {
+    public static double getTailleCotePieceLongueur() {
         return TAILLE_COTE_PIECE_LONGUEUR;
     }
 
-    public static void setTailleCotePieceLongueur(int tailleCotePieceLongueur) {
+    public static void setTailleCotePieceLongueur(double tailleCotePieceLongueur) {
         TAILLE_COTE_PIECE_LONGUEUR = tailleCotePieceLongueur;
     }
 
-    public static int getMinTaille() {
+    public static double getMinTaille() {
         return MIN_TAILLE;
     }
 
-    public static void setMinTaille(int minTaille) {
+    public static void setMinTaille(double minTaille) {
         MIN_TAILLE = minTaille;
     }
 

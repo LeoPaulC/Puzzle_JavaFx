@@ -6,7 +6,7 @@ public class Bordure_Plate extends Forme_Bordure {
     private final static Boolean est_plat = true;
 
 
-    public Bordure_Plate(int indice, double posX, double posY, int hauteur, int longueur) {
+    public Bordure_Plate(int indice, double posX, double posY, double hauteur, double longueur) {
         super(est_plat);
         //System.out.println("je suis dans bordure plate ind x y ");
         this.posX = posX;

@@ -28,15 +28,15 @@ import java.util.function.Consumer;
 public class Main extends Application {
     double oldX,oldY;
     static Stage primary_Stage;
-    static int width_plateau = 800;
-    static int height_plateau = 500;
+    static int width_plateau = 850;
+    static int height_plateau = 550;
 
     static final int DEFAULT_NIVEAU = 1;
     static int niveau = DEFAULT_NIVEAU;
 
     static int nombre_ligne;
     static int nombre_colonne;
-    static Plateau plateau;
+    protected static Plateau plateau;
     static Image image;
     static Consumer<String> consumer = e -> System.out.println(e);
 
@@ -76,7 +76,7 @@ public class Main extends Application {
     private void puzzle_principale() throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("Fenetre.fxml"));
         this.primary_Stage.setTitle("Jeu du Puzzle");
-        this.primary_Stage.setScene(new Scene(root, 800, 600));
+        this.primary_Stage.setScene(new Scene(root, 900, 700));
         this.primary_Stage.show();
     }
     private void test_Plateau(BorderPane root) {

@@ -52,8 +52,8 @@ public class Piece extends Shape {
     static final int TAB_COEFFICIENT_TRANSLATION_X_PLAT[] = {0, 1, 1, 0};
     static final int TAB_COEFFICIENT_TRANSLATION_Y_PLAT[] = {0, 0, 1, 1};
     static final int NOMBRE_COTE = 4;
-    static final int MIN_LONGUEUR = 30;
-    static final int MIN_HAUTEUR = 30;
+    static final double MIN_LONGUEUR = 30;
+    static final double MIN_HAUTEUR = 30;
     private double posX = 0;
     private double posY = 0;
     private static final int DEFAULT_NIVEAU = 1;
@@ -70,11 +70,50 @@ public class Piece extends Shape {
     Shape forme;
     Path path;
     ArrayList<PathElement> liste_shape;
-    int hauteur;
-    int longueur;
+    double hauteur;
+    double longueur;
 
+    public Piece() {
+
+    }
+
+    public Piece(Piece p) {
+        this.tab_bordure = new Forme_Bordure[NOMBRE_COTE];
+        path = new Path();
+        liste_cercle_controle = new ArrayList<Circle>();
+        liste_cercle = new ArrayList<Circle>();
+        liste_courbe = new ArrayList<CubicCurveTo>();
+        liste_shape = new ArrayList<PathElement>();
+        fill_tab_bordure(p.tab_bordure);
+        copie_listes_cercle(p);
+        //fill_liste_cercle();// pas besoin de l'inversion presente dans cette fonction
+        create_shapes();
+        forme = Shape.union(path, new Circle(0));
+    }
+
+    private void copie_listes_cercle(Piece p) {
+        this.liste_cercle = (ArrayList<Circle>) p.liste_cercle.clone();
+        this.liste_cercle_controle = (ArrayList<Circle>) p.liste_cercle_controle.clone();
+    }
+
+    private void fill_tab_bordure(Forme_Bordure[] tab_bordure) {
+        for (int i = 0; i < NOMBRE_COTE; i++) {
+            if (tab_bordure[i].getClass() == Dents.class || tab_bordure[i].getClass() == Creux.class) {
+                ArrayList<Circle> liste1 = (ArrayList<Circle>) tab_bordure[i].getListe_cercle().clone();
+                ArrayList<Circle> liste2 = (ArrayList<Circle>) tab_bordure[i].getListe_cercle_controle().clone();
+                if (tab_bordure[i].getClass() == Creux.class) {
+                    this.tab_bordure[i] = new Creux(liste1, liste2);
+                } else {
+                    this.tab_bordure[i] = new Dents(liste1, liste2);
+                }
+            } else { // bordure plate
+                Bordure_Plate b = (Bordure_Plate)tab_bordure[i];
+                this.tab_bordure[i] = new Bordure_Plate(i, b.posX, b.posY, hauteur, longueur);
+            }
+        }
+    }
     //constructeur qui permet de placer la piece dans l'espace
-    public Piece(ArrayList<Forme_Bordure> liste_bordure, double x, double y, int hauteur, int longueur) {
+    public Piece(ArrayList<Forme_Bordure> liste_bordure, double x, double y, double hauteur, double longueur) {
         posX = x;
         posY = y;
         this.hauteur = hauteur;
@@ -93,8 +132,8 @@ public class Piece extends Shape {
     }
 
     //constructeur qui permet de placer la piece dans l'espace
-    public Piece(ArrayList<Forme_Bordure> liste_bordure, double x, double y, int hauteur, int longueur, int niveau) {
-        Main.consumer.accept("dans piece avec niveau");
+    public Piece(ArrayList<Forme_Bordure> liste_bordure, double x, double y, double hauteur, double longueur, int niveau) {
+       // Main.consumer.accept("dans piece avec niveau");
         posX = x;
         posY = y;
         this.hauteur = hauteur;
@@ -136,7 +175,7 @@ public class Piece extends Shape {
 
 
     /** Gerer la prise en compte des bordure de contraintes !!!! */
-    private void fill_tab_bordure(ArrayList<Forme_Bordure> liste_bordure, int hauteur, int longueur) {
+    private void fill_tab_bordure(ArrayList<Forme_Bordure> liste_bordure, double hauteur, double longueur) {
         for (int i = 0; i < NOMBRE_COTE; i++) {
             if (liste_bordure.get(i) == null) {
                 //si pas de contrainte alors on met une dent
@@ -144,7 +183,7 @@ public class Piece extends Shape {
                 tab_bordure[i] = randoms_Bordure(i, hauteur , longueur);
                 gestion_placement(tab_bordure[i],i);
             } else if (liste_bordure.get(i).getClass() == Dents.class) {
-                Main.consumer.accept("listebordure.get(i).class == Dents");
+                //Main.consumer.accept("listebordure.get(i).class == Dents");
                 ArrayList<Circle> liste1 = liste_bordure.get(i).getListe_cercle();
                 ArrayList<Circle> liste2 = liste_bordure.get(i).getListe_cercle_controle();
                 if (i == BAS || i == HAUT) {
@@ -154,12 +193,12 @@ public class Piece extends Shape {
                 tab_bordure[i]= new Creux(liste1,liste2); // pas besoin de la placer normalement
 
                 //tab_bordure[i] = new Creux((Dents)liste_bordure.get(i),i );// passer en parametre le cote pour faire une inversion soit sur les X soit les Y
-                System.out.println("tab_bordure i :" + i + " cote : "+i);
+               // System.out.println("tab_bordure i :" + i + " cote : "+i);
                 //Dents d = new Dents((Dents) liste_bordure.get(i),niveau);
                 //gestion_placement(tab_bordure[i],i);
                 //tab_bordure[i] = new Creux(new Dents(i,posX,posY, hauteur, longueur, niveau));
             } else if (liste_bordure.get(i).getClass() == Creux.class) {
-                Main.consumer.accept("listebordure.get(i).class == Creux");
+                //Main.consumer.accept("listebordure.get(i).class == Creux");
                 ArrayList<Circle> liste1 = liste_bordure.get(i).getListe_cercle();
                 ArrayList<Circle> liste2 = liste_bordure.get(i).getListe_cercle_controle();
                 if (i == BAS || i == HAUT) {
@@ -290,8 +329,8 @@ public class Piece extends Shape {
         this.liste_cercle.add(this.liste_cercle.get(0));
     }
 
-    private Forme_Bordure randoms_Bordure(int i ,int hauteur , int longueur) {
-        Main.consumer.accept("dans randoms_bordure");
+    private Forme_Bordure randoms_Bordure(int i ,double hauteur , double longueur) {
+        //Main.consumer.accept("dans randoms_bordure");
         Forme_Bordure bordure;
         Random random = new Random();
         int r =random.nextInt(2+ 1); // random entre
@@ -494,36 +533,36 @@ public class Piece extends Shape {
             // start cubiccurveto
             Circle c = new Circle();
             c.setLayoutX(cct.get(i).getX());
-            System.out.println("coord x : " + c.getLayoutX());
+            //System.out.println("coord x : " + c.getLayoutX());
             c.setLayoutY(cct.get(i).getY());
-            System.out.println("coord y : " + c.getLayoutY());
+            //System.out.println("coord y : " + c.getLayoutY());
             newCircle.add(c);
             cpt++;
             // controle 1 :
             c = new Circle();
             c.setLayoutX(cct.get(i).getControlX1());
-            System.out.println("coord x : " + c.getLayoutX());
+            //System.out.println("coord x : " + c.getLayoutX());
             c.setLayoutY(cct.get(i).getControlY1());
-            System.out.println("coord y : " + c.getLayoutY());
+            //System.out.println("coord y : " + c.getLayoutY());
             newCircleControle.add(c);
             cpt++;
             // controle 2 :
             c = new Circle();
             c.setLayoutX(cct.get(i).getControlX2());
-            System.out.println("coord x : " + c.getLayoutX());
+            //System.out.println("coord x : " + c.getLayoutX());
             c.setLayoutY(cct.get(i).getControlY2());
-            System.out.println("coord y : " + c.getLayoutY());
+            //System.out.println("coord y : " + c.getLayoutY());
             newCircleControle.add(c);
             cpt++;
         }
         Circle c = new Circle();
         c.setLayoutX(mt.get(mt.size() - 1).getX());
-        System.out.println("coord x : " + c.getLayoutX());
+        //System.out.println("coord x : " + c.getLayoutX());
         c.setLayoutY(mt.get(mt.size() - 1).getY());
-        System.out.println("coord y : " + c.getLayoutY());
+        //System.out.println("coord y : " + c.getLayoutY());
         newCircle.add(c);
         cpt++;
-        System.out.println("mon cpt : " + cpt);
+        //System.out.println("mon cpt : " + cpt);
 
     }
 
@@ -587,11 +626,11 @@ public class Piece extends Shape {
         return tab_bordure[HAUT];
     }
 
-    public static int getMinLongueur() {
+    public static double getMinLongueur() {
         return MIN_LONGUEUR;
     }
 
-    public static int getMinHauteur() {
+    public static double getMinHauteur() {
         return MIN_HAUTEUR;
     }
 

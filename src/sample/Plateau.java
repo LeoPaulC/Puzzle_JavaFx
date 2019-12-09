@@ -4,6 +4,7 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Shape;
+import javafx.scene.shape.StrokeType;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -16,17 +17,67 @@ public class Plateau {
     private int posY;
     private int nb_ligne;
     private int nb_colonne;
-    private int longueur;
-    private int hauteur;
+    private double longueur;
+    private double hauteur;
     private Image image;
-    private Piece tab[][];
+    protected Piece tab[][];
     private ArrayList<Shape> liste_piece;
     private double oldX, oldY;
     private static final int DEFAULT_NIVEAU = 1;
     private int niveau = DEFAULT_NIVEAU;
 
+    public Plateau(Plateau p) {// pour le plateau transparent
+        //this.longueur = p.longueur;
+        //this.hauteur = p.hauteur;
+        //this.tab = p.tab;
+        Main.consumer.accept("plateau.getTab().length :"+p.getTab().length+"plateau.getTab()[0].length "+p.getTab()[0].length);
+        this.tab = new Piece[p.getTab().length][p.getTab()[0].length];
+        copie_piece_plateau(p);
+        //copie_shape(p);
+        //set_default_color();
+    }
 
-    public Plateau(int ligne,int col, int longueur, int hauteur) {
+    private void copie_piece_plateau(Plateau plateau) {
+        for (int i = 0; i < plateau.tab.length; i++) {
+            for (int j = 0; j < plateau.tab[0].length; j++) {
+                Piece p = plateau.tab[i][j];
+                Piece ma_piece = new Piece(p);
+                ma_piece.forme.setFill(Color.TRANSPARENT);
+                ma_piece.forme.setStrokeWidth(1.5);
+                ma_piece.forme.setStroke(Color.LIGHTGRAY);
+                //ma_piece.forme.getStrokeDashArray().addAll(2.0,7.0,2.0,7.0);
+                this.tab[i][j] = ma_piece;
+            }
+        }
+    }
+    private void copie_shape(Plateau plateau) {
+        for (int i = 0; i < plateau.tab.length; i++) {
+            for (int j = 0; j < plateau.tab[0].length; j++) {
+                Piece p = new Piece();
+                p.forme = plateau.tab[i][j].forme;
+                p.forme.setFill(Color.TRANSPARENT);
+                p.forme.setStrokeWidth(2);
+                p.forme.setStroke(Color.BLACK);
+                p.forme.setStrokeWidth(1.5);
+                p.forme.getStrokeDashArray().addAll(3.0,7.0,3.0,7.0);
+                tab[i][j] = p;
+            }
+        }
+    }
+
+    private void set_default_color() {
+        for (int i = 0; i < this.tab.length; i++) {
+            for (int j = 0; j < this.tab[0].length; j++) {
+                tab[i][j].forme.setFill(Color.WHITE);
+                //tab[i][j].forme.setStroke(Color.BLACK);
+                //tab[i][j].forme.setStrokeDashOffset(2d);
+                tab[i][j].forme.setFill(Color.WHITE);
+                tab[i][j].forme.setStrokeWidth(1);
+                tab[i][j].forme.setStroke(Color.BLACK);
+            }
+        }
+    }
+    public Plateau(int ligne,int col, double longueur, double hauteur) {
         image = new Image("file:" + DEFAULT_FILE);//met une image par defaut
         nb_ligne = ligne;
         nb_colonne = col;
@@ -35,7 +86,7 @@ public class Plateau {
         tab = new Piece[ligne][col];
         create_plateau();
     }
-    public Plateau(int x, int y,int ligne,int col, int longueur, int hauteur, Image image) {
+    public Plateau(int x, int y,int ligne,int col, double longueur, double hauteur, Image image) {
         this.posX = x; // a ajouter dans create plateau aux coord des != piece MORRAY
         this.posY = y;
         this.liste_piece = new ArrayList<Shape>();
@@ -48,7 +99,7 @@ public class Plateau {
         create_plateau();
         ajout_piece_liste();
     }
-    public Plateau(int x, int y,int ligne,int col, int longueur, int hauteur, Image image, int niveau) {
+    public Plateau(int x, int y,int ligne,int col, double longueur, double hauteur, Image image, int niveau) {
         Main.consumer.accept(" dans plateau avec niveau");
         this.posX = x; // a ajouter dans create plateau aux coord des != piece MORRAY
         this.posY = y;
@@ -86,7 +137,9 @@ public class Plateau {
             for (int j = 0; j < nb_colonne; j++) {
                 ArrayList<Forme_Bordure> liste = new ArrayList<Forme_Bordure>();
                 recup_bordure_contrainte(i, j, liste);
-                Piece piece = new Piece(liste, j * longueur, i * hauteur, hauteur, longueur,niveau);
+                double h = hauteur;
+                double l = longueur;
+                Piece piece = new Piece(liste, j * l, i * h, hauteur, longueur,niveau);
                 piece.forme.setFill(Color.TRANSPARENT);
                 piece.forme.setStrokeWidth(1);
                 piece.forme.setStroke(Color.BLACK);
@@ -105,8 +158,8 @@ public class Plateau {
             oldX = mouseEvent.getSceneX();
             oldY = mouseEvent.getSceneY();
 
-            Main.consumer.accept(" pressed oldX :"+oldX);
-            Main.consumer.accept("pressed oldY :"+oldY);
+            //Main.consumer.accept(" pressed oldX :"+oldX);
+            //Main.consumer.accept("pressed oldY :"+oldY);
         });
         p.forme.setOnMouseDragged(mouseEvent ->{
             p.forme.setTranslateX(mouseEvent.getSceneX() - oldX);
@@ -115,8 +168,8 @@ public class Plateau {
         p.forme.setOnMouseReleased(mouseEvent -> {
             //oldX = mouseEvent.getSceneX();
             //oldY = mouseEvent.getSceneY();
-            Main.consumer.accept("released oldX :"+oldX);
-            Main.consumer.accept("resleased oldY :"+oldY);
+            //Main.consumer.accept("released oldX :"+oldX);
+            //Main.consumer.accept("resleased oldY :"+oldY);
         });
     }
 
@@ -163,7 +216,7 @@ public class Plateau {
             return tab[i - 1][j].getBordure(Piece.BAS);
         }
     }
-    public int getLongueur() {
+    public double getLongueur() {
         return longueur;
     }
 
@@ -193,14 +246,6 @@ public class Plateau {
 
     public void setTab(Piece[][] tab) {
         this.tab = tab;
-    }
-
-    public double getLargeur() {
-        return longueur;
-    }
-
-    public void setLargeur(int longueur) {
-        this.longueur = longueur;
     }
 
     public double getHauteur() {

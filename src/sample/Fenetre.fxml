@@ -24,12 +24,12 @@
                 <MenuItem text="puzzle" fx:id="wiki_puzzle" onAction="#fill_wiki_puzzle"></MenuItem>
             </Menu>
             <Menu text="Help" fx:id="Help">
-                <MenuItem text="énouncé" fx:id="enonce" onAction="#fill_enonce"></MenuItem>
+                <MenuItem text="énoncé" fx:id="enonce" onAction="#fill_enonce"></MenuItem>
             </Menu>
         </MenuBar>
     </top>
     <center>
-        <HBox fx:id="box_contour" maxWidth="850" maxHeight="550" style=" -fx-background-color: green;">
+        <HBox fx:id="box_contour"  minWidth="900" minHeight="600" maxWidth="900" maxHeight="600" style=" -fx-background-color: green;">
             <children>
                 <AnchorPane fx:id="pane_assemblage" ></AnchorPane>
                 <Label fx:id="label_bienvenue" underline="true" style=" -fx-background-color: darkcyan;"  text="Bienvenue dans le Jeu du Puzzle" visible="true">
