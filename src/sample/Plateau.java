@@ -50,20 +50,6 @@ public class Plateau {
             }
         }
     }
-    private void copie_shape(Plateau plateau) {
-        for (int i = 0; i < plateau.tab.length; i++) {
-            for (int j = 0; j < plateau.tab[0].length; j++) {
-                Piece p = new Piece();
-                p.forme = plateau.tab[i][j].forme;
-                p.forme.setFill(Color.TRANSPARENT);
-                p.forme.setStrokeWidth(2);
-                p.forme.setStroke(Color.BLACK);
-                p.forme.setStrokeWidth(1.5);
-                p.forme.getStrokeDashArray().addAll(3.0,7.0,3.0,7.0);
-                tab[i][j] = p;
-            }
-        }
-    }
 
     private void set_default_color() {
         for (int i = 0; i < this.tab.length; i++) {

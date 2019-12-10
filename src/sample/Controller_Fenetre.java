@@ -141,7 +141,10 @@ public class Controller_Fenetre  {
         plateau.getTab()[i][j].forme.setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                //consumer.accept("dans onCilicked de piece ");
+                // remonter de l'element dans la hierarchie d'affichage
+                (pane_assemblage).getChildren().remove(plateau.getTab()[i][j].forme);
+                (pane_assemblage).getChildren().add(plateau.getTab()[i][j].forme);
+
                 oldX = mouseEvent.getSceneX();
                 oldY = mouseEvent.getSceneY();
                 //consumer.accept("oldX : "+oldX);
@@ -156,7 +159,6 @@ public class Controller_Fenetre  {
                 plateau.getTab()[i][j].forme.setTranslateY(mouseEvent.getSceneY() - oldY);
             }
         });
-
     }
 
 
@@ -183,10 +185,10 @@ public class Controller_Fenetre  {
         );
     }
 
+    //vide le panneau d'assaemblage de son plateau et de ses autres enfants
     private void clear_pane_plateau() {
-//        if (plateau.tab != null) {
-        pane_assemblage.getChildren().removeAll();
-       // }
+        consumer.accept("dans clear plateau");
+        pane_assemblage.getChildren().clear();
     }
     // renvoie la longueur d'une piece en fonction du nombre de
     // colonne et de la longueur du plateau
@@ -210,12 +212,6 @@ public class Controller_Fenetre  {
     private void set_plateau_on_pane(Plateau plateau) {
         //positionnement_plateau_assemblage();
         consumer.accept("taille du plateau : "+plateau.getTab().length+" x "+plateau.getTab()[0].length);
-        /*for (int j = 0; j < plateau.getTab().length; j++) {
-            for (int i = 0; i < plateau.getTab()[0].length ; i++) {
-                consumer.accept("i "+ i +" j "+j);
-                pane_assemblage.getChildren().add(plateau.getTab()[i][j].forme);
-            }
-        }*/
         for (int i = 0; i < plateau.getTab().length; i++) {
             for (int j = 0; j < plateau.getTab()[0].length; j++) {
                 pane_assemblage.getChildren().add(plateau.getTab()[i][j].forme);

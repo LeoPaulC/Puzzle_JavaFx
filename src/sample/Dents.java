@@ -143,16 +143,19 @@ public class Dents extends Forme_Bordure {
             this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle_controle.get(i).getLayoutX() + this.decalage);
         }
     }
-    // --- gestion des deformations
 
 
     private void gestion_niveau() {
         if (this.niveau == 1) {// si niveau == 1
             // alors les conitions de deformations restes à ceux par defauts
+            //  pieces basiques
             this.MARGE_HAUTEUR = 0;
             this.MARGE_HAUTEUR_CONTROLE = 0;
         }else if (this.niveau == 2) { // niveau 2 -> deformation de locale de cadre
-            //alors on laisse les marges a default
+            // pieces  basiques
+            this.MARGE_HAUTEUR = 0;
+            this.MARGE_HAUTEUR_CONTROLE = 0;
+
         } else if (this.niveau == 3) { // niveau 3 -> deportation de l'axe
             est_decalable = true;
             this.MARGE_HAUTEUR = 0;
@@ -169,32 +172,19 @@ public class Dents extends Forme_Bordure {
         //Main.consumer.accept("valeur du coef de decalage : "+ this.decalage);
     }
 
-    // calcul la distance de decalage
+    // calcul la distance de decalage d'un appendice
     private double calcul_decalage() {
-
         int indice_min = get_indice_min_tab_coef_longeur();
-        //Main.consumer.accept("indice_min : "+indice_min);
         double minimum = this.liste_cercle.get(indice_min).getLayoutX();
-        //Main.consumer.accept("minimum : "+minimum);
         double diff_min = minimum - this.liste_cercle.get(0).getLayoutX();
-
         int indice_max = get_indice_max_tab_coef_longeur();
         double maximum = this.liste_cercle.get(indice_max).getLayoutX();
-       // Main.consumer.accept("maximum : " + maximum+" indice du max : "+ indice_max);
         double diff_max = this.liste_cercle.get(6).getLayoutX() - maximum;
-
         double hauteur_appendice = calcul_hauteur_appendice_contigu();
-        //Main.consumer.accept("hauteur_appendice : "+hauteur_appendice);
-
-        // ordre de grandeur : hauteur_appendice < minimum et maximum < ( 1 -hauteur_appendice )
         double max_distance = Math.min(diff_min, diff_max) - hauteur_appendice;
-        //double max_distance = calcul_marge_decalage();
         double distance = 0;
-        //TODO: faire le random sur decalage
         double random = new Random().nextDouble();
         distance = random * max_distance;
-        //Main.consumer.accept("max_distance : " + max_distance);
-        //Main.consumer.accept("distance : " + distance);
         return distance;
     }
 
@@ -204,12 +194,7 @@ public class Dents extends Forme_Bordure {
         //res = TAILLE_COTE_PIECE_HAUTEUR * (get_max_tab_coef_hauteur() - this.MARGE_HAUTEUR);
         // -> y0 - y3 = posY - (posY - TAILLZ_COTE_PIECE_HAUTEUR * tab_coef_hauteur[3] -this.MARGE_HAUTEUR )
         // == position du cercle 0 en Y - formule de positionnement du cercle 3 en Y
-
-        //res = this.liste_cercle.get(0).getLayoutY() - this.liste_cercle.get(indice).getLayoutY();
         res = min_taille * (this.tab_coef_hauteur[get_indice_max_tab_coef_hauteur()] - MARGE_DECALAGE);
-       // Main.consumer.accept("min-taille :"+ min_taille+" max tab coef hauteur : "+this.tab_coef_hauteur[get_indice_max_tab_coef_hauteur()]);
-        // coef de cercle 0 en Y est 0.0
-        //res = 0.0 -
         return res;
     }
 
@@ -253,7 +238,6 @@ public class Dents extends Forme_Bordure {
         return signe;
     }
 
-    // ----- //
 
 
 
