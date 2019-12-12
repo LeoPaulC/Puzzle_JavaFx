@@ -83,13 +83,10 @@ public class Dents extends Forme_Bordure {
     }
     // determine si la bordure se trouve a la derniere ligne du plateau
     private void check_dernier() {
-        Main.consumer.accept("checke dernier");
-        Main.consumer.accept("checke dernier");
-        Main.consumer.accept("checke dernier");
         if (this.cote == Piece.DROITE) {
             double c = this.posY / Plateau.getNb_ligne();
-            Main.consumer.accept(" c ="+ c);
-            Main.consumer.accept(" taille hauteur ="+ TAILLE_COTE_PIECE_HAUTEUR);
+            //Main.consumer.accept(" c ="+ c);
+            //Main.consumer.accept(" taille hauteur ="+ TAILLE_COTE_PIECE_HAUTEUR);
             if (c == TAILLE_COTE_PIECE_HAUTEUR) {
                 this.est_dernier = true;
             }
@@ -286,7 +283,7 @@ public class Dents extends Forme_Bordure {
         }
         // on s'occupe des valeur des angles de deformations
         if (cote == Piece.DROITE && est_dernier == false) {
-            Main.consumer.accept(" droite cote == "+this.cote);
+            //Main.consumer.accept(" droite cote == "+this.cote);
             gestion_deformation_locale();
         }
         if (cote == Piece.DROITE && est_dernier ) { // pas utile mais par securité

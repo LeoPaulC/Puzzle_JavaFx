@@ -30,7 +30,7 @@ public class Plateau {
         //this.longueur = p.longueur;
         //this.hauteur = p.hauteur;
         //this.tab = p.tab;
-        Main.consumer.accept("plateau.getTab().length :"+p.getTab().length+"plateau.getTab()[0].length "+p.getTab()[0].length);
+        //Main.consumer.accept("plateau.getTab().length :"+p.getTab().length+"plateau.getTab()[0].length "+p.getTab()[0].length);
         this.tab = new Piece[p.getTab().length][p.getTab()[0].length];
         copie_piece_plateau(p);
         //copie_shape(p);
@@ -42,9 +42,12 @@ public class Plateau {
             for (int j = 0; j < plateau.tab[0].length; j++) {
                 Piece p = plateau.tab[i][j];
                 Piece ma_piece = new Piece(p);
-                ma_piece.forme.setFill(Color.TRANSPARENT);
-                ma_piece.forme.setStrokeWidth(1.5);
-                ma_piece.forme.setStroke(Color.LIGHTGRAY);
+                //ma_piece.forme.setFill(Color.TRANSPARENT);
+                //ma_piece.forme.setStrokeWidth(1.5);
+                //ma_piece.forme.setStroke(Color.LIGHTGRAY);
+                ma_piece.path.setFill(Color.TRANSPARENT);
+                ma_piece.path.setStrokeWidth(1.5);
+                ma_piece.path.setStroke(Color.LIGHTGRAY);
                 //ma_piece.forme.getStrokeDashArray().addAll(2.0,7.0,2.0,7.0);
                 this.tab[i][j] = ma_piece;
             }
@@ -86,7 +89,7 @@ public class Plateau {
         ajout_piece_liste();
     }
     public Plateau(int x, int y,int ligne,int col, double longueur, double hauteur, Image image, int niveau) {
-        Main.consumer.accept(" dans plateau avec niveau");
+        //Main.consumer.accept(" dans plateau avec niveau");
         this.posX = x; // a ajouter dans create plateau aux coord des != piece MORRAY
         this.posY = y;
         this.liste_piece = new ArrayList<Shape>();
@@ -101,18 +104,12 @@ public class Plateau {
         ajout_piece_liste();
     }
 
-    public ArrayList<Shape> getListe_piece() {
-        return liste_piece;
-    }
-
-    public void setListe_piece(ArrayList<Shape> liste_piece) {
-        this.liste_piece = liste_piece;
-    }
 
     private void ajout_piece_liste() {
         for (Piece[] pieces : tab) {
             for (Piece piece : pieces) {
-                this.liste_piece.add(piece.forme);
+                //this.liste_piece.add(piece.forme);
+                this.liste_piece.add(piece.path);
             }
         }
     }
@@ -126,9 +123,12 @@ public class Plateau {
                 double h = hauteur;
                 double l = longueur;
                 Piece piece = new Piece(liste, j * l, i * h, hauteur, longueur,niveau);
-                piece.forme.setFill(Color.TRANSPARENT);
-                piece.forme.setStrokeWidth(1);
-                piece.forme.setStroke(Color.BLACK);
+                piece.path.setFill(Color.TRANSPARENT);
+                //piece.forme.setFill(Color.TRANSPARENT);
+                piece.path.setStrokeWidth(1);
+                //piece.forme.setStrokeWidth(1);
+                piece.path.setStroke(Color.BLACK);
+                //piece.forme.setStroke(Color.BLACK);
                 //add_evenement(piece); //faire l'ajout d'evenment dans le controller
                 gestion_Image(piece);
                 tab[i][j] = piece;
@@ -137,26 +137,8 @@ public class Plateau {
     }
 
     private void gestion_Image(Piece p) {
-       p.forme.setFill(new ImagePattern(this.image,0,0,this.longueur*nb_colonne,this.hauteur*nb_ligne,false));
-    }
-    private void add_evenement(Piece p) {
-        p.forme.setOnMousePressed(mouseEvent -> {
-            oldX = mouseEvent.getSceneX();
-            oldY = mouseEvent.getSceneY();
-
-            //Main.consumer.accept(" pressed oldX :"+oldX);
-            //Main.consumer.accept("pressed oldY :"+oldY);
-        });
-        p.forme.setOnMouseDragged(mouseEvent ->{
-            p.forme.setTranslateX(mouseEvent.getSceneX() - oldX);
-            p.forme.setTranslateY(mouseEvent.getSceneY() - oldY);
-        });
-        p.forme.setOnMouseReleased(mouseEvent -> {
-            //oldX = mouseEvent.getSceneX();
-            //oldY = mouseEvent.getSceneY();
-            //Main.consumer.accept("released oldX :"+oldX);
-            //Main.consumer.accept("resleased oldY :"+oldY);
-        });
+       //p.forme.setFill(new ImagePattern(this.image,0,0,this.longueur*nb_colonne,this.hauteur*nb_ligne,false));
+       p.path.setFill(new ImagePattern(this.image,0,0,this.longueur*nb_colonne,this.hauteur*nb_ligne,false));
     }
 
     //recupere les bordures des pieces entourant notre piece
@@ -202,6 +184,14 @@ public class Plateau {
             return tab[i - 1][j].getBordure(Piece.BAS);
         }
     }
+    public ArrayList<Shape> getListe_piece() {
+        return liste_piece;
+    }
+
+    public void setListe_piece(ArrayList<Shape> liste_piece) {
+        this.liste_piece = liste_piece;
+    }
+
     public double getLongueur() {
         return longueur;
     }

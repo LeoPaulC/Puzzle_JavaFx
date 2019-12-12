@@ -75,6 +75,15 @@ public class Piece extends Shape {
     double hauteur;
     double longueur;
 
+    private double oldX;
+    private double oldY;
+
+    private Pane panneau;
+
+
+    protected double translationX;
+    protected double translationY;
+
     public Piece() {
 
     }
@@ -90,7 +99,15 @@ public class Piece extends Shape {
         copie_listes_cercle(p);
         //fill_liste_cercle();// pas besoin de l'inversion presente dans cette fonction
         create_shapes();
-        forme = Shape.union(path, new Circle(0));
+        //forme = Shape.union(path, new Circle(0));
+        //forme.layoutXProperty().bindBidirectional(path.layoutXProperty());
+        //forme.layoutYProperty().bindBidirectional(path.layoutYProperty());
+    }
+
+    protected void MAJ_Forme() {
+        forme.setLayoutX(path.getLayoutX());
+        forme.setLayoutY(path.getLayoutY());
+        //forme = Shape.union(path, new Circle(0));
     }
 
     private void copie_listes_cercle(Piece p) {
@@ -130,7 +147,7 @@ public class Piece extends Shape {
         ///Gestion_Placement_Bordure();
         fill_liste_cercle();
         create_shapes();
-        forme = Shape.union(path, new Circle(0));
+        //forme = Shape.union(path, new Circle(0));
     }
 
     //constructeur qui permet de placer la piece dans l'espace
@@ -151,7 +168,8 @@ public class Piece extends Shape {
         //Gestion_Placement_Bordure();
         fill_liste_cercle();
         create_shapes();
-        forme = Shape.union(path, new Circle(0));
+        Ajouter_evenement();
+        //forme = Shape.union(path, new Circle(0));
     }
 
     //prend en parametre une liste de Forme_Bordure précisant les contraintes de
@@ -172,7 +190,8 @@ public class Piece extends Shape {
         Gestion_Placement_Bordure();
         fill_liste_cercle();
         create_shapes();
-        forme = Shape.union(path, new Circle(0));
+        //Ajouter_evenement();
+        //forme = Shape.union(path, new Circle(0));
     }
 
 
@@ -204,7 +223,6 @@ public class Piece extends Shape {
                 }
                 tab_bordure[i]= new Dents(liste1, liste2);
             } else if (liste_bordure.get(i).getClass() == Bordure_Plate.class) {
-
                 tab_bordure[i] = new Bordure_Plate(i, posX ,posY, hauteur, longueur);
                 gestion_placement(tab_bordure[i],i);
                 //true pcq la bordure est plate
@@ -334,12 +352,12 @@ public class Piece extends Shape {
             if (i == DROITE) {
                 if (liste_bordure.get(HAUT).getClass() == Dents.class) {
                     double angle = liste_bordure.get(HAUT).getAngle1();
-                    Main.consumer.accept("angle 1 "+liste_bordure.get(HAUT).getAngle1()+" angle2 "+liste_bordure.get(HAUT).getAngle2());
+                    //Main.consumer.accept("angle 1 "+liste_bordure.get(HAUT).getAngle1()+" angle2 "+liste_bordure.get(HAUT).getAngle2());
                     bordure = new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),-angle);
                 }
                 else {
                     double angle = liste_bordure.get(HAUT).getAngle1();
-                    Main.consumer.accept("angle 1 "+liste_bordure.get(HAUT).getAngle1()+" angle2 "+liste_bordure.get(HAUT).getAngle2());
+                    //Main.consumer.accept("angle 1 "+liste_bordure.get(HAUT).getAngle1()+" angle2 "+liste_bordure.get(HAUT).getAngle2());
                     bordure = new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),angle);
                 }
             } else if (i == BAS) {
@@ -393,12 +411,12 @@ public class Piece extends Shape {
             if (i == DROITE) {
                 if (liste_bordure.get(HAUT).getClass() == Creux.class) {
                     double angle = liste_bordure.get(HAUT).getAngle1();
-                    Main.consumer.accept("angle 1 "+liste_bordure.get(HAUT).getAngle1()+" angle2 "+liste_bordure.get(HAUT).getAngle2());
+                    //Main.consumer.accept("angle 1 "+liste_bordure.get(HAUT).getAngle1()+" angle2 "+liste_bordure.get(HAUT).getAngle2());
                     bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),-angle));
                 }
                 else{
                     double angle = liste_bordure.get(HAUT).getAngle1();
-                    Main.consumer.accept("angle 1 "+liste_bordure.get(HAUT).getAngle1()+" angle2 "+liste_bordure.get(HAUT).getAngle2());
+                    //Main.consumer.accept("angle 1 "+liste_bordure.get(HAUT).getAngle1()+" angle2 "+liste_bordure.get(HAUT).getAngle2());
                     bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),angle));
                 }
             } else if (i == BAS) {
@@ -609,23 +627,37 @@ public class Piece extends Shape {
 
 
 
-    public void Ajouter_evenement(Shape forme) {
-        /*forme.setOnMouseDragged(new EventHandler<MouseEvent>() {
+    public void Ajouter_evenement() {
+        path.setOnMousePressed((new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                forme.setLayoutX(mouseEvent.getX());
-                forme.setLayoutY(mouseEvent.getY());
+                panneau.getChildren().remove(path);
+                panneau.getChildren().add(path);
+                oldX = mouseEvent.getX();
+                oldY = mouseEvent.getY();
+            }
+        }));
+        path.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                double newX = mouseEvent.getX();
+                double newY = mouseEvent.getY();
+                path.setLayoutX(path.getLayoutX() + newX - oldX);
+                path.setLayoutY(path.getLayoutY() + newY - oldY);
+
             }
         });
-
-         */
-        //forme.setFill(new ImagePattern());
-       /* forme.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        path.setOnMouseReleased(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                forme.getTransforms().add(new Rotate(90));
+
             }
-        });*/
+        });
+       path.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+            }
+        });
     }
 
 
@@ -752,7 +784,6 @@ public class Piece extends Shape {
         }
         return tab_bordure[HAUT];
     }
-
     public static double getMinLongueur() {
         return MIN_LONGUEUR;
     }
@@ -779,6 +810,13 @@ public class Piece extends Shape {
 
     public void setForme(Shape forme) {
         this.forme = forme;
+    }
+    public Pane getPanneau() {
+        return panneau;
+    }
+
+    public void setPanneau(Pane panneau) {
+        this.panneau = panneau;
     }
 
 

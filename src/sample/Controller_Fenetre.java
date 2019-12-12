@@ -114,18 +114,6 @@ public class Controller_Fenetre  {
         rectangle.setStroke(Color.BLACK);
         return rectangle;
     }
-    private void gestion_plateau_transparent() {
-
-        // rectangle qui fait le cadre du plateau transparent
-        Rectangle rectangle = new Rectangle();
-        rectangle.setX(plateau.getPosX());
-        rectangle.setY(plateau.getPosY());
-        rectangle.setHeight(height_plateau);
-        rectangle.setWidth(width_plateau);
-        Plateau p = new Plateau(plateau);
-        pane_assemblage.getChildren().add(rectangle);
-        set_plateau_on_pane(p);
-    }
     //ajoute des evenement aux pieces du plateau
     private void gestion_evenement_plateau() {
         Piece[][] tab = plateau.getTab();
@@ -135,33 +123,19 @@ public class Controller_Fenetre  {
             }
         }
     }
-    // ajoute des event a une piece
+    // informe la piece du panneau qui l'a contient // sert pour la priorite visuel a l'affichage
     private void ajout_event_piece(int i, int j) {
-        //consumer.accept("dans ajout event piece i : "+ i+" j :"+j);
-        plateau.getTab()[i][j].forme.setOnMousePressed(new EventHandler<MouseEvent>() {
+        plateau.getTab()[i][j].path.setOnMouseEntered(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                // remonter de l'element dans la hierarchie d'affichage
-                (pane_assemblage).getChildren().remove(plateau.getTab()[i][j].forme);
-                (pane_assemblage).getChildren().add(plateau.getTab()[i][j].forme);
+                try {
+                    plateau.getTab()[i][j].setPanneau(pane_assemblage);
+                } catch (Exception e) {
+                }
+            }
+        });
 
-                oldX = mouseEvent.getSceneX();
-                oldY = mouseEvent.getSceneY();
-                //consumer.accept("oldX : "+oldX);
-                //consumer.accept("oldY : "+oldY);
-            }
-        });
-        plateau.getTab()[i][j].forme.setOnMouseDragged(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent mouseEvent) {
-                //consumer.accept("dans on dragged de piece");
-                plateau.getTab()[i][j].forme.setTranslateX(mouseEvent.getSceneX() - oldX);
-                plateau.getTab()[i][j].forme.setTranslateY(mouseEvent.getSceneY() - oldY);
-            }
-        });
     }
-
-
     private void hide_titre() {
         this.label_bienvenue.setVisible(false);
     }
@@ -187,7 +161,7 @@ public class Controller_Fenetre  {
 
     //vide le panneau d'assaemblage de son plateau et de ses autres enfants
     private void clear_pane_plateau() {
-        consumer.accept("dans clear plateau");
+        //consumer.accept("dans clear plateau");
         pane_assemblage.getChildren().clear();
     }
     // renvoie la longueur d'une piece en fonction du nombre de
@@ -195,7 +169,7 @@ public class Controller_Fenetre  {
     private int calcul_longueur_piece() {
         int res =0;
         res = (int)box_contour.getMaxWidth() / nombre_colonne;
-        consumer.accept("calcul longueur piece "+box_contour.getMaxWidth() + " x "+ nombre_colonne + " = "+res);
+        //consumer.accept("calcul longueur piece "+box_contour.getMaxWidth() + " x "+ nombre_colonne + " = "+res);
         return res;
     }
     // renvoie la hauteur d'une piece en fonction du nombre de
@@ -203,7 +177,7 @@ public class Controller_Fenetre  {
     private int  calcul_hauteur_piece() {
         int res=0;
         res = (int) box_contour.getMaxHeight() / nombre_ligne;
-        consumer.accept("calcul hauteur piece "+box_contour.getMaxHeight() + " x "+ nombre_ligne + " = "+res);
+        //consumer.accept("calcul hauteur piece "+box_contour.getMaxHeight() + " x "+ nombre_ligne + " = "+res);
         return res;
     }
 
@@ -211,10 +185,11 @@ public class Controller_Fenetre  {
     // met notre plateau dans l'affichage
     private void set_plateau_on_pane(Plateau plateau) {
         //positionnement_plateau_assemblage();
-        consumer.accept("taille du plateau : "+plateau.getTab().length+" x "+plateau.getTab()[0].length);
+        //consumer.accept("taille du plateau : "+plateau.getTab().length+" x "+plateau.getTab()[0].length);
         for (int i = 0; i < plateau.getTab().length; i++) {
             for (int j = 0; j < plateau.getTab()[0].length; j++) {
-                pane_assemblage.getChildren().add(plateau.getTab()[i][j].forme);
+                //pane_assemblage.getChildren().add(plateau.getTab()[i][j].forme);
+                pane_assemblage.getChildren().add(plateau.getTab()[i][j].path);
             }
         }
     }
