@@ -55,8 +55,8 @@ public class Main extends Application {
     private void puzzle_test_divers() {
         BorderPane root = new BorderPane();
         //test_Piece(root);
-        //test_piece2(root);
-        test_bordure(root);
+        test_piece2(root);
+        //test_bordure(root);
         //test_Plateau(root);
         this.primary_Stage.setTitle("Hello World");
         this.primary_Stage.setScene(new Scene(root, 1400, 1275));
@@ -131,7 +131,16 @@ public class Main extends Application {
             p1.forme.setTranslateX(x - oldX);
             p1.forme.setTranslateY(y - oldY);
         });
-        root.getChildren().addAll(p.forme,p1.forme);
+        root.getChildren().addAll(p.forme, p1.forme);
+        affiche_cerlce(root,p);
+    }
+    private void affiche_cerlce(BorderPane root, Piece p) {
+        consumer.accept("Affiche cercle");
+        for (int i = 0; i < p.liste_cercle.size(); i++) {
+            consumer.accept("i ="+i);
+            Color c = (Color)p.liste_cercle.get(i).getFill();
+            consumer.accept("R:"+ c.getRed()+" G:"+c.getGreen()+" B:"+c.getBlue());
+        }
     }
     private void test_Piece(BorderPane root) {
         ArrayList<Forme_Bordure> list = new ArrayList<>();

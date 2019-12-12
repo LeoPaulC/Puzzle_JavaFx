@@ -1,13 +1,20 @@
 package sample;
 
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
+import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 
+import java.awt.*;
+import java.security.Signature;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 public class Dents extends Forme_Bordure {
+    private final double ANGLE_MAX = 25.0;
+    private final double ANGLE_MIN = 20.0;
     private static final int DEFAULT_COTE = 0;
     private final static Boolean est_plat = false;
     private static final int DEFAULT_NIVEAU = 1;
@@ -43,13 +50,73 @@ public class Dents extends Forme_Bordure {
 
     private double decalage = DEFAULT_DECALAGE;
     private boolean est_decalable = false;
-    private  double min_taille ; //= Math.min(TAILLE_COTE_PIECE_HAUTEUR, TAILLE_COTE_PIECE_LONGUEUR);
-
+    private boolean est_deformable_localement = false;
+    private double min_taille ; //= Math.min(TAILLE_COTE_PIECE_HAUTEUR, TAILLE_COTE_PIECE_LONGUEUR);
+    private boolean est_dernier = false; // sert pour deformation de cadre si tte fois on est sur la derniere ligne du plateau
     /*public Dents(ArrayList<Circle> liste_c , ArrayList<Circle> list_c_c, int hauteur, int largeur) {
         super(est_plat);
         setTailleCotePieceHauteur(hauteur);
         setTailleCotePieceLongueur(longueur);
     }*/
+
+    public Dents(int cote, double x, double y, double hauteur, double longueur, int niveau , double angle2) {
+        super(est_plat);
+        //Main.consumer.accept("dans Dents avec niveau");
+        posY = y;
+        posX = x;
+        this.cote = cote;
+        this.niveau = niveau;
+        check_dernier();
+        this.setAngle2(angle2);
+        setTailleCotePieceHauteur(hauteur);
+        setTailleCotePieceLongueur(longueur);
+        init_MinTaille(hauteur,longueur);
+        //Main.consumer.accept("init_MinTaille() : " + min_taille);
+        //setHauteur_appendice(Math.min(hauteur, longueur));
+        //setLongueur_appendice(Math.min(hauteur, longueur));
+        gestion_niveau();
+        gestion_dimension_bordure();
+        fill_liste_cercle();
+        fill_list_cercle_controle();
+        ajout_decalage();
+        ajout_deformation_cadre_locale();
+    }
+    // determine si la bordure se trouve a la derniere ligne du plateau
+    private void check_dernier() {
+        Main.consumer.accept("checke dernier");
+        Main.consumer.accept("checke dernier");
+        Main.consumer.accept("checke dernier");
+        if (this.cote == Piece.DROITE) {
+            double c = this.posY / Plateau.getNb_ligne();
+            Main.consumer.accept(" c ="+ c);
+            Main.consumer.accept(" taille hauteur ="+ TAILLE_COTE_PIECE_HAUTEUR);
+            if (c == TAILLE_COTE_PIECE_HAUTEUR) {
+                this.est_dernier = true;
+            }
+        }
+    }
+
+    public Dents(int cote, double x, double y, double hauteur, double longueur, int niveau ,double angle1, double angle2) {
+        super(est_plat);
+        posY = y;
+        posX = x;
+        this.cote = cote;
+        this.niveau = niveau;
+        this.setAngle1(angle1);
+        this.setAngle2(angle2);
+        setTailleCotePieceHauteur(hauteur);
+        setTailleCotePieceLongueur(longueur);
+        init_MinTaille(hauteur,longueur);
+        gestion_niveau();
+        gestion_dimension_bordure();
+        fill_liste_cercle();
+        fill_list_cercle_controle();
+        ajout_decalage();
+        ajout_deformation_cadre_locale();
+    }
+
+
+
     public Dents(int cote, double x, double y, double hauteur, double longueur) {
         super(est_plat);
         posY = y;
@@ -64,6 +131,73 @@ public class Dents extends Forme_Bordure {
         fill_liste_cercle();
         fill_list_cercle_controle();
         ajout_decalage();
+        ajout_deformation_cadre_locale();
+    }
+    public Dents(int cote, double x, double y, double hauteur, double longueur, int niveau, boolean dernier) {
+        super(est_plat);
+        //Main.consumer.accept("dans Dents avec niveau");
+        posY = y;
+        posX = x;
+        this.cote = cote;
+        this.niveau = niveau;
+        this.est_dernier = dernier;
+        setTailleCotePieceHauteur(hauteur);
+        setTailleCotePieceLongueur(longueur);
+        init_MinTaille(hauteur,longueur);
+        //Main.consumer.accept("init_MinTaille() : " + min_taille);
+        //setHauteur_appendice(Math.min(hauteur, longueur));
+        //setLongueur_appendice(Math.min(hauteur, longueur));
+        gestion_niveau();
+        gestion_dimension_bordure();
+        fill_liste_cercle();
+        fill_list_cercle_controle();
+        ajout_decalage();
+        ajout_deformation_cadre_locale();
+    }
+    public Dents(int cote, double x, double y, double hauteur, double longueur, int niveau, boolean dernier, double angle2) {
+        super(est_plat);
+        //Main.consumer.accept("dans Dents avec niveau");
+        posY = y;
+        posX = x;
+        this.cote = cote;
+        this.niveau = niveau;
+        this.est_dernier = dernier;
+        this.setAngle2(angle2);
+        setTailleCotePieceHauteur(hauteur);
+        setTailleCotePieceLongueur(longueur);
+        init_MinTaille(hauteur,longueur);
+        //Main.consumer.accept("init_MinTaille() : " + min_taille);
+        //setHauteur_appendice(Math.min(hauteur, longueur));
+        //setLongueur_appendice(Math.min(hauteur, longueur));
+        gestion_niveau();
+        gestion_dimension_bordure();
+        fill_liste_cercle();
+        fill_list_cercle_controle();
+        ajout_decalage();
+        ajout_deformation_cadre_locale();
+    }
+    public Dents(int cote, double x, double y, double hauteur, double longueur, int niveau, boolean dernier,double angle1, double angle2) {
+        super(est_plat);
+        //Main.consumer.accept("dans Dents avec niveau");
+        posY = y;
+        posX = x;
+        this.cote = cote;
+        this.niveau = niveau;
+        this.est_dernier = dernier;
+        this.setAngle1(angle1);
+        this.setAngle2(angle2);
+        setTailleCotePieceHauteur(hauteur);
+        setTailleCotePieceLongueur(longueur);
+        init_MinTaille(hauteur,longueur);
+        //Main.consumer.accept("init_MinTaille() : " + min_taille);
+        //setHauteur_appendice(Math.min(hauteur, longueur));
+        //setLongueur_appendice(Math.min(hauteur, longueur));
+        gestion_niveau();
+        gestion_dimension_bordure();
+        fill_liste_cercle();
+        fill_list_cercle_controle();
+        ajout_decalage();
+        ajout_deformation_cadre_locale();
     }
     public Dents(int cote, double x, double y, double hauteur, double longueur, int niveau) {
         super(est_plat);
@@ -83,6 +217,7 @@ public class Dents extends Forme_Bordure {
         fill_liste_cercle();
         fill_list_cercle_controle();
         ajout_decalage();
+        ajout_deformation_cadre_locale();
     }
     // creer un creux a partir des cercle d'une dents de la piece voisine sans aucune operation desssus
     public Dents(ArrayList<Circle> liste1, ArrayList<Circle> liste2) {
@@ -98,6 +233,7 @@ public class Dents extends Forme_Bordure {
         fill_liste_cercle();
         fill_list_cercle_controle();
         ajout_decalage();
+        ajout_deformation_cadre_locale();
     }
 
     Dents() { // Aléatoire complet
@@ -144,6 +280,34 @@ public class Dents extends Forme_Bordure {
         }
     }
 
+    public void ajout_deformation_cadre_locale() {
+        if (!est_deformable_localement) {
+            return;// alors on ne fait rien
+        }
+        // on s'occupe des valeur des angles de deformations
+        if (cote == Piece.DROITE && est_dernier == false) {
+            Main.consumer.accept(" droite cote == "+this.cote);
+            gestion_deformation_locale();
+        }
+        if (cote == Piece.DROITE && est_dernier ) { // pas utile mais par securité
+            setAngle1(0.0);
+        }
+        //on effectue la rotation et affecte le resultat au premier point de controle
+        Circle o1 = this.liste_cercle.get(0);
+        Circle m1 = this.liste_cercle_controle.get(0);
+        Point p = Piece.calcul_rotation(m1, o1, getAngle1());
+        this.liste_cercle_controle.get(0).setLayoutX(p.getX());
+        this.liste_cercle_controle.get(0).setLayoutY(p.getY());
+
+        //on effectue la rotation et affecte le resultat au dernier point de controle
+        Circle o2 = this.liste_cercle.get(6);
+        Circle m2 = this.liste_cercle_controle.get(11);
+        Point p2 = Piece.calcul_rotation(m2, o2, getAngle2());
+        this.liste_cercle_controle.get(11).setLayoutX(p2.getX());
+        this.liste_cercle_controle.get(11).setLayoutY(p2.getY());
+
+    }
+
 
     private void gestion_niveau() {
         if (this.niveau == 1) {// si niveau == 1
@@ -155,6 +319,7 @@ public class Dents extends Forme_Bordure {
             // pieces  basiques
             this.MARGE_HAUTEUR = 0;
             this.MARGE_HAUTEUR_CONTROLE = 0;
+            est_deformable_localement = true;
 
         } else if (this.niveau == 3) { // niveau 3 -> deportation de l'axe
             est_decalable = true;
@@ -165,6 +330,23 @@ public class Dents extends Forme_Bordure {
         }
     }
 
+    // gere le calcul de l'angle 1  de deformation de cadre locale de la bordure
+    // il n'y a que l'angle 1 a gere car on ne calcule que l'angle 1 de la bordure DROITE (angle du bas)
+    private void gestion_deformation_locale() {
+        int signe = rand_signe();
+        this.setAngle1(signe * calcul_deformation_locale());
+        /*if (i == 1) {
+            this.setAngle1(signe * calcul_deformation_locale());
+        } else this.setAngle2(signe * calcul_deformation_locale());*/
+    }
+
+    private double calcul_deformation_locale() {
+        double angle = 0;
+        double random = new Random().nextDouble();
+        //angle = random *  ANGLE_MIN + (ANGLE_MAX) ;
+        angle  = (Math.random()*((ANGLE_MAX-ANGLE_MIN)+1))+ANGLE_MIN;
+        return angle;
+    }
     private void gestion_decalage() {
         int signe = rand_signe(); // signe == 1 || signe  == -1
         this.decalage = (signe * (calcul_decalage() ));//- marge_decalage));
@@ -290,13 +472,21 @@ public class Dents extends Forme_Bordure {
 
     // coloris les cercles de lacourbe ---> utile pour nos tests
     private void ajout_couleur_cercle() {
-        this.liste_cercle.get(0).setFill(Color.GOLD);
+        /* this.liste_cercle.get(0).setFill(Color.GOLD);
         this.liste_cercle.get(1).setFill(Color.ORANGE);
         this.liste_cercle.get(2).setFill(Color.RED);
         this.liste_cercle.get(3).setFill(Color.PINK);
         this.liste_cercle.get(4).setFill(Color.PURPLE);
         this.liste_cercle.get(5).setFill(Color.DARKBLUE);
         this.liste_cercle.get(6).setFill(Color.GOLD);
+        */
+        this.liste_cercle.get(0).setFill(Color.RED);
+        this.liste_cercle.get(1).setFill(Color.RED);
+        this.liste_cercle.get(2).setFill(Color.RED);
+        this.liste_cercle.get(3).setFill(Color.GREEN);
+        this.liste_cercle.get(4).setFill(Color.GREEN);
+        this.liste_cercle.get(5).setFill(Color.BLUE);
+        this.liste_cercle.get(6).setFill(Color.BLUE);
     }
 
     //rempli la liste de cercle controle en fonction des cercle de la liste de cercle

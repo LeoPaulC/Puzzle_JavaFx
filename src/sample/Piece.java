@@ -7,6 +7,8 @@ import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.*;
@@ -180,7 +182,7 @@ public class Piece extends Shape {
             if (liste_bordure.get(i) == null) {
                 //si pas de contrainte alors on met une dent
                 // ou un creux mais pas de bordure plate --- pcq pas de bord
-                tab_bordure[i] = randoms_Bordure(i, hauteur , longueur);
+                tab_bordure[i] = randoms_Bordure(i, hauteur , longueur,liste_bordure);
                 gestion_placement(tab_bordure[i],i);
             } else if (liste_bordure.get(i).getClass() == Dents.class) {
                 //Main.consumer.accept("listebordure.get(i).class == Dents");
@@ -192,11 +194,6 @@ public class Piece extends Shape {
                 }
                 tab_bordure[i]= new Creux(liste1,liste2); // pas besoin de la placer normalement
 
-                //tab_bordure[i] = new Creux((Dents)liste_bordure.get(i),i );// passer en parametre le cote pour faire une inversion soit sur les X soit les Y
-               // System.out.println("tab_bordure i :" + i + " cote : "+i);
-                //Dents d = new Dents((Dents) liste_bordure.get(i),niveau);
-                //gestion_placement(tab_bordure[i],i);
-                //tab_bordure[i] = new Creux(new Dents(i,posX,posY, hauteur, longueur, niveau));
             } else if (liste_bordure.get(i).getClass() == Creux.class) {
                 //Main.consumer.accept("listebordure.get(i).class == Creux");
                 ArrayList<Circle> liste1 = liste_bordure.get(i).getListe_cercle();
@@ -206,9 +203,8 @@ public class Piece extends Shape {
                     Collections.reverse(liste2);
                 }
                 tab_bordure[i]= new Dents(liste1, liste2);
-                //tab_bordure[i] = new Dents(i, posX,posY, hauteur, longueur,niveau);// passer en parametre le cote pour faire une inversion soit sur les X soit les Y
-                //gestion_placement(tab_bordure[i],i);
             } else if (liste_bordure.get(i).getClass() == Bordure_Plate.class) {
+
                 tab_bordure[i] = new Bordure_Plate(i, posX ,posY, hauteur, longueur);
                 gestion_placement(tab_bordure[i],i);
                 //true pcq la bordure est plate
@@ -329,20 +325,151 @@ public class Piece extends Shape {
         this.liste_cercle.add(this.liste_cercle.get(0));
     }
 
-    private Forme_Bordure randoms_Bordure(int i ,double hauteur , double longueur) {
+    private Forme_Bordure randoms_Bordure(int i ,double hauteur , double longueur , ArrayList<Forme_Bordure> liste_bordure) {
         //Main.consumer.accept("dans randoms_bordure");
         Forme_Bordure bordure;
         Random random = new Random();
         int r =random.nextInt(2+ 1); // random entre
         if ( r%2 == 0) {
-            bordure = new Dents(i,posX, posY,hauteur,longueur,niveau);
-            //bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau));
+            if (i == DROITE) {
+                if (liste_bordure.get(HAUT).getClass() == Dents.class) {
+                    double angle = liste_bordure.get(HAUT).getAngle1();
+                    Main.consumer.accept("angle 1 "+liste_bordure.get(HAUT).getAngle1()+" angle2 "+liste_bordure.get(HAUT).getAngle2());
+                    bordure = new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),-angle);
+                }
+                else {
+                    double angle = liste_bordure.get(HAUT).getAngle1();
+                    Main.consumer.accept("angle 1 "+liste_bordure.get(HAUT).getAngle1()+" angle2 "+liste_bordure.get(HAUT).getAngle2());
+                    bordure = new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),angle);
+                }
+            } else if (i == BAS) {
+                if (tab_bordure[DROITE].getClass() == Creux.class && liste_bordure.get(GAUCHE).getClass() == Creux.class ) {
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    bordure = new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),angle1,angle2);
+                }else if (tab_bordure[DROITE].getClass() == Creux.class && liste_bordure.get(GAUCHE).getClass() == Dents.class) {
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    bordure = new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),angle1,-angle2);
+                } else if (tab_bordure[DROITE].getClass() == Dents.class && liste_bordure.get(GAUCHE).getClass() == Dents.class) {
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    bordure = new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),-angle1,-angle2);
+                }else if( tab_bordure[DROITE].getClass()  == Dents.class && liste_bordure.get(GAUCHE).getClass() == Creux.class){
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    bordure = new Dents(i, posX, posY, hauteur, longueur, niveau, bordure_Plate_Possede(liste_bordure), -angle1, angle2);
+                }
+                else if (tab_bordure[DROITE].getClass() == Bordure_Plate.class) {
+                    double angle1 = 0.0;
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    if (liste_bordure.get(GAUCHE).getClass() == Creux.class){ // dents Bordure_plate
+                        bordure = new Dents(i, posX, posY, hauteur, longueur, niveau, bordure_Plate_Possede(liste_bordure), angle1, angle2);
+                    }
+                    else { //GAUCHE == Dents
+                        bordure = new Dents(i, posX, posY, hauteur, longueur, niveau, bordure_Plate_Possede(liste_bordure), angle1, -angle2);
+                    }
+                }
+                else if ( liste_bordure.get(GAUCHE).getClass()== Bordure_Plate.class) {
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = 0.0;
+                    if ( tab_bordure[DROITE].getClass()== Creux.class){ // dents Bordure_plate
+                        bordure = new Dents(i, posX, posY, hauteur, longueur, niveau, bordure_Plate_Possede(liste_bordure), angle1, angle2);
+                    }
+                    else { //GAUCHE == Dents
+                        bordure = new Dents(i, posX, posY, hauteur, longueur, niveau, bordure_Plate_Possede(liste_bordure), -angle1, -angle2);
+                    }
+                }
+                else{ //CAS TERMINAL !!! // faut pas arriver ici chef
+                    double angle1 = 0.0;
+                    double angle2 = 0.0;
+                    bordure = new Dents(i, posX, posY, hauteur, longueur, niveau, bordure_Plate_Possede(liste_bordure), angle1, angle2);
+                }
+            }else{
+                bordure = null; // si on arrive ici c'est pas bien
+            }
         }
         else{
-            bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau));
+            if (i == DROITE) {
+                if (liste_bordure.get(HAUT).getClass() == Creux.class) {
+                    double angle = liste_bordure.get(HAUT).getAngle1();
+                    Main.consumer.accept("angle 1 "+liste_bordure.get(HAUT).getAngle1()+" angle2 "+liste_bordure.get(HAUT).getAngle2());
+                    bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),-angle));
+                }
+                else{
+                    double angle = liste_bordure.get(HAUT).getAngle1();
+                    Main.consumer.accept("angle 1 "+liste_bordure.get(HAUT).getAngle1()+" angle2 "+liste_bordure.get(HAUT).getAngle2());
+                    bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),angle));
+                }
+            } else if (i == BAS) {
+                // TODO: gerer les 4 cas avec les bons angles et les bons cotes (d'angle) si il le faut
+                if (tab_bordure[DROITE].getClass() == Creux.class && liste_bordure.get(GAUCHE).getClass() == Creux.class ) {
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),-angle1,-angle2));
+                }else if (tab_bordure[DROITE].getClass() == Creux.class && liste_bordure.get(GAUCHE).getClass() == Dents.class) {
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),-angle1,angle2));
+                } else if (tab_bordure[DROITE].getClass() == Dents.class && liste_bordure.get(GAUCHE).getClass() == Dents.class) {
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),angle1,angle2));
+                }else if( tab_bordure[DROITE].getClass()  == Dents.class && liste_bordure.get(GAUCHE).getClass() == Creux.class){
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),angle1,-angle2));
+                }
+                else if (tab_bordure[DROITE].getClass() == Bordure_Plate.class) {
+                    double angle1 = 0.0;
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    if (liste_bordure.get(GAUCHE).getClass() == Creux.class){ // dents Bordure_plate
+                        bordure = new Creux(new Dents(i, posX, posY, hauteur, longueur, niveau, bordure_Plate_Possede(liste_bordure), angle1, -angle2));
+                    }
+                    else { //GAUCHE == Dents
+                        bordure = new Creux(new Dents(i, posX, posY, hauteur, longueur, niveau, bordure_Plate_Possede(liste_bordure), angle1, angle2));
+                    }
+                }
+                else if ( liste_bordure.get(GAUCHE).getClass()== Bordure_Plate.class) {
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = 0.0;
+                    if ( tab_bordure[DROITE].getClass()== Creux.class){ // dents Bordure_plate
+                        bordure = new Creux(new Dents(i, posX, posY, hauteur, longueur, niveau, bordure_Plate_Possede(liste_bordure), -angle1, angle2));
+                    }
+                    else { //GAUCHE == Dents
+                        bordure = new Creux(new Dents(i, posX, posY, hauteur, longueur, niveau, bordure_Plate_Possede(liste_bordure), angle1, angle2));
+                    }
+                }
+                else{ // CAS TERMINAL !!!! // faut pas arriver ici chef
+                    double angle1 = 0.0;
+                    double angle2 = 0.0;
+                    bordure = new Creux(new Dents(i, posX, posY, hauteur, longueur, niveau, bordure_Plate_Possede(liste_bordure), angle1, angle2));
+                }
+
+            }else{
+                bordure = null; // si on arrive ici c'est pas bien
+            }
+            //bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau));
         }
         return bordure;
     }
+
+    // TODO: gerer cette fonction pour quelle renvoie true ssi bordurePlate a droite ou en Bas
+    private boolean bordure_Plate_Possede(ArrayList<Forme_Bordure> liste_bordure) {
+        boolean res = false;
+        /*for (Forme_Bordure bordure : liste_bordure) {
+            if ( bordure !=null && bordure.getClass() == Bordure_Plate.class) {
+                res = true;
+            }
+        }*/
+        if (liste_bordure.get(BAS) != null && liste_bordure.get(BAS).getClass() == Bordure_Plate.class) {
+            res = true;
+        }
+
+        return res;
+    }
+
+
 
     // s'occupe de placer les Formes_Bordure sur les cotes de la piece
     private void Gestion_Placement_Bordure() {
@@ -394,7 +521,7 @@ public class Piece extends Shape {
     }
 
     //renvoie les nouvelles coordonné de m apres rotation en fonction de o : origine
-    private Point calcul_rotation(Circle m, Circle o, int angle) {
+    protected static Point calcul_rotation(Circle m, Circle o, double angle) {
         double xm, ym, x, y;
         double rot = angle * Math.PI / 180;
         xm = m.getLayoutX() - o.getLayoutX();

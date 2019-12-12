@@ -15,8 +15,8 @@ public class Plateau {
     private final static String DEFAULT_FILE = "./image/roronoa.jpg";
     private int posX;
     private int posY;
-    private int nb_ligne;
-    private int nb_colonne;
+    private static int nb_ligne;
+    private static int nb_colonne;
     private double longueur;
     private double hauteur;
     private Image image;
@@ -210,7 +210,7 @@ public class Plateau {
         this.longueur = longueur;
     }
 
-    public int getNb_ligne() {
+    public static int getNb_ligne() {
         return nb_ligne;
     }
 
@@ -218,7 +218,7 @@ public class Plateau {
         this.nb_ligne = nb_ligne;
     }
 
-    public int getNb_colonne() {
+    public static int getNb_colonne() {
         return nb_colonne;
     }
 

@@ -1,5 +1,6 @@
 package sample;
 
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
 
@@ -22,11 +23,13 @@ public class Creux extends Forme_Bordure {
         super(est_plat);
         Dents d = new Dents();
         new Creux(d);
+        ajout_couleur_cercle();
     }
     public Creux(Creux c) {
         super(est_plat);
         copie_Coordonnee(c.liste_cercle,c.liste_cercle_controle);
         cercle_Vers_Courbe();//utile que pour les tests de desssinner la bordure
+        ajout_couleur_cercle();
     }
     private void copie_Coordonnee(ArrayList<Circle> liste_cercle,ArrayList<Circle> liste_controleurs) {
         for (int i = 0; i < liste_cercle.size(); i++) {
@@ -46,6 +49,7 @@ public class Creux extends Forme_Bordure {
         super(est_plat);
         this.liste_cercle = liste1;
         this.liste_cercle_controle = liste2;
+        ajout_couleur_cercle();
     }// pas besoin de faire des transformation pour le placer dans la piece
 
     public Creux(Dents d, int cote) {
@@ -56,11 +60,31 @@ public class Creux extends Forme_Bordure {
         }else{
             inversion_Hauteur2(d.liste_cercle,d.liste_cercle_controle);
         }
+        ajout_couleur_cercle();
     }
     public Creux(Dents d) {
         super(est_plat);
+        this.setAngle1(d.getAngle1());
+        this.setAngle2(d.getAngle2());
         inversion_Hauteur(d.liste_cercle,d.liste_cercle_controle);
-
+        ajout_couleur_cercle();
+    }
+    private void ajout_couleur_cercle() {
+       /* this.liste_cercle.get(0).setFill(Color.GOLD);
+        this.liste_cercle.get(1).setFill(Color.ORANGE);
+        this.liste_cercle.get(2).setFill(Color.RED);
+        this.liste_cercle.get(3).setFill(Color.PINK);
+        this.liste_cercle.get(4).setFill(Color.PURPLE);
+        this.liste_cercle.get(5).setFill(Color.DARKBLUE);
+        this.liste_cercle.get(6).setFill(Color.GOLD);
+        */
+        this.liste_cercle.get(0).setFill(Color.RED);
+        this.liste_cercle.get(1).setFill(Color.RED);
+        this.liste_cercle.get(2).setFill(Color.RED);
+        this.liste_cercle.get(3).setFill(Color.GREEN);
+        this.liste_cercle.get(4).setFill(Color.GREEN);
+        this.liste_cercle.get(5).setFill(Color.BLUE);
+        this.liste_cercle.get(6).setFill(Color.BLUE);
     }
     //cree des courbes a partir des 2 listes de cercles
     private void cercle_Vers_Courbe() {
@@ -113,6 +137,8 @@ public class Creux extends Forme_Bordure {
             c.setLayoutY(liste_cercle.get(i).getLayoutY() + 2 * (liste_cercle.get(0).getLayoutY() - liste_cercle.get(i).getLayoutY()));
             //on affecte la psition en x sans la changer
             c.setLayoutX(liste_cercle.get(i).getLayoutX());
+            this.liste_cercle.get(i).setLayoutX(c.getLayoutX());
+            this.liste_cercle.get(i).setLayoutY(c.getLayoutY());
         }
         for (int i = 0; i < liste_cercle_controle.size() ; i++) {
             Circle c = this.liste_cercle_controle.get(i);
@@ -121,6 +147,8 @@ public class Creux extends Forme_Bordure {
             c.setLayoutY(liste_controleurs.get(i).getLayoutY() + 2 * (liste_cercle.get(0).getLayoutY() - liste_controleurs.get(i).getLayoutY()));
             //on affecte la psition en x sans la changer
             c.setLayoutX(liste_controleurs.get(i).getLayoutX());
+            this.liste_cercle_controle.get(i).setLayoutX(c.getLayoutX());
+            this.liste_cercle_controle.get(i).setLayoutY(c.getLayoutY());
         }
     }
 

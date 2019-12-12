@@ -46,6 +46,11 @@ public class Forme_Bordure extends Shape {
     private double longueur_appendice;
     private double hauteur_appendice;
 
+
+    // angle de rotation des cercles de controle pour deformation de cadre (locale)
+    private double angle1 = 0.0;
+    private double angle2 = 0.0;
+
     ArrayList<Circle> liste_cercle ;
     ArrayList<Circle> liste_cercle_controle ;
     ArrayList<CubicCurveTo> liste_cubicCurveTo ;
@@ -138,6 +143,21 @@ public class Forme_Bordure extends Shape {
         this.liste_cubicCurveTo = liste_cubicCurveTo;
     }
 
+    public double getAngle1() {
+        return angle1;
+    }
+
+    public void setAngle1(double angle1) {
+        this.angle1 = angle1;
+    }
+
+    public double getAngle2() {
+        return angle2;
+    }
+
+    public void setAngle2(double angle2) {
+        this.angle2 = angle2;
+    }
     public ArrayList<MoveTo> getListe_Moveto() {
         return liste_Moveto;
     }
