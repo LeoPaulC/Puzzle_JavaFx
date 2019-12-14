@@ -56,6 +56,7 @@ public class Piece extends Shape {
     static final int NOMBRE_COTE = 4;
     static final double MIN_LONGUEUR = 30;
     static final double MIN_HAUTEUR = 30;
+    private static final boolean DEFAULT_ISMOVABLE = true;
     private double posX = 0;
     private double posY = 0;
     private static final int DEFAULT_NIVEAU = 1;
@@ -68,6 +69,7 @@ public class Piece extends Shape {
     private int cpt_cercle_controle = 0; //compteur sur la liste de cercle de controle
     ArrayList<CubicCurveTo> liste_courbe;
     Forme_Bordure[] tab_bordure;
+
     Rectangle rectangle;
     Shape forme;
     Path path;
@@ -79,6 +81,7 @@ public class Piece extends Shape {
     private double oldY;
 
     private Pane panneau;
+    private boolean isMovable = DEFAULT_ISMOVABLE; // nous dit si la piece peut etre bougée ou non
 
 
     protected double translationX;
@@ -102,6 +105,55 @@ public class Piece extends Shape {
         //forme = Shape.union(path, new Circle(0));
         //forme.layoutXProperty().bindBidirectional(path.layoutXProperty());
         //forme.layoutYProperty().bindBidirectional(path.layoutYProperty());
+    }
+
+    // renvoie la coordonnee x du point de la piece situé le plus a gauche
+    protected double getMinX() {
+        double min = tab_bordure[0].liste_cercle.get(0).getLayoutX();
+        for (Forme_Bordure bordure : tab_bordure) {
+            for (Circle circle : bordure.liste_cercle) {
+                if (circle.getLayoutX() < min) {
+                    min = circle.getLayoutX();
+                }
+            }
+        }
+        return min;
+    }
+    // renvoie la coordonnee x du point de la piece situé le plus a gauche
+    protected double getMaxX() {
+        double max = tab_bordure[0].liste_cercle.get(0).getLayoutX();
+        for (Forme_Bordure bordure : tab_bordure) {
+            for (Circle circle : bordure.liste_cercle) {
+                if (circle.getLayoutX() > max) {
+                    max = circle.getLayoutX();
+                }
+            }
+        }
+        return max;
+    }
+    // renvoie la coordonnee y du point de la piece situé le plus BAS
+    protected double getMinY() {
+        double min = tab_bordure[0].liste_cercle.get(0).getLayoutY();
+        for (Forme_Bordure bordure : tab_bordure) {
+            for (Circle circle : bordure.liste_cercle) {
+                if (circle.getLayoutY() < min) {
+                    min = circle.getLayoutY();
+                }
+            }
+        }
+        return min;
+    }
+    // renvoie la coordonnee y du point de la piece situé le plus HAUT
+    protected double getMaxY() {
+        double max = tab_bordure[0].liste_cercle.get(0).getLayoutY();
+        for (Forme_Bordure bordure : tab_bordure) {
+            for (Circle circle : bordure.liste_cercle) {
+                if (circle.getLayoutY() > max) {
+                    max = circle.getLayoutY();
+                }
+            }
+        }
+        return max;
     }
 
     protected void MAJ_Forme() {
@@ -144,15 +196,12 @@ public class Piece extends Shape {
         liste_courbe = new ArrayList<CubicCurveTo>();
         liste_shape = new ArrayList<PathElement>();
         fill_tab_bordure(liste_bordure , hauteur, longueur);
-        ///Gestion_Placement_Bordure();
         fill_liste_cercle();
         create_shapes();
-        //forme = Shape.union(path, new Circle(0));
     }
 
     //constructeur qui permet de placer la piece dans l'espace
     public Piece(ArrayList<Forme_Bordure> liste_bordure, double x, double y, double hauteur, double longueur, int niveau) {
-       // Main.consumer.accept("dans piece avec niveau");
         posX = x;
         posY = y;
         this.hauteur = hauteur;
@@ -165,11 +214,9 @@ public class Piece extends Shape {
         liste_shape = new ArrayList<PathElement>();
         this.niveau = niveau;
         fill_tab_bordure(liste_bordure, hauteur, longueur);
-        //Gestion_Placement_Bordure();
         fill_liste_cercle();
         create_shapes();
         Ajouter_evenement();
-        //forme = Shape.union(path, new Circle(0));
     }
 
     //prend en parametre une liste de Forme_Bordure précisant les contraintes de
@@ -186,12 +233,9 @@ public class Piece extends Shape {
         liste_cercle = new ArrayList<Circle>();
         liste_courbe = new ArrayList<CubicCurveTo>();
         liste_shape = new ArrayList<PathElement>();
-        ///////////////////////////////////////////////////////////////////////////////////fill_tab_bordure(liste_bordure);
         Gestion_Placement_Bordure();
         fill_liste_cercle();
         create_shapes();
-        //Ajouter_evenement();
-        //forme = Shape.union(path, new Circle(0));
     }
 
 
@@ -350,14 +394,11 @@ public class Piece extends Shape {
         int r =random.nextInt(2+ 1); // random entre
         if ( r%2 == 0) {
             if (i == DROITE) {
+                double angle = liste_bordure.get(HAUT).getAngle1();
                 if (liste_bordure.get(HAUT).getClass() == Dents.class) {
-                    double angle = liste_bordure.get(HAUT).getAngle1();
-                    //Main.consumer.accept("angle 1 "+liste_bordure.get(HAUT).getAngle1()+" angle2 "+liste_bordure.get(HAUT).getAngle2());
                     bordure = new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),-angle);
                 }
                 else {
-                    double angle = liste_bordure.get(HAUT).getAngle1();
-                    //Main.consumer.accept("angle 1 "+liste_bordure.get(HAUT).getAngle1()+" angle2 "+liste_bordure.get(HAUT).getAngle2());
                     bordure = new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),angle);
                 }
             } else if (i == BAS) {
@@ -409,18 +450,14 @@ public class Piece extends Shape {
         }
         else{
             if (i == DROITE) {
+                double angle = liste_bordure.get(HAUT).getAngle1();
                 if (liste_bordure.get(HAUT).getClass() == Creux.class) {
-                    double angle = liste_bordure.get(HAUT).getAngle1();
-                    //Main.consumer.accept("angle 1 "+liste_bordure.get(HAUT).getAngle1()+" angle2 "+liste_bordure.get(HAUT).getAngle2());
                     bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),-angle));
                 }
                 else{
-                    double angle = liste_bordure.get(HAUT).getAngle1();
-                    //Main.consumer.accept("angle 1 "+liste_bordure.get(HAUT).getAngle1()+" angle2 "+liste_bordure.get(HAUT).getAngle2());
                     bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau, bordure_Plate_Possede(liste_bordure),angle));
                 }
             } else if (i == BAS) {
-                // TODO: gerer les 4 cas avec les bons angles et les bons cotes (d'angle) si il le faut
                 if (tab_bordure[DROITE].getClass() == Creux.class && liste_bordure.get(GAUCHE).getClass() == Creux.class ) {
                     double angle1 = tab_bordure[DROITE].getAngle1();
                     double angle2 = liste_bordure.get(GAUCHE).getAngle1();
@@ -463,11 +500,9 @@ public class Piece extends Shape {
                     double angle2 = 0.0;
                     bordure = new Creux(new Dents(i, posX, posY, hauteur, longueur, niveau, bordure_Plate_Possede(liste_bordure), angle1, angle2));
                 }
-
             }else{
                 bordure = null; // si on arrive ici c'est pas bien
             }
-            //bordure = new Creux(new Dents(i,posX, posY,hauteur,longueur,niveau));
         }
         return bordure;
     }
@@ -640,22 +675,13 @@ public class Piece extends Shape {
         path.setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                double newX = mouseEvent.getX();
-                double newY = mouseEvent.getY();
-                path.setLayoutX(path.getLayoutX() + newX - oldX);
-                path.setLayoutY(path.getLayoutY() + newY - oldY);
+                if (isMovable) { // drag seulement si la piece est deplacable
+                    double newX = mouseEvent.getX();
+                    double newY = mouseEvent.getY();
+                    path.setLayoutX(path.getLayoutX() + newX - oldX);
+                    path.setLayoutY(path.getLayoutY() + newY - oldY);
+                }
 
-            }
-        });
-        path.setOnMouseReleased(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent mouseEvent) {
-
-            }
-        });
-       path.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent mouseEvent) {
             }
         });
     }
@@ -818,7 +844,13 @@ public class Piece extends Shape {
     public void setPanneau(Pane panneau) {
         this.panneau = panneau;
     }
+    public boolean isMovable() {
+        return isMovable;
+    }
 
+    public void setMovable(boolean movable) {
+        isMovable = movable;
+    }
 
     public double getPosX() {
         return posX;

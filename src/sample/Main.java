@@ -37,6 +37,10 @@ public class Main extends Application {
     static int nombre_ligne;
     static int nombre_colonne;
     protected static Plateau plateau;
+    protected static boolean est_lancable = false;
+
+
+    protected static Plateau plateau_assemblage; //plateau blanc en dessous du puzzle
     static Image image;
     static Consumer<String> consumer = e -> System.out.println(e);
 
@@ -76,7 +80,8 @@ public class Main extends Application {
     private void puzzle_principale() throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("Fenetre.fxml"));
         this.primary_Stage.setTitle("Jeu du Puzzle");
-        this.primary_Stage.setScene(new Scene(root, 900, 700));
+        Scene scene =new Scene(root, 900, 700);
+        this.primary_Stage.setScene(scene);
         this.primary_Stage.show();
     }
     private void test_Plateau(BorderPane root) {
@@ -206,6 +211,14 @@ public class Main extends Application {
 
     public static void setPrimary_Stage(Stage primary_Stage) {
         Main.primary_Stage = primary_Stage;
+    }
+
+    public static Plateau getPlateau_assemblage() {
+        return plateau_assemblage;
+    }
+
+    public static void setPlateau_assemblage(Plateau plateau_assemblage) {
+        Main.plateau_assemblage = plateau_assemblage;
     }
 
 }

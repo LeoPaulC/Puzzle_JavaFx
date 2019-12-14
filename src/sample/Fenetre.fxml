@@ -12,7 +12,7 @@
             fx:controller="sample.Controller_Fenetre" style="-fx-background-color: #ddb0ed" >
 
     <top>
-        <MenuBar>
+        <MenuBar fx:id="menuBar">
             <Menu text="File" fx:id="File">
                 <MenuItem text="New" fx:id="new_puzzle" onAction="#fill_new"></MenuItem>
                 <MenuItem text="Lancement" fx:id="lancement" onAction="#fill_lancement"></MenuItem>
@@ -29,28 +29,17 @@
         </MenuBar>
     </top>
     <center>
-        <HBox fx:id="box_contour"  minWidth="900" minHeight="600" maxWidth="900" maxHeight="600" style=" -fx-background-color: green;">
+        <VBox fx:id="box_contour"  minWidth="700" minHeight="500" maxWidth="700" maxHeight="500" style="-fx-background-color: lightblue;">
             <children>
                 <AnchorPane fx:id="pane_assemblage" ></AnchorPane>
-                <Label fx:id="label_bienvenue" underline="true" style=" -fx-background-color: darkcyan;"  text="Bienvenue dans le Jeu du Puzzle" visible="true">
+                <Label fx:id="label_bienvenue" textFill="red" textAlignment="CENTER" underline="true" style=" -fx-padding: 250  0  0 150;"  text="Bienvenue dans le Jeu du Puzzle" visible="true">
                     <font>
                         <Font size="35.0"></Font>
                     </font>
                 </Label>
             </children>
-        </HBox>
+        </VBox>
     </center>
-    <!--
-    <center>
-        <BorderPane fx:id="pane_contour" style="-fx-background-color: #ccccff" maxWidth="850" maxHeight="550" visible="false" >
-            <center>
-                <Pane fx:id="pane_assemblabe" visible="false">
-
-                </Pane>
-            </center>
-        </BorderPane>
-    </center>
-    -->
 
 
 </BorderPane>

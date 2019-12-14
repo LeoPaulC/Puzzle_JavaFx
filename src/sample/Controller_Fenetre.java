@@ -15,6 +15,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Random;
 import java.util.function.Consumer;
 
 import static sample.Main.*;
@@ -39,8 +41,9 @@ import static sample.Main.*;
 public class Controller_Fenetre  {
 
     // attribut "GLOBAL"
-
+    private final static String DEFAULT_FILE = "./image/congratulations.gif";
     private static final int DECALAGE_PLATEAU_ASSEMBLAGE = 25;
+    private static final double MARGE_ASSEMBLAGE = 5.0;
     private Stage stage;
     private Scene scene;
     private static final double min_longueur = Piece.getMinLongueur();
@@ -51,12 +54,13 @@ public class Controller_Fenetre  {
     private double oldY;
 
     // page principale
+    @FXML private MenuBar menuBar;
     @FXML private MenuItem open;
     @FXML private MenuItem lancement;
     @FXML private MenuItem quit;
     @FXML private MenuItem save_as;
     @FXML private MenuItem new_puzzle;
-    @FXML private HBox box_contour;
+    @FXML private VBox box_contour;
     @FXML private Label label_bienvenue;
     @FXML private AnchorPane pane_assemblage;
     //parametrage
@@ -76,6 +80,7 @@ public class Controller_Fenetre  {
 
     public Controller_Fenetre() {
         this.stage = Main.getPrimary_Stage();
+        this.scene = stage.getScene();
     }
     @FXML
     private void fill_lancement() {
@@ -88,19 +93,73 @@ public class Controller_Fenetre  {
         Rectangle rectangle = create_Rectangle();
         pane_assemblage.getChildren().add(rectangle);
         gestion_affichage_box();
+        consumer.accept("lancment : "+plateau.getTab()[0][1].path.getLayoutX()+" ; "+plateau.getTab()[0][1].path.getLayoutY());
         Plateau p = new Plateau(plateau);
+        setPlateau_assemblage(p); // MAJ le plateaud'assemblage == plateau blanc en dessous du puzzle
         set_plateau_on_pane(p);
         //gestion_plateau_transparent();
         //positionnement_plateau_assemblage();
         set_plateau_on_pane(plateau);
+        consumer.accept("lancment 2 : "+plateau.getTab()[0][1].path.getLayoutX()+" ; "+plateau.getTab()[0][1].path.getLayoutY());
         gestion_evenement_plateau();
+        //TODO: split des piece dans la scene
+        split_piece();
+    }
+    // disperse les pieces du puzzle en random dans la scene au lancement du jeu
+    private void split_piece() {
+        for (Piece[] pieces : plateau.getTab()) {
+            for (Piece piece : pieces) {
+                // max et min prennent en compte l'appendice
+                double minX = box_contour.getLayoutX()+piece.getMinX();
+                double maxX = box_contour.getLayoutX()+piece.getMaxX();
+                double minY = (box_contour.getLayoutX()/2)-menuBar.getHeight()*1.5+piece.getMinY();
+                double maxY = box_contour.getLayoutY() + piece.getMaxY();
+                double x1 = -randNumber(0, minX);// a gauche du 0 relatif au layout de la piece
+                double x2 = randNumber(0, scene.getWidth()-maxX);
+                double y1 = -randNumber(0, minY);// a gauche du 0 relatif au layout de la piece
+                double y2 = randNumber(0,scene.getHeight()-maxY);
+                consumer.accept("");
+                consumer.accept("coordonnees max min piece : (on prend en compte l'appendice)");
+                Main.consumer.accept("scene width : "+scene.getWidth());
+                Main.consumer.accept("scene heigth : "+scene.getHeight());
+                consumer.accept("x : " + minX+ " ; "+maxX);
+                consumer.accept("y : " + minY+ " ; "+maxY);
+                consumer.accept("x1:"+x1+" ; x2:"+x2);
+                consumer.accept("y1:"+y1+" ; y2:"+y2);
+                piece.path.setLayoutX(rand_choice(x1,x2));
+                piece.path.setLayoutY(rand_choice(y1,y2));
+
+            }
+        }
+
     }
 
+    private double rand_choice(double choix1,double choix2) {
+        int rand = new Random().nextInt(2);
+        double res = 0;
+        if (rand == 1) { // alors signe negatif
+            res = choix1;
+        } else if (rand == 0) { // alors signe positif
+            res = choix2;
+        }
+        Main.consumer.accept("rand choix :"+rand);
+        return res;
+    }
+    private double randNumber(double min, double max) {
+        Random r = new Random();
+        double randomValue = min + (max - min) * r.nextDouble();
+        return randomValue;
+    }
     private void gestion_affichage_box() {
         box_contour.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY)));
         box_contour.setMaxHeight(plateau.getNb_ligne() * plateau.getHauteur());
         box_contour.setMaxWidth(plateau.getNb_colonne() * plateau.getLongueur());
 
+    }
+
+    private void affichage_fin() {
+        pane_assemblage.getChildren().clear();
+        box_contour.setBackground(new Background(new BackgroundImage(new Image("file:" + DEFAULT_FILE),BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.CENTER,new BackgroundSize(box_contour.getMaxWidth(),box_contour.getMaxHeight(),false,false,false,false))));
     }
 
     private Rectangle create_Rectangle() {
@@ -135,6 +194,36 @@ public class Controller_Fenetre  {
             }
         });
 
+        plateau.getTab()[i][j].path.setOnMouseReleased(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                if (plateau.getTab()[i][j].path.getLayoutX() <= MARGE_ASSEMBLAGE && plateau.getTab()[i][j].path.getLayoutX() >= -MARGE_ASSEMBLAGE ) {
+                    if (plateau.getTab()[i][j].path.getLayoutY() <= MARGE_ASSEMBLAGE && plateau.getTab()[i][j].path.getLayoutY() >= -MARGE_ASSEMBLAGE) {
+                        // si placement approximativement convenable alors placement de la piece dans son espace d'assemblage
+                        plateau.getTab()[i][j].path.setLayoutX(0.0);
+                        plateau.getTab()[i][j].path.setLayoutY(0.0);
+                        plateau.getTab()[i][j].setMovable(false);
+                        if (isFinished()) { // si le puzzle est finit
+                            // alors fin de jeu
+                            consumer.accept("GAME IS FINISHED");
+                            affichage_fin();
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    private boolean isFinished() {
+        boolean res = true;
+        for (Piece[] pieces : plateau.getTab()) {
+            for (Piece piece : pieces) {
+                if (piece.isMovable()) {
+                    res = false; // si on peut encore bouger une piece c'est qu'on a pas finis de jouer
+                }
+            }
+        }
+        return res;
     }
     private void hide_titre() {
         this.label_bienvenue.setVisible(false);
@@ -275,9 +364,10 @@ public class Controller_Fenetre  {
     private void valider_onAction() throws IOException {
         System.out.println("dans valider on action");
         if (check_parametrage()) {
+            est_lancable = true;
             // mise a jour des attribut du main
             MAJ_attribut();
-            //TODO : retour a la fenetre principale et debut du jeu
+            /**retour a la fenetre principale et debut du jeu**/
             final URL url = getClass().getResource("Fenetre.fxml");
             // Création du loader
             System.out.println("1");
@@ -343,11 +433,11 @@ public class Controller_Fenetre  {
         System.out.println("w: " + image.getWidth() + " min_longueur: " + min_longueur + " == max_col : " + calcul_max_colonne());
         System.out.println("h: " + image.getHeight() + " min_hauteur: " + min_hauteur + " == max_li : " + calcul_max_ligne());
         SpinnerValueFactory<Integer> valueFactory =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, calcul_max_colonne(), 1);
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(2, calcul_max_colonne(), 2);
         spinner_colonne.setValueFactory(valueFactory);
 
         SpinnerValueFactory<Integer> valueFactory2 =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, calcul_max_ligne(), 1);
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(2, calcul_max_ligne(), 2);
         spinner_ligne.setValueFactory(valueFactory2);
         nb_ligne.textProperty().bind(StringProperty.stringExpression(spinner_ligne.valueProperty()));
         nb_colonne.textProperty().bind(StringProperty.stringExpression(spinner_colonne.valueProperty()));
