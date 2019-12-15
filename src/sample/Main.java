@@ -1,8 +1,10 @@
 package sample;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -16,7 +18,9 @@ import javafx.scene.shape.*;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import javax.swing.border.Border;
 import java.io.File;
@@ -44,6 +48,18 @@ public class Main extends Application {
     static Image image;
     static Consumer<String> consumer = e -> System.out.println(e);
 
+    //tableau static des pieces
+    protected static Piece[][] tab_piece;
+
+    // pour le trie et du coup drag and drop
+
+    protected static int NB_ZONE = 5;// primary + bordure + red + green + blue
+    protected static Stage[] tab_stage = new Stage[NB_ZONE];
+    protected static Scene[] tab_scene = new Scene[NB_ZONE];
+    protected static AnchorPane tab_pane[] = new AnchorPane[NB_ZONE];
+    protected static ArrayList<Piece[][]> liste_tab_piece = new ArrayList<>();
+
+
     @Override
     public void start(Stage primaryStage) throws Exception{
         this.primary_Stage = primaryStage;
@@ -53,7 +69,20 @@ public class Main extends Application {
 
         // test divers
         //puzzle_test_divers();
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent t) {
+                for (Stage stage : tab_stage) {
+                    try {
+                        stage.hide();
+                    } catch (Exception e) {
 
+                    }
+                }
+                Platform.exit();
+                System.exit(0);
+            }
+        });
     }
 
     private void puzzle_test_divers() {
@@ -80,7 +109,15 @@ public class Main extends Application {
     private void puzzle_principale() throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("Fenetre.fxml"));
         this.primary_Stage.setTitle("Jeu du Puzzle");
-        Scene scene =new Scene(root, 900, 700);
+        Screen screen = Screen.getPrimary();
+        Rectangle2D bounds = screen.getVisualBounds();
+
+        this.primary_Stage.setX(bounds.getMinX());
+        this.primary_Stage.setY(bounds.getMinY());
+        this.primary_Stage.setWidth(bounds.getWidth());
+        this.primary_Stage.setHeight(bounds.getHeight());
+        Scene scene =new Scene(root);
+        this.primary_Stage.setResizable(false);
         this.primary_Stage.setScene(scene);
         this.primary_Stage.show();
     }

@@ -42,13 +42,9 @@ public class Plateau {
             for (int j = 0; j < plateau.tab[0].length; j++) {
                 Piece p = plateau.tab[i][j];
                 Piece ma_piece = new Piece(p);
-                //ma_piece.forme.setFill(Color.TRANSPARENT);
-                //ma_piece.forme.setStrokeWidth(1.5);
-                //ma_piece.forme.setStroke(Color.LIGHTGRAY);
                 ma_piece.path.setFill(Color.TRANSPARENT);
                 ma_piece.path.setStrokeWidth(1.5);
                 ma_piece.path.setStroke(Color.LIGHTGRAY);
-                //ma_piece.forme.getStrokeDashArray().addAll(2.0,7.0,2.0,7.0);
                 this.tab[i][j] = ma_piece;
             }
         }
@@ -58,8 +54,6 @@ public class Plateau {
         for (int i = 0; i < this.tab.length; i++) {
             for (int j = 0; j < this.tab[0].length; j++) {
                 tab[i][j].forme.setFill(Color.WHITE);
-                //tab[i][j].forme.setStroke(Color.BLACK);
-                //tab[i][j].forme.setStrokeDashOffset(2d);
                 tab[i][j].forme.setFill(Color.WHITE);
                 tab[i][j].forme.setStrokeWidth(1);
                 tab[i][j].forme.setStroke(Color.BLACK);

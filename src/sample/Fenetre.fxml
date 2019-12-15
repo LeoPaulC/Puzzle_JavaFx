@@ -15,13 +15,23 @@
         <MenuBar fx:id="menuBar">
             <Menu text="File" fx:id="File">
                 <MenuItem text="New" fx:id="new_puzzle" onAction="#fill_new"></MenuItem>
-                <MenuItem text="Lancement" fx:id="lancement" onAction="#fill_lancement"></MenuItem>
-                <MenuItem text="Open" fx:id="open" onAction="#fill_open"></MenuItem>
-                <MenuItem text="Save as" fx:id="save_as" onAction="#fill_save_as"></MenuItem>
+                <MenuItem text="Open" fx:id="open" onAction="#fill_open" disable="true"></MenuItem>
+                <MenuItem text="Save as" fx:id="save_as" onAction="#fill_save_as" disable="true"></MenuItem>
                 <MenuItem text="Quit" fx:id="quit" onAction="#fill_quit"></MenuItem>
+            </Menu>
+            <Menu fx:id="Option" text="Option">
+                <MenuItem  text="Lancement" fx:id="lancement" onAction="#fill_lancement"></MenuItem>
+                <MenuItem disable="true" text="Trier" fx:id="trier" onAction="#fill_trier"></MenuItem>
+
             </Menu>
             <Menu text="Navigate" fx:id="Navigate">
                 <MenuItem text="puzzle" fx:id="wiki_puzzle" onAction="#fill_wiki_puzzle"></MenuItem>
+            </Menu>
+            <Menu text="Zone de Trie" fx:id="zones" disable="true">
+                <MenuItem text="Bordures" fx:id="z_bordure" visible="false" onAction="#fill_z_bordure"></MenuItem>
+                <MenuItem text="Rouges et autres" fx:id="z_rouge" visible="false" onAction="#fill_z_rouge"></MenuItem>
+                <MenuItem text="Vertes" fx:id="z_verte" visible="false" onAction="#fill_z_verte"></MenuItem>
+                <MenuItem text="Bleues" fx:id="z_bleue" visible="false" onAction="#fill_z_bleue"></MenuItem>
             </Menu>
             <Menu text="Help" fx:id="Help">
                 <MenuItem text="énoncé" fx:id="enonce" onAction="#fill_enonce"></MenuItem>
@@ -32,7 +42,7 @@
         <VBox fx:id="box_contour"  minWidth="700" minHeight="500" maxWidth="700" maxHeight="500" style="-fx-background-color: lightblue;">
             <children>
                 <AnchorPane fx:id="pane_assemblage" ></AnchorPane>
-                <Label fx:id="label_bienvenue" textFill="red" textAlignment="CENTER" underline="true" style=" -fx-padding: 250  0  0 150;"  text="Bienvenue dans le Jeu du Puzzle" visible="true">
+                <Label fx:id="label_bienvenue" textFill="red" textAlignment="CENTER" underline="true" style=" -fx-padding: 200  0  0 50;"  text="Bienvenue dans le Jeu du Puzzle" visible="true">
                     <font>
                         <Font size="35.0"></Font>
                     </font>

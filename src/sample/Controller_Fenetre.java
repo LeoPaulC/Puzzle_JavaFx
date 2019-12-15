@@ -15,17 +15,22 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
+import javafx.scene.image.PixelReader;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Translate;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.awt.*;
 import java.io.File;
@@ -60,6 +65,12 @@ public class Controller_Fenetre  {
     @FXML private MenuItem quit;
     @FXML private MenuItem save_as;
     @FXML private MenuItem new_puzzle;
+    @FXML private MenuItem trier;
+    @FXML private Menu zones;
+    @FXML private MenuItem z_bordure;
+    @FXML private MenuItem z_rouge;
+    @FXML private MenuItem z_verte;
+    @FXML private MenuItem z_bleue;
     @FXML private VBox box_contour;
     @FXML private Label label_bienvenue;
     @FXML private AnchorPane pane_assemblage;
@@ -84,7 +95,7 @@ public class Controller_Fenetre  {
     }
     @FXML
     private void fill_lancement() {
-        lancement();
+        if (est_lancable) lancement();
     }
     //lance un puzzle a partir du plateau etc ...
     private void lancement() {
@@ -93,41 +104,355 @@ public class Controller_Fenetre  {
         Rectangle rectangle = create_Rectangle();
         pane_assemblage.getChildren().add(rectangle);
         gestion_affichage_box();
-        consumer.accept("lancment : "+plateau.getTab()[0][1].path.getLayoutX()+" ; "+plateau.getTab()[0][1].path.getLayoutY());
         Plateau p = new Plateau(plateau);
         setPlateau_assemblage(p); // MAJ le plateaud'assemblage == plateau blanc en dessous du puzzle
         set_plateau_on_pane(p);
-        //gestion_plateau_transparent();
-        //positionnement_plateau_assemblage();
         set_plateau_on_pane(plateau);
-        consumer.accept("lancment 2 : "+plateau.getTab()[0][1].path.getLayoutX()+" ; "+plateau.getTab()[0][1].path.getLayoutY());
         gestion_evenement_plateau();
-        //TODO: split des piece dans la scene
+
         split_piece();
+        trier.setDisable(false);
+        //init du tableau static de piece
+        tab_piece = plateau.tab.clone();
+        //liste(1) == liste principale de piece
+        liste_tab_piece.add(plateau.tab.clone());/// indice 0
     }
+
+
+    @FXML
+    private void fill_z_bordure() {
+        int indice = 1;
+        tab_stage[indice].hide();
+        tab_stage[indice].show();
+    }
+    @FXML
+    private void fill_z_rouge() {
+        int indice = 2;
+
+        tab_stage[indice].hide();
+        tab_stage[indice].show();
+    }
+    @FXML
+    private void fill_z_verte() {
+        int indice = 3;
+        tab_stage[indice].hide();
+        tab_stage[indice].show();
+    }
+    @FXML
+    private void fill_z_bleue() {
+        int indice = 4;
+        tab_stage[indice].hide();
+        tab_stage[indice].show();
+    }
+
+    @FXML
+    private void fill_trier() {
+        if (plateau == null) {
+            consumer.accept("plateau est null !! ");
+            return ;
+        }
+        // creation des diff zones de trie
+        create_stage_bordure();
+        create_stage_rouge();
+        create_stage_verte();
+        create_stage_bleue();
+
+        // different tableau de piece pour la differentiationdes piece = TRIE
+        // une piece du tableau static
+        Piece[][] tab_piece_bordure = new Piece[nombre_ligne][nombre_colonne];
+        fill_tab_piece_bordure(tab_piece_bordure);
+        Piece[][] tab_piece_red = new Piece[nombre_ligne][nombre_colonne];
+        Piece[][] tab_piece_green = new Piece[nombre_ligne][nombre_colonne];
+        Piece[][] tab_piece_blue = new Piece[nombre_ligne][nombre_colonne];
+        fill_tab_piece_color(tab_piece_blue, tab_piece_green, tab_piece_red, tab_piece_bordure);
+        // MAJ la liiste de tableau de piece static
+        fill_liste_tab_piece(tab_piece_blue, tab_piece_green, tab_piece_red, tab_piece_bordure);
+        //TODO: ajouter les events aux pieces des listes afin de faire du DND vers le panneau principal
+
+        //vider le panneau principale de ses pieces
+        unfill_piece_pane();
+
+        // affichage
+        affichage_test(0, tab_piece_bordure);
+        affichage_test(1, tab_piece_red);
+        affichage_test(2, tab_piece_green);
+        affichage_test(3, tab_piece_blue);
+
+
+
+        //visibilité de la partie du menu corresp. au trie
+        zones.setDisable(false);
+        z_bordure.setVisible(true);
+        z_rouge.setVisible(true);
+        z_verte.setVisible(true);
+        z_bleue.setVisible(true);
+
+        // remplissage des diff zones de trie
+        fill_stage_trie();
+
+    }
+
+    //enleve les pieces presentes dans les zones de trie du panneau d'assemblage
+    private void unfill_piece_pane() {
+        for (int k = 1; k < NB_ZONE; k++) {
+            for (int i = 0; i < liste_tab_piece.get(1).length; i++) {
+                for (int j = 0; j < liste_tab_piece.get(1)[0].length; j++) {
+                    if (liste_tab_piece.get(k)[i][j] != null) {
+                        if (liste_tab_piece.get(0)[i][j] != null) {
+                            liste_tab_piece.get(0)[i][j] = null;
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+    private void fill_liste_tab_piece(Piece[][] tab_piece_blue,Piece[][] tab_piece_green, Piece[][] tab_piece_red, Piece[][] tab_piece_bordure) {
+        liste_tab_piece.add(tab_piece_bordure);
+        liste_tab_piece.add(tab_piece_red);
+        liste_tab_piece.add(tab_piece_green);
+        liste_tab_piece.add(tab_piece_blue);
+    }
+
+    //remplie les zone de trie en fonction de leur tableau de pieces
+    private void fill_stage_trie() {
+        for (int i = 1; i <5 ; i++) {
+            consumer.accept("fill stage trie indice :"+i);
+            for (Piece[] pieces : liste_tab_piece.get(i)) {
+                for (Piece piece : pieces) {
+                    if (piece != null) {
+                        tab_pane[i].getChildren().add(piece.path);
+                    }
+                }
+            }
+        }
+    }
+    // cree la zone de trie correspondant aux bordure
+    private void create_stage_bordure() {
+        Stage ma_stage = new Stage();
+        ma_stage.setWidth(stage.getWidth() / 3);
+        ma_stage.setHeight(stage.getHeight());
+        ma_stage.setX(stage.getX()+ma_stage.getWidth()*2);// fenetre dans le diernier tier de l'ecran
+        ma_stage.setY(stage.getY());
+        AnchorPane mon_pane = new AnchorPane();
+        Scene ma_scene = new Scene(mon_pane);
+        ma_stage.setScene(ma_scene);
+        ma_stage.setTitle("Pieces Bordures");
+        mon_pane.setBackground(new Background(new BackgroundFill(Color.GRAY, CornerRadii.EMPTY, Insets.EMPTY)));
+        ma_stage.hide(); // invisible a la creation
+        ma_stage.setResizable(false);
+        ma_stage.initStyle(StageStyle.UNDECORATED);
+        //MAJ des champs static
+        tab_stage[1] = ma_stage;
+        tab_scene[1] = ma_scene;
+        tab_pane[1] = mon_pane;
+    }
+    // cree la zone de trie correspondant aux bordure
+    private void create_stage_rouge() {
+        Stage ma_stage = new Stage();
+        ma_stage.setWidth(stage.getWidth() / 3);
+        ma_stage.setHeight(stage.getHeight());
+        ma_stage.setX(stage.getX()+ma_stage.getWidth()*2);// fenetre dans le diernier tier de l'ecran
+        ma_stage.setY(stage.getY());
+        AnchorPane mon_pane = new AnchorPane();
+        Scene ma_scene = new Scene(mon_pane);
+        ma_stage.setScene(ma_scene);
+        ma_stage.setTitle("Pieces Rouges");
+        mon_pane.setBackground(new Background(new BackgroundFill(Color.DARKRED, CornerRadii.EMPTY, Insets.EMPTY)));
+        ma_stage.hide(); // invisible a la creation
+        ma_stage.setResizable(false);
+        ma_stage.initStyle(StageStyle.UNDECORATED);
+        //MAJ des champs static
+        tab_stage[2] = ma_stage;
+        tab_scene[2] = ma_scene;
+        tab_pane[2] = mon_pane;
+    }
+    // cree la zone de trie correspondant aux bordure
+    private void create_stage_verte() {
+        Stage ma_stage = new Stage();
+        ma_stage.setWidth(stage.getWidth() / 3);
+        ma_stage.setHeight(stage.getHeight());
+        ma_stage.setX(stage.getX()+ma_stage.getWidth()*2);// fenetre dans le diernier tier de l'ecran
+        ma_stage.setY(stage.getY());
+        AnchorPane mon_pane = new AnchorPane();
+        Scene ma_scene = new Scene(mon_pane);
+        ma_stage.setScene(ma_scene);
+        ma_stage.setTitle("Pieces Vertes");
+        mon_pane.setBackground(new Background(new BackgroundFill(Color.DARKGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+        ma_stage.hide(); // invisible a la creation
+        ma_stage.setResizable(false);
+        ma_stage.initStyle(StageStyle.UNDECORATED);
+        //MAJ des champs static
+        tab_stage[3] = ma_stage;
+        tab_scene[3] = ma_scene;
+        tab_pane[3] = mon_pane;
+    }
+    // cree la zone de trie correspondant aux bordure
+    private void create_stage_bleue() {
+        Stage ma_stage = new Stage();
+        ma_stage.setWidth(stage.getWidth() / 3);
+        ma_stage.setHeight(stage.getHeight());
+        ma_stage.setX(stage.getX()+ma_stage.getWidth()*2);// fenetre dans le diernier tier de l'ecran
+        ma_stage.setY(stage.getY());
+        AnchorPane mon_pane = new AnchorPane();
+        Scene ma_scene = new Scene(mon_pane);
+        ma_stage.setScene(ma_scene);
+        ma_stage.setTitle("Pieces Bleues");
+        mon_pane.setBackground(new Background(new BackgroundFill(Color.DARKBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+        ma_stage.hide(); // invisible a la creation
+        ma_stage.setResizable(false);
+        ma_stage.initStyle(StageStyle.UNDECORATED);
+        //MAJ des champs static
+        tab_stage[4] = ma_stage;
+        tab_scene[4] = ma_scene;
+        tab_pane[4] = mon_pane;
+    }
+
+    private void affichage_test(int i, Piece[][] tab) {
+        if(i == 0) consumer.accept("tableau de BORD");
+        if(i == 1) consumer.accept("tableau de ROUGE");
+        if(i == 2) consumer.accept("tableau de VERT");
+        if(i == 3) consumer.accept("tableau de BLEUE");
+        if(i == 4) consumer.accept("tableau du plateau");
+        if(i == 5) consumer.accept("tableau du tab_piece");
+        consumer.accept("nb ligne :"+tab.length+", nb colonne l"+tab[0].length);
+        for (Piece[] pieces : tab) {
+            for (Piece piece : pieces) {
+                if (piece != null) {
+                    System.out.print("1");
+                }else {
+                    System.out.print(".");
+                }
+            }
+            consumer.accept("");
+        }
+    }
+    // remplie les tableau de piece color en fonction de la couleur majoritaire de chaque piece du tab de piece static
+    private void fill_tab_piece_color(Piece[][] tab_piece_blue,Piece[][] tab_piece_green, Piece[][] tab_piece_red, Piece[][] tab_piece_bordure) {
+        for (int i = 0; i < liste_tab_piece.get(0).length; i++) {
+            for (int j = 0; j < liste_tab_piece.get(0)[0].length; j++) {
+
+                ImagePattern pattern = (ImagePattern) liste_tab_piece.get(0)[i][j].path.getFill();
+                Image im = pattern.getImage();
+                Color c = get_color_majoritaire(liste_tab_piece.get(0)[i][j],im); // renvoie la couleur majoritaire de la piece
+                Piece p = new Piece(liste_tab_piece.get(0)[i][j]);
+                p.path.setFill(liste_tab_piece.get(0)[i][j].path.getFill());
+                p.path.setStroke(liste_tab_piece.get(0)[i][j].path.getStroke());
+                p.path.setLayoutX(rand_coord_X(tab_stage[1],p));
+                p.path.setLayoutY(rand_coord_Y(tab_stage[1],p));
+                if ( c == Color.RED && tab_piece_bordure[i][j] == null) {
+                    tab_piece_red[i][j] = p;
+                } else if (c == Color.GREEN && tab_piece_bordure[i][j] == null) {
+                    tab_piece_green[i][j] = p;
+                }  else if (c == Color.BLUE && tab_piece_bordure[i][j] == null) {
+                    tab_piece_blue[i][j] = p;
+                } else {
+                    //consumer.accept("la piece i:" + i + ", j:" + j + " est deja dans le tableau des bords");
+                }
+            }
+        }
+    }
+
+    private Color get_color_majoritaire(Piece p,Image image) {
+        int cpt_red = 0;
+        int cpt_green = 0;
+        int cpt_blue = 0;
+        int minX = (int) p.getMinX();
+        int maxX = (int) p.getMaxX();
+        int minY = (int) p.getMinY();
+        int maxY = (int) p.getMaxY();
+        PixelReader reader = image.getPixelReader();
+        for (int i = minX; i < maxX; i++) {
+            for (int j = minX; j < maxY ; j++) {
+                Color c = reader.getColor(i, j);
+                if (c.getRed() > c.getGreen() && c.getRed() > c.getBlue()) {
+                    cpt_red++;
+                } else if (c.getGreen() > c.getRed() && c.getGreen() > c.getBlue()) {
+                    cpt_green++;
+                } else if (c.getBlue() > c.getRed() && c.getBlue() > c.getGreen()) {
+                    cpt_blue++;
+                }
+            }
+        }
+        if (cpt_blue > cpt_green && cpt_blue > cpt_red) {
+            return Color.BLUE;
+        } else if (cpt_green > cpt_red && cpt_green > cpt_blue) {
+            return Color.GREEN;
+        } else {
+            return Color.RED;
+        }
+    }
+
+
+
+    // remplie un tableau avec les piece des bord du tableau de piece static
+    private void fill_tab_piece_bordure(Piece [][] tab_piece_bordure) {
+        for (int i = 0; i < liste_tab_piece.get(0).length; i++) {
+            for (int j = 0; j < liste_tab_piece.get(0)[0].length; j++) {
+
+                boolean est_piece_bord = false;
+                for (int k = 0; k < liste_tab_piece.get(0)[i][j].tab_bordure.length; k++) {
+                    if (liste_tab_piece.get(0)[i][j].tab_bordure[k].getClass() == Bordure_Plate.class) {
+                        est_piece_bord = true;
+                    }
+                }
+                if (est_piece_bord) { // alors la piece a au moins un cote qui est un bord
+                    //tab_piece_bordure[i][j] = tab_piece[i][j];
+                    Piece p = new Piece(liste_tab_piece.get(0)[i][j]);
+                    p.path.setFill(liste_tab_piece.get(0)[i][j].path.getFill());
+                    p.path.setStroke(liste_tab_piece.get(0)[i][j].path.getStroke());
+                    p.path.setLayoutX(rand_coord_X(tab_stage[1],p));
+                    p.path.setLayoutY(rand_coord_Y(tab_stage[1],p));
+                    tab_piece_bordure[i][j] = p;
+                }
+
+            }
+        }
+        //liste_tab_piece.add(tab_piece_bordure);
+    }
+
+    // renvoie une nouvelle valeur x pour une piece dans une scene
+    private double rand_coord_X(Stage stage, Piece p) {
+        consumer.accept("scene width : "+ stage.getWidth());
+        //double x = randNumber(0.0, stage.getWidth()/2 - p.longueur);
+        double x = randNumber(0.0- p.getMinX(), stage.getWidth()/2 - p.getMinX());
+        consumer.accept(" coord x :"+x);
+        return x;
+    }
+
+    // renvoie une nouvelle valeur y pour une piece dans une scene
+    private double rand_coord_Y(Stage stage, Piece p) {
+        consumer.accept("scene heigth : "+ stage.getHeight());
+        //double y = randNumber(20, stage.getHeight()/2);
+        double y = randNumber(stage.getHeight()*0.05 - p.getMinY() ,stage.getHeight()*0.7 - p.getMinY());
+        consumer.accept(" coord x :" + y);
+        return y;
+    }
+
     // disperse les pieces du puzzle en random dans la scene au lancement du jeu
     private void split_piece() {
+
         for (Piece[] pieces : plateau.getTab()) {
             for (Piece piece : pieces) {
                 // max et min prennent en compte l'appendice
-                double minX = box_contour.getLayoutX()+piece.getMinX();
-                double maxX = box_contour.getLayoutX()+piece.getMaxX();
-                double minY = (box_contour.getLayoutX()/2)-menuBar.getHeight()*1.5+piece.getMinY();
+                double minX = box_contour.getLayoutX() + piece.getMinX();
+                double maxX = box_contour.getLayoutX() + piece.getMaxX();
+                double minY = (box_contour.getLayoutX() / 2) - menuBar.getHeight() * 2 + piece.getMinY();
                 double maxY = box_contour.getLayoutY() + piece.getMaxY();
                 double x1 = -randNumber(0, minX);// a gauche du 0 relatif au layout de la piece
-                double x2 = randNumber(0, scene.getWidth()-maxX);
+                double x2 = randNumber(0, scene.getWidth() - maxX);
                 double y1 = -randNumber(0, minY);// a gauche du 0 relatif au layout de la piece
-                double y2 = randNumber(0,scene.getHeight()-maxY);
-                consumer.accept("");
+                double y2 = randNumber(0, scene.getHeight() - maxY);
+                /*consumer.accept("");
                 consumer.accept("coordonnees max min piece : (on prend en compte l'appendice)");
-                Main.consumer.accept("scene width : "+scene.getWidth());
-                Main.consumer.accept("scene heigth : "+scene.getHeight());
-                consumer.accept("x : " + minX+ " ; "+maxX);
-                consumer.accept("y : " + minY+ " ; "+maxY);
-                consumer.accept("x1:"+x1+" ; x2:"+x2);
-                consumer.accept("y1:"+y1+" ; y2:"+y2);
-                piece.path.setLayoutX(rand_choice(x1,x2));
-                piece.path.setLayoutY(rand_choice(y1,y2));
+                Main.consumer.accept("scene width : " + scene.getWidth());
+                Main.consumer.accept("scene heigth : " + scene.getHeight());
+                consumer.accept("x : " + minX + " ; " + maxX);
+                consumer.accept("y : " + minY + " ; " + maxY);
+                consumer.accept("x1:" + x1 + " ; x2:" + x2);
+                consumer.accept("y1:" + y1 + " ; y2:" + y2);*/
+                piece.path.setLayoutX(rand_choice(x1, x2));
+                piece.path.setLayoutY(rand_choice(y1, y2));
 
             }
         }
@@ -142,7 +467,7 @@ public class Controller_Fenetre  {
         } else if (rand == 0) { // alors signe positif
             res = choix2;
         }
-        Main.consumer.accept("rand choix :"+rand);
+        //Main.consumer.accept("rand choix :"+rand);
         return res;
     }
     private double randNumber(double min, double max) {
@@ -207,6 +532,7 @@ public class Controller_Fenetre  {
                             // alors fin de jeu
                             consumer.accept("GAME IS FINISHED");
                             affichage_fin();
+                            trier.setDisable(true);
                         }
                     }
                 }
@@ -328,7 +654,9 @@ public class Controller_Fenetre  {
     }
     @FXML
     private void fill_quit() {
-        quit.setOnAction(e -> Platform.exit());
+        //quit.setOnAction(e -> Platform.exit());
+        Platform.exit();
+        System.exit(0);
         // Fermeture propre de l'application
         // stage.setOnCloseRequest(e -> Platform.exit());
     }
