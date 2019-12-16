@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 
 public class Main extends Application {
+    protected static int TAILLE_HAUTEUR_TITRE_STAGE = 37;
     double oldX,oldY;
     static Stage primary_Stage;
     static int width_plateau = 850;
@@ -63,7 +64,27 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         this.primary_Stage = primaryStage;
+        /*EventHandler pressed = new EventHandler<javafx.scene.input.MouseEvent>() {
 
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+
+            }
+        };
+        EventHandler dragged = new EventHandler<javafx.scene.input.MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+
+            }
+        };
+        EventHandler released = new EventHandler<javafx.scene.input.MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+
+            }
+        };*/
         // programme principal
         puzzle_principale();
 

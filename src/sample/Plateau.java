@@ -1,6 +1,7 @@
 package sample;
 
 import javafx.scene.image.Image;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Shape;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 
 public class Plateau {
     private final static String DEFAULT_FILE = "./image/roronoa.jpg";
+    private Pane panneau;
     private int posX;
     private int posY;
     private static int nb_ligne;
@@ -97,6 +99,22 @@ public class Plateau {
         create_plateau();
         ajout_piece_liste();
     }
+    public Plateau(int x, int y, int ligne, int col, double longueur, double hauteur, Image image, int niveau, Pane pane) {
+        //Main.consumer.accept(" dans plateau avec niveau");
+        this.posX = x; // a ajouter dans create plateau aux coord des != piece MORRAY
+        this.posY = y;
+        this.liste_piece = new ArrayList<Shape>();
+        this.image = image;
+        nb_ligne = ligne;
+        nb_colonne = col;
+        this.longueur = longueur;
+        this.hauteur = hauteur;
+        tab = new Piece[ligne][col];
+        this.niveau = niveau;
+        this.panneau = pane;
+        create_plateau();
+        ajout_piece_liste();
+    }
 
 
     private void ajout_piece_liste() {
@@ -116,14 +134,10 @@ public class Plateau {
                 recup_bordure_contrainte(i, j, liste);
                 double h = hauteur;
                 double l = longueur;
-                Piece piece = new Piece(liste, j * l, i * h, hauteur, longueur,niveau);
+                Piece piece = new Piece(liste, j * l, i * h, hauteur, longueur,niveau,panneau);
                 piece.path.setFill(Color.TRANSPARENT);
-                //piece.forme.setFill(Color.TRANSPARENT);
                 piece.path.setStrokeWidth(1);
-                //piece.forme.setStrokeWidth(1);
                 piece.path.setStroke(Color.BLACK);
-                //piece.forme.setStroke(Color.BLACK);
-                //add_evenement(piece); //faire l'ajout d'evenment dans le controller
                 gestion_Image(piece);
                 tab[i][j] = piece;
             }

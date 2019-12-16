@@ -39,16 +39,18 @@
         </MenuBar>
     </top>
     <center>
-        <VBox fx:id="box_contour"  minWidth="700" minHeight="500" maxWidth="700" maxHeight="500" style="-fx-background-color: lightblue;">
-            <children>
-                <AnchorPane fx:id="pane_assemblage" ></AnchorPane>
-                <Label fx:id="label_bienvenue" textFill="red" textAlignment="CENTER" underline="true" style=" -fx-padding: 200  0  0 50;"  text="Bienvenue dans le Jeu du Puzzle" visible="true">
-                    <font>
-                        <Font size="35.0"></Font>
-                    </font>
-                </Label>
-            </children>
-        </VBox>
+        <AnchorPane fx:id="pane_principal" prefWidth="Infinity" prefHeight="Infinity">
+            <VBox fx:id="box_contour" layoutY="100" layoutX="300" minWidth="700" minHeight="500" maxWidth="700" maxHeight="500" style="-fx-background-color: lightblue;">
+                <children>
+                    <AnchorPane fx:id="pane_assemblage" ></AnchorPane>
+                    <Label fx:id="label_bienvenue" textFill="red" textAlignment="CENTER" underline="true" style=" -fx-padding: 200  0  0 50;"  text="Bienvenue dans le Jeu du Puzzle" visible="true">
+                        <font>
+                            <Font size="35.0"></Font>
+                        </font>
+                    </Label>
+                </children>
+            </VBox>
+        </AnchorPane>
     </center>
 
 

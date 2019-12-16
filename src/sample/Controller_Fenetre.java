@@ -32,6 +32,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import javax.swing.event.DocumentEvent;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -59,6 +60,7 @@ public class Controller_Fenetre  {
     private double oldY;
 
     // page principale
+    @FXML private AnchorPane pane_principal;
     @FXML private MenuBar menuBar;
     @FXML private MenuItem open;
     @FXML private MenuItem lancement;
@@ -109,11 +111,14 @@ public class Controller_Fenetre  {
         set_plateau_on_pane(p);
         set_plateau_on_pane(plateau);
         gestion_evenement_plateau();
-
+        affichage_test(4,plateau.getTab());
         split_piece();
+        affichage_test(4,plateau.getTab());
         trier.setDisable(false);
         //init du tableau static de piece
         tab_piece = plateau.tab.clone();
+        //consumer.accept("ICI");
+        //affichage_test(5, tab_piece);
         //liste(1) == liste principale de piece
         liste_tab_piece.add(plateau.tab.clone());/// indice 0
     }
@@ -151,7 +156,13 @@ public class Controller_Fenetre  {
             consumer.accept("plateau est null !! ");
             return ;
         }
+        consumer.accept("dans fill trier");
+        affichage_test(4,plateau.getTab());
         // creation des diff zones de trie
+
+        Maj_stage_principale();
+        consumer.accept("apres maj stage principale");
+        affichage_test(4,plateau.getTab());
         create_stage_bordure();
         create_stage_rouge();
         create_stage_verte();
@@ -171,13 +182,14 @@ public class Controller_Fenetre  {
 
         //vider le panneau principale de ses pieces
         unfill_piece_pane();
-
+        affichage_test(4,plateau.getTab());
         // affichage
-        affichage_test(0, tab_piece_bordure);
+       /* affichage_test(0, tab_piece_bordure);
         affichage_test(1, tab_piece_red);
         affichage_test(2, tab_piece_green);
         affichage_test(3, tab_piece_blue);
-
+        affichage_test(5, tab_piece);
+        */
 
 
         //visibilité de la partie du menu corresp. au trie
@@ -199,7 +211,8 @@ public class Controller_Fenetre  {
                 for (int j = 0; j < liste_tab_piece.get(1)[0].length; j++) {
                     if (liste_tab_piece.get(k)[i][j] != null) {
                         if (liste_tab_piece.get(0)[i][j] != null) {
-                            liste_tab_piece.get(0)[i][j] = null;
+                            pane_assemblage.getChildren().remove(liste_tab_piece.get(0)[i][j].path);
+                            //liste_tab_piece.get(0)[i][j] = null;
                         }
                     }
                 }
@@ -208,16 +221,20 @@ public class Controller_Fenetre  {
         }
     }
     private void fill_liste_tab_piece(Piece[][] tab_piece_blue,Piece[][] tab_piece_green, Piece[][] tab_piece_red, Piece[][] tab_piece_bordure) {
+        add_evenement_tab_piece(tab_piece_bordure);
         liste_tab_piece.add(tab_piece_bordure);
+        add_evenement_tab_piece(tab_piece_red);
         liste_tab_piece.add(tab_piece_red);
+        add_evenement_tab_piece(tab_piece_green);
         liste_tab_piece.add(tab_piece_green);
+        add_evenement_tab_piece(tab_piece_blue);
         liste_tab_piece.add(tab_piece_blue);
     }
 
     //remplie les zone de trie en fonction de leur tableau de pieces
     private void fill_stage_trie() {
         for (int i = 1; i <5 ; i++) {
-            consumer.accept("fill stage trie indice :"+i);
+           // consumer.accept("fill stage trie indice :"+i);
             for (Piece[] pieces : liste_tab_piece.get(i)) {
                 for (Piece piece : pieces) {
                     if (piece != null) {
@@ -227,13 +244,19 @@ public class Controller_Fenetre  {
             }
         }
     }
+
+    private void Maj_stage_principale() {
+        tab_stage[0] = primary_Stage;
+        tab_scene[0] = primary_Stage.getScene();
+        tab_pane[0] = pane_principal;
+    }
     // cree la zone de trie correspondant aux bordure
     private void create_stage_bordure() {
         Stage ma_stage = new Stage();
         ma_stage.setWidth(stage.getWidth() / 3);
-        ma_stage.setHeight(stage.getHeight());
+        ma_stage.setHeight(stage.getHeight() - menuBar.getHeight()-TAILLE_HAUTEUR_TITRE_STAGE);
         ma_stage.setX(stage.getX()+ma_stage.getWidth()*2);// fenetre dans le diernier tier de l'ecran
-        ma_stage.setY(stage.getY());
+        ma_stage.setY(stage.getY()+menuBar.getHeight()+TAILLE_HAUTEUR_TITRE_STAGE);
         AnchorPane mon_pane = new AnchorPane();
         Scene ma_scene = new Scene(mon_pane);
         ma_stage.setScene(ma_scene);
@@ -326,6 +349,9 @@ public class Controller_Fenetre  {
             }
             consumer.accept("");
         }
+        if (i == 4) {
+            consumer.accept("piece 0,0 : "+tab[0][0].getLayoutX()+";"+tab[0][0].getLayoutY());
+        }
     }
     // remplie les tableau de piece color en fonction de la couleur majoritaire de chaque piece du tab de piece static
     private void fill_tab_piece_color(Piece[][] tab_piece_blue,Piece[][] tab_piece_green, Piece[][] tab_piece_red, Piece[][] tab_piece_bordure) {
@@ -335,16 +361,26 @@ public class Controller_Fenetre  {
                 ImagePattern pattern = (ImagePattern) liste_tab_piece.get(0)[i][j].path.getFill();
                 Image im = pattern.getImage();
                 Color c = get_color_majoritaire(liste_tab_piece.get(0)[i][j],im); // renvoie la couleur majoritaire de la piece
-                Piece p = new Piece(liste_tab_piece.get(0)[i][j]);
-                p.path.setFill(liste_tab_piece.get(0)[i][j].path.getFill());
-                p.path.setStroke(liste_tab_piece.get(0)[i][j].path.getStroke());
-                p.path.setLayoutX(rand_coord_X(tab_stage[1],p));
-                p.path.setLayoutY(rand_coord_Y(tab_stage[1],p));
                 if ( c == Color.RED && tab_piece_bordure[i][j] == null) {
+                    Piece p = new Piece(liste_tab_piece.get(0)[i][j],tab_pane[2]);
+                    p.path.setFill(liste_tab_piece.get(0)[i][j].path.getFill());
+                    p.path.setStroke(liste_tab_piece.get(0)[i][j].path.getStroke());
+                    p.path.setLayoutX(rand_coord_X(tab_stage[1],p));
+                    p.path.setLayoutY(rand_coord_Y(tab_stage[1],p));
                     tab_piece_red[i][j] = p;
                 } else if (c == Color.GREEN && tab_piece_bordure[i][j] == null) {
+                    Piece p = new Piece(liste_tab_piece.get(0)[i][j],tab_pane[3]);
+                    p.path.setFill(liste_tab_piece.get(0)[i][j].path.getFill());
+                    p.path.setStroke(liste_tab_piece.get(0)[i][j].path.getStroke());
+                    p.path.setLayoutX(rand_coord_X(tab_stage[1],p));
+                    p.path.setLayoutY(rand_coord_Y(tab_stage[1],p));
                     tab_piece_green[i][j] = p;
                 }  else if (c == Color.BLUE && tab_piece_bordure[i][j] == null) {
+                    Piece p = new Piece(liste_tab_piece.get(0)[i][j],tab_pane[4]);
+                    p.path.setFill(liste_tab_piece.get(0)[i][j].path.getFill());
+                    p.path.setStroke(liste_tab_piece.get(0)[i][j].path.getStroke());
+                    p.path.setLayoutX(rand_coord_X(tab_stage[1],p));
+                    p.path.setLayoutY(rand_coord_Y(tab_stage[1],p));
                     tab_piece_blue[i][j] = p;
                 } else {
                     //consumer.accept("la piece i:" + i + ", j:" + j + " est deja dans le tableau des bords");
@@ -392,18 +428,22 @@ public class Controller_Fenetre  {
 
                 boolean est_piece_bord = false;
                 for (int k = 0; k < liste_tab_piece.get(0)[i][j].tab_bordure.length; k++) {
+                   // consumer.accept("K K K K K :" +k);
                     if (liste_tab_piece.get(0)[i][j].tab_bordure[k].getClass() == Bordure_Plate.class) {
                         est_piece_bord = true;
                     }
                 }
                 if (est_piece_bord) { // alors la piece a au moins un cote qui est un bord
                     //tab_piece_bordure[i][j] = tab_piece[i][j];
-                    Piece p = new Piece(liste_tab_piece.get(0)[i][j]);
+                    Piece p = new Piece(liste_tab_piece.get(0)[i][j],tab_pane[1]);
                     p.path.setFill(liste_tab_piece.get(0)[i][j].path.getFill());
                     p.path.setStroke(liste_tab_piece.get(0)[i][j].path.getStroke());
                     p.path.setLayoutX(rand_coord_X(tab_stage[1],p));
                     p.path.setLayoutY(rand_coord_Y(tab_stage[1],p));
                     tab_piece_bordure[i][j] = p;
+                    //affichage_test(5, tab_piece_bordure);
+                    //consumer.accept("liistte tab cette fois");
+                    //affichage_test(5,liste_tab_piece.get(0));
                 }
 
             }
@@ -413,19 +453,19 @@ public class Controller_Fenetre  {
 
     // renvoie une nouvelle valeur x pour une piece dans une scene
     private double rand_coord_X(Stage stage, Piece p) {
-        consumer.accept("scene width : "+ stage.getWidth());
+       // consumer.accept("scene width : "+ stage.getWidth());
         //double x = randNumber(0.0, stage.getWidth()/2 - p.longueur);
         double x = randNumber(0.0- p.getMinX(), stage.getWidth()/2 - p.getMinX());
-        consumer.accept(" coord x :"+x);
+        //consumer.accept(" coord x :"+x);
         return x;
     }
 
     // renvoie une nouvelle valeur y pour une piece dans une scene
     private double rand_coord_Y(Stage stage, Piece p) {
-        consumer.accept("scene heigth : "+ stage.getHeight());
+        //consumer.accept("scene heigth : "+ stage.getHeight());
         //double y = randNumber(20, stage.getHeight()/2);
         double y = randNumber(stage.getHeight()*0.05 - p.getMinY() ,stage.getHeight()*0.7 - p.getMinY());
-        consumer.accept(" coord x :" + y);
+        //consumer.accept(" coord x :" + y);
         return y;
     }
 
@@ -453,6 +493,7 @@ public class Controller_Fenetre  {
                 consumer.accept("y1:" + y1 + " ; y2:" + y2);*/
                 piece.path.setLayoutX(rand_choice(x1, x2));
                 piece.path.setLayoutY(rand_choice(y1, y2));
+                consumer.accept("rand layout :"+piece.path.getLayoutX() +"; "+piece.path.getLayoutY());
 
             }
         }
@@ -482,7 +523,7 @@ public class Controller_Fenetre  {
 
     }
 
-    private void affichage_fin() {
+    public void affichage_fin() {
         pane_assemblage.getChildren().clear();
         box_contour.setBackground(new Background(new BackgroundImage(new Image("file:" + DEFAULT_FILE),BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.CENTER,new BackgroundSize(box_contour.getMaxWidth(),box_contour.getMaxHeight(),false,false,false,false))));
     }
@@ -503,44 +544,246 @@ public class Controller_Fenetre  {
         Piece[][] tab = plateau.getTab();
         for (int i = 0; i < tab.length ; i++) {
             for (int j = 0; j <tab[0].length ; j++) {
-                ajout_event_piece(i,j);
+                ajout_event_piece(plateau.getTab()[i][j]);
+            }
+        }
+    }
+
+    private void add_evenement_tab_piece(Piece[][] tab) {
+        for (int i = 0; i < tab.length ; i++) {
+            for (int j = 0; j <tab[0].length ; j++) {
+                ajout_event_piece(tab[i][j]);
             }
         }
     }
     // informe la piece du panneau qui l'a contient // sert pour la priorite visuel a l'affichage
-    private void ajout_event_piece(int i, int j) {
-        plateau.getTab()[i][j].path.setOnMouseEntered(new EventHandler<MouseEvent>() {
+    private void ajout_event_piece(Piece p) {
+        if (p == null) {
+            return ;
+        }
+        p.path.setOnMousePressed((new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                try {
-                    plateau.getTab()[i][j].setPanneau(pane_assemblage);
-                } catch (Exception e) {
+                consumer.accept("dans event pressed");
+                //gestion event dans le panneau courant de la piece
+                double x = p.path.getLayoutX();
+                double y = p.path.getLayoutY();
+                consumer.accept("lay x:" + x + " lay y:" + y);
+                p.panneau.getChildren().remove(p.path);
+                p.panneau.getChildren().add(p.path);
+                oldX = mouseEvent.getX();
+                oldY = mouseEvent.getY();
+                //gestion du Drag and Drop
+                if (p.panneau == tab_pane[1] || p.panneau == tab_pane[2] || p.panneau == tab_pane[3] || p.panneau == tab_pane[4]) {
+                    consumer.accept("piece d'une zone de trie");
+                    p.piece_ombre = new Piece(p, tab_pane[0]);
+                    p.piece_ombre.path.setStroke(p.path.getStroke());
+                    p.piece_ombre.path.setFill(p.path.getFill());
+                    p.piece_ombre.path.setLayoutX(p.path.getLayoutX() + p.panneau.getWidth() * 2);
+                    p.piece_ombre.path.setLayoutY(p.path.getLayoutY());
+                    tab_pane[0].getChildren().add(p.piece_ombre.path);
+                }else{
+                    consumer.accept("piece du panneau d'assemblage");
+                }
+            }
+        }));
+        p.path.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                if (p.isMovable) { // drag seulement si la piece est deplacable
+                    double newX = mouseEvent.getX();
+                    double newY = mouseEvent.getY();
+                    p.path.setLayoutX(p.path.getLayoutX() + newX - oldX);
+                    p.path.setLayoutY(p.path.getLayoutY() + newY - oldY);
+                    if (p.piece_ombre != null) {
+                        p.piece_ombre.path.setLayoutX((p.piece_ombre.path.getLayoutX() + newX - oldX));
+                        p.piece_ombre.path.setLayoutY((p.piece_ombre.path.getLayoutY() + newY - oldY));
+                    }
                 }
             }
         });
-
-        plateau.getTab()[i][j].path.setOnMouseReleased(new EventHandler<MouseEvent>() {
+        p.path.setOnMouseReleased(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                if (plateau.getTab()[i][j].path.getLayoutX() <= MARGE_ASSEMBLAGE && plateau.getTab()[i][j].path.getLayoutX() >= -MARGE_ASSEMBLAGE ) {
-                    if (plateau.getTab()[i][j].path.getLayoutY() <= MARGE_ASSEMBLAGE && plateau.getTab()[i][j].path.getLayoutY() >= -MARGE_ASSEMBLAGE) {
-                        // si placement approximativement convenable alors placement de la piece dans son espace d'assemblage
-                        plateau.getTab()[i][j].path.setLayoutX(0.0);
-                        plateau.getTab()[i][j].path.setLayoutY(0.0);
-                        plateau.getTab()[i][j].setMovable(false);
-                        if (isFinished()) { // si le puzzle est finit
-                            // alors fin de jeu
-                            consumer.accept("GAME IS FINISHED");
-                            affichage_fin();
-                            trier.setDisable(true);
+                consumer.accept("dans event released");
+                if (p.panneau == tab_pane[0] || p.panneau == pane_assemblage) { // null si normale
+                    consumer.accept("piece du panneau principal");
+                    consumer.accept("lay x:"+p.path.getLayoutX()+" lay y:"+p.path.getLayoutY());
+                    if (p.path.getLayoutX() <= MARGE_ASSEMBLAGE && p.path.getLayoutX() >= -MARGE_ASSEMBLAGE) {
+                        if (p.path.getLayoutY() <= MARGE_ASSEMBLAGE && p.path.getLayoutY() >= -MARGE_ASSEMBLAGE) {
+                            // si placement approximativement convenable alors placement de la piece dans son espace d'assemblage
+                            p.path.setLayoutX(0.0);
+                            p.path.setLayoutY(0.0);
+                            p.setMovable(false);
+                            gestion_fin_jeu();
                         }
+                    }
+                }else if(p.panneau == tab_pane[1] || p.panneau == tab_pane[2] || p.panneau == tab_pane[3] || p.panneau == tab_pane[4]){ // gestion du drag and drop
+                    //consumer.accept("getLayoutSceneX" + mouseEvent.getSceneX());
+                    consumer.accept("piece d'une zonne de trie");
+                    if (mouseEvent.getSceneX() < 0.0) { // si la piece est relaché a gauche de la zone de trie
+                        //alors c'est qu'on a relache la piece dans le panneau principal 'PAS FORCEMENT'
+                        // alors on pop la piece de son pane
+                        //set_piece_on_pane(p);
+                        for (int i = 0; i < liste_tab_piece.get(0).length; i++) {
+                            for (int j = 0; j < liste_tab_piece.get(0)[0].length ; j++) {
+                                if (liste_tab_piece.get(0)[i][j].path.getFill() == p.path.getFill()) {
+                                    // TODO : gerer le decale=age entre ombre et piece principale
+                                    tab_pane[0].getChildren().add(liste_tab_piece.get(0)[i][j].path);
+                                    tab_pane[0].getChildren().remove(p.piece_ombre.path);
+                                    p.panneau.getChildren().remove(p.path);
+                                }
+                            }
+                        }
+                    }else{
+                        tab_pane[0].getChildren().remove(p.piece_ombre.path);
+                        p.piece_ombre = null;
                     }
                 }
             }
         });
     }
+// buggé
+    private void set_piece_on_pane(Piece piece) {
+        int indice = 0; // ne peut pas etre 0 apres traitement
+        //on recupere l'indice du panneau de la piece
+        for (int i = 0; i < tab_pane.length; i++) {
+            if (tab_pane[i] == piece.panneau) {
+                indice = i;
+            }
+        }
+        consumer.accept("indice du panneau de la piece =" + indice);
+        int num_ligne = 0;
+        int num_colonne = 0;
+        // on recupere la case de la piece dans son tableau
+        for (int i = 0; i < liste_tab_piece.get(indice).length; i++) {
+            for (int j = 0; j < liste_tab_piece.get(indice)[0].length; j++) {
+                if (liste_tab_piece.get(indice)[i][j] == piece) {
+                    num_ligne = i;
+                    num_colonne = j;
+                }
+            }
+        }
+        consumer.accept("num_ligne : " + num_ligne + "num_colonne :" + num_colonne);
+        // on remet la piece correspondante dans le panneau d'assemblage
+        //on place la piece du panneau d'assemblage a celle de la piece ombre que l'on a deplace depuis la zone de trie
+        double x_ombre = piece.piece_ombre.path.getLayoutX();
+        double y_ombre = piece.piece_ombre.path.getLayoutY();
+        consumer.accept("layout x :"+tab_piece[num_ligne][num_colonne].getLayoutX()+" lah=yout y : "+tab_piece[num_ligne][num_colonne].getLayoutY());
+        consumer.accept("liste tab piece 0    : layout x :"+liste_tab_piece.get(0)[num_ligne][num_colonne].getLayoutX()+" lah=yout y : "+liste_tab_piece.get(0)[num_ligne][num_colonne].getLayoutY() +menuBar.getHeight()+TAILLE_HAUTEUR_TITRE_STAGE);
+        //plateau.getTab()[num_ligne][num_colonne].path.setTranslateX((x_ombre ) - plateau.getTab()[num_ligne][num_colonne].path.getLayoutX());
+        //plateau.getTab()[num_ligne][num_colonne].path.setTranslateY(y_ombre - plateau.getTab()[num_ligne][num_colonne].path.getLayoutY());
+        //tab_piece[num_ligne][num_colonne].path.setTranslateX((x_ombre ) - tab_piece[num_ligne][num_colonne].path.getLayoutX());
+        //tab_piece[num_ligne][num_colonne].path.setTranslateY(y_ombre - tab_piece[num_ligne][num_colonne].path.getLayoutY());
+        liste_tab_piece.get(0)[num_ligne][num_colonne].path.setTranslateX(piece.piece_ombre.getLayoutX() + tab_pane[indice].getWidth()*2 - box_contour.getLayoutX() - liste_tab_piece.get(0)[num_ligne][num_colonne].longueur*num_colonne);
+        liste_tab_piece.get(0)[num_ligne][num_colonne].path.setTranslateY(piece.piece_ombre.getLayoutX() - box_contour.getLayoutY() - liste_tab_piece.get(0)[num_ligne][num_colonne].hauteur*num_ligne);
+        tab_pane[0].getChildren().remove(piece.piece_ombre.path);
+        tab_piece[num_ligne][num_colonne].panneau = tab_pane[0];
+        liste_tab_piece.get(0)[num_ligne][num_colonne] = tab_piece[num_ligne][num_colonne];
+        tab_pane[0].getChildren().add(tab_piece[num_ligne][num_colonne].path);
+    }
 
-    private boolean isFinished() {
+
+
+
+
+
+
+
+
+
+
+
+
+    // buggé
+    private void delete_piece_from_pane(Piece piece) {
+        int indice = -1;
+        // on recupere l'indice du panneau de la piece
+        for (int i = 1; i < tab_pane.length; i++) {//on ne touche aux pieces de basesœ
+            if (tab_pane[i] == piece.panneau) {
+                indice = i;
+            }
+        }
+        for (int i = 0; i < liste_tab_piece.get(indice).length; i++) {
+            for (int j = 0; j < liste_tab_piece.get(indice)[0].length; j++) {
+                if (liste_tab_piece.get(indice)[i][j] == piece) {
+                    set_piece_ref(indice,i,j,liste_tab_piece.get(indice)[i][j].path.getLayoutX(),liste_tab_piece.get(indice)[i][j].path.getLayoutY());
+                   // consumer.accept("voy a remove piece1");
+                    tab_pane[indice].getChildren().remove(liste_tab_piece.get(indice)[i][j].path);
+                    //consumer.accept("voy a set null piece1");
+                    liste_tab_piece.get(indice)[i][j].path = null;
+                    liste_tab_piece.get(indice)[i][j] = null;
+                    //consumer.accept("c bon frere");
+                }
+            }
+        }
+    }
+
+    private void set_piece_ref(int indice,int i, int j,double x, double y) {
+        double newX = x + (2 * tab_stage[indice].getWidth()) ;//+ (2 * tab_stage[indice].getWidth()) - box_contour.getLayoutX();
+        double newY = y ;//+plateau.getHauteur()/2;
+        /*if (liste_tab_piece.get(0)[i][j] == null) {
+            consumer.accept("la piece de la liste est nul");
+        }
+        if (liste_tab_piece.get(0)[i][j].path == null) {
+            consumer.accept("le path de la piece de la liste est nul");
+        }
+         */
+        //liste_tab_piece.get(0)[i][j].path;
+        liste_tab_piece.get(0)[i][j].path.setLayoutX(newX);
+        liste_tab_piece.get(0)[i][j].path.setLayoutY(newY);
+        // TODO: refaire les handler avec la forme : EventHandler boatHandler = new EventHandler<javafx.scene.input.MouseEvent>(){
+        //TODO: pour ensuite pouvoir les removes avec : canvas.removeEventHandler(MouseEvent.MOUSE_PRESSED, boatHandler);
+        //newEvent(liste_tab_piece.get(0)[i][j]);
+        consumer.accept("new path piece layout x:"+liste_tab_piece.get(0)[i][j].path.getLayoutX()+" y : "+liste_tab_piece.get(0)[i][j].path.getLayoutY());
+        tab_pane[0].getChildren().add(liste_tab_piece.get(0)[i][j].path);
+    }
+/*
+    private void newEvent(Piece p) {
+        p.path.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                p.panneau.getChildren().remove(p.path);
+                p.panneau.getChildren().add(p.path);
+                oldX = mouseEvent.getX();
+                oldY = mouseEvent.getY();
+            }
+        });
+        p.path.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                if (p.isMovable) { // drag seulement si la piece est deplacable
+                    double newX = mouseEvent.getX();
+                    double newY = mouseEvent.getY();
+                    p.path.setLayoutX(p.path.getLayoutX() + newX - oldX);
+                    p.path.setLayoutY(p.path.getLayoutY() + newY - oldY);
+                }
+            }
+        });
+        p.path.setOnMouseReleased(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                if (p.path.getLayoutX() <= MARGE_ASSEMBLAGE && p.path.getLayoutX() >= -MARGE_ASSEMBLAGE) {
+                    if (p.path.getLayoutY() <= MARGE_ASSEMBLAGE && p.path.getLayoutY() >= -MARGE_ASSEMBLAGE) {
+                        // si placement approximativement convenable alors placement de la piece dans son espace d'assemblage
+                        p.path.setLayoutX(0.0);
+                        p.path.setLayoutY(0.0);
+                        p.setMovable(false);
+                        gestion_fin_jeu();
+                    }
+                }
+            }
+        });
+    }*/
+    public void gestion_fin_jeu() {
+        if (isFinished()) {
+            Main.consumer.accept("GAME IS FINISHED");
+            affichage_fin();
+            trier.setDisable(true);
+        }
+    }
+
+    private static boolean isFinished() {
         boolean res = true;
         for (Piece[] pieces : plateau.getTab()) {
             for (Piece piece : pieces) {
@@ -570,7 +813,8 @@ public class Controller_Fenetre  {
                 calcul_longueur_piece(),
                 calcul_hauteur_piece(),
                 image,
-                niveau
+                niveau,
+                pane_assemblage
         );
     }
 
@@ -600,20 +844,13 @@ public class Controller_Fenetre  {
     // met notre plateau dans l'affichage
     private void set_plateau_on_pane(Plateau plateau) {
         //positionnement_plateau_assemblage();
-        //consumer.accept("taille du plateau : "+plateau.getTab().length+" x "+plateau.getTab()[0].length);
         for (int i = 0; i < plateau.getTab().length; i++) {
             for (int j = 0; j < plateau.getTab()[0].length; j++) {
-                //pane_assemblage.getChildren().add(plateau.getTab()[i][j].forme);
                 pane_assemblage.getChildren().add(plateau.getTab()[i][j].path);
             }
         }
     }
 
-    /*private void positionnement_plateau_assemblage() {
-        pane_assemblage.getTransforms().add(new Translate(25,25));
-    }
-
-     */
     @FXML
     private void fill_new() throws IOException {
         System.out.println("Dans fill_new");

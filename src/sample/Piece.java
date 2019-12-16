@@ -24,6 +24,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
+import static sample.Main.plateau;
+import static sample.Main.tab_pane;
+
 /**
  * il
  * nous
@@ -80,9 +83,9 @@ public class Piece extends Shape {
     private double oldX;
     private double oldY;
 
-    private Pane panneau;
-    private boolean isMovable = DEFAULT_ISMOVABLE; // nous dit si la piece peut etre bougée ou non
-
+    protected Pane panneau;
+    protected boolean isMovable = DEFAULT_ISMOVABLE; // nous dit si la piece peut etre bougée ou non
+    protected Piece piece_ombre =null;
 
     protected double translationX;
     protected double translationY;
@@ -106,7 +109,19 @@ public class Piece extends Shape {
         //forme.layoutXProperty().bindBidirectional(path.layoutXProperty());
         //forme.layoutYProperty().bindBidirectional(path.layoutYProperty());
     }
-
+    public Piece(Piece p, Pane pane) {
+        this.tab_bordure = new Forme_Bordure[NOMBRE_COTE];
+        path = new Path();
+        liste_cercle_controle = new ArrayList<Circle>();
+        liste_cercle = new ArrayList<Circle>();
+        liste_courbe = new ArrayList<CubicCurveTo>();
+        liste_shape = new ArrayList<PathElement>();
+        this.panneau = pane;
+        fill_tab_bordure(p.tab_bordure);
+        copie_listes_cercle(p);
+        create_shapes();
+        //Ajouter_evenement();
+    }
     // renvoie la coordonnee x du point de la piece situé le plus a gauche
     protected double getMinX() {
         double min = tab_bordure[0].liste_cercle.get(0).getLayoutX();
@@ -216,7 +231,27 @@ public class Piece extends Shape {
         fill_tab_bordure(liste_bordure, hauteur, longueur);
         fill_liste_cercle();
         create_shapes();
-        Ajouter_evenement();
+        //Ajouter_evenement();
+    }
+
+    //constructeur qui permet de placer la piece dans l'espace
+    public Piece(ArrayList<Forme_Bordure> liste_bordure, double x, double y, double hauteur, double longueur, int niveau, Pane pane) {
+        posX = x;
+        posY = y;
+        this.hauteur = hauteur;
+        this.longueur = longueur;
+        path = new Path();
+        tab_bordure = new Forme_Bordure[NOMBRE_COTE];
+        liste_cercle_controle = new ArrayList<Circle>();
+        liste_cercle = new ArrayList<Circle>();
+        liste_courbe = new ArrayList<CubicCurveTo>();
+        liste_shape = new ArrayList<PathElement>();
+        this.niveau = niveau;
+        this.panneau = pane;
+        fill_tab_bordure(liste_bordure, hauteur, longueur);
+        fill_liste_cercle();
+        create_shapes();
+        //Ajouter_evenement();
     }
 
     //prend en parametre une liste de Forme_Bordure précisant les contraintes de
@@ -663,13 +698,24 @@ public class Piece extends Shape {
 
 
     public void Ajouter_evenement() {
+        Piece piece1 = this;
         path.setOnMousePressed((new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
+                //gestion event dans le panneau courant de la piece
                 panneau.getChildren().remove(path);
                 panneau.getChildren().add(path);
                 oldX = mouseEvent.getX();
                 oldY = mouseEvent.getY();
+                //gestion du Drag and Drop
+                if (panneau == tab_pane[1] || panneau == tab_pane[2] || panneau == tab_pane[3] || panneau == tab_pane[4]) {
+                    piece_ombre = new Piece(piece1, tab_pane[0] );
+                    piece_ombre.path.setStroke(piece1.path.getStroke());
+                    piece_ombre.path.setFill(piece1.path.getFill());
+                    piece_ombre.path.setLayoutX(piece1.path.getLayoutX() + piece1.panneau.getWidth()*2);
+                    piece_ombre.path.setLayoutY(piece1.path.getLayoutY() );
+                    tab_pane[0].getChildren().add(piece_ombre.path);
+                }
             }
         }));
         path.setOnMouseDragged(new EventHandler<MouseEvent>() {
@@ -680,6 +726,8 @@ public class Piece extends Shape {
                     double newY = mouseEvent.getY();
                     path.setLayoutX(path.getLayoutX() + newX - oldX);
                     path.setLayoutY(path.getLayoutY() + newY - oldY);
+                    piece_ombre.path.setLayoutX((piece_ombre.path.getLayoutX() + newX - oldX));
+                    piece_ombre.path.setLayoutY((piece_ombre.path.getLayoutY() + newY - oldY));
                 }
 
             }
