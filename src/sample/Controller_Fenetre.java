@@ -625,13 +625,34 @@ public class Controller_Fenetre  {
                         //alors c'est qu'on a relache la piece dans le panneau principal 'PAS FORCEMENT'
                         // alors on pop la piece de son pane
                         //set_piece_on_pane(p);
-                        for (int i = 0; i < liste_tab_piece.get(0).length; i++) {
-                            for (int j = 0; j < liste_tab_piece.get(0)[0].length ; j++) {
-                                if (liste_tab_piece.get(0)[i][j].path.getFill() == p.path.getFill()) {
+                        for (int i = 0; i < plateau.tab.length; i++) {
+                            for (int j = 0; j < plateau.tab[0].length ; j++) {
+                                if (plateau.tab[i][j].path.getFill() == p.path.getFill()) {
                                     // TODO : gerer le decale=age entre ombre et piece principale
-                                    tab_pane[0].getChildren().add(liste_tab_piece.get(0)[i][j].path);
+                                    int indice = 0;
+                                    for (int k=0; k< tab_pane.length; k++ ) {
+                                        if (tab_pane[k] == p.panneau) {
+                                            indice = k;
+                                        }
+                                    }
+                                    consumer.accept("scene X + stage x " + (mouseEvent.getSceneX() + tab_stage[indice].getWidth() * 2));
+                                    consumer.accept("ombre x " + (p.piece_ombre.path.getLayoutX() + tab_stage[indice].getWidth() * 2));
+                                    consumer.accept("piece  x " + (p.path.getLayoutX() + tab_stage[indice].getWidth() * 2));
+                                    consumer.accept("layout x "+plateau.tab[i][j].path.getLayoutX());
+                                    consumer.accept("layout y "+plateau.tab[i][j].path.getLayoutY());
+                                    plateau.tab[i][j].path.setLayoutX(p.path.getLayoutX()  + tab_stage[indice].getWidth()*2 );
+                                    plateau.tab[i][j].path.setLayoutY(p.path.getLayoutY() - box_contour.getLayoutY() +menuBar.getHeight()*2+1+TAILLE_HAUTEUR_TITRE_STAGE );
+                                    consumer.accept("scene y "+mouseEvent.getSceneY());
+                                    consumer.accept("min x "+plateau.tab[i][j].getMinX());
+                                    consumer.accept("min y "+plateau.tab[i][j].getMinY());
+                                    consumer.accept("layout x "+plateau.tab[i][j].path.getLayoutX());
+                                    consumer.accept("layout y "+plateau.tab[i][j].path.getLayoutY());
+
+                                    pane_assemblage.getChildren().add(plateau.tab[i][j].path);
+                                    tab_pane[0].getChildren().add(plateau.tab[i][j].path);
                                     tab_pane[0].getChildren().remove(p.piece_ombre.path);
                                     p.panneau.getChildren().remove(p.path);
+                                    p.piece_ombre = null;
                                 }
                             }
                         }

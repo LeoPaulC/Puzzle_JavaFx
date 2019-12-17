@@ -695,8 +695,6 @@ public class Piece extends Shape {
         }
     }
 
-
-
     public void Ajouter_evenement() {
         Piece piece1 = this;
         path.setOnMousePressed((new EventHandler<MouseEvent>() {
@@ -915,6 +913,23 @@ public class Piece extends Shape {
     public void setPosY(double posY) {
         this.posY = posY;
     }
+
+    public double getOldX() {
+        return oldX;
+    }
+
+    public void setOldX(double oldX) {
+        this.oldX = oldX;
+    }
+
+    public double getOldY() {
+        return oldY;
+    }
+
+    public void setOldY(double oldY) {
+        this.oldY = oldY;
+    }
+
 }
 /*private void create_cubiCurveTo() {
         init_Liste_Courbe();
