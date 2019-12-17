@@ -29,14 +29,8 @@ public class Plateau {
     private int niveau = DEFAULT_NIVEAU;
 
     public Plateau(Plateau p) {// pour le plateau transparent
-        //this.longueur = p.longueur;
-        //this.hauteur = p.hauteur;
-        //this.tab = p.tab;
-        //Main.consumer.accept("plateau.getTab().length :"+p.getTab().length+"plateau.getTab()[0].length "+p.getTab()[0].length);
         this.tab = new Piece[p.getTab().length][p.getTab()[0].length];
         copie_piece_plateau(p);
-        //copie_shape(p);
-        //set_default_color();
     }
 
     private void copie_piece_plateau(Plateau plateau) {
@@ -145,7 +139,6 @@ public class Plateau {
     }
 
     private void gestion_Image(Piece p) {
-       //p.forme.setFill(new ImagePattern(this.image,0,0,this.longueur*nb_colonne,this.hauteur*nb_ligne,false));
        p.path.setFill(new ImagePattern(this.image,0,0,this.longueur*nb_colonne,this.hauteur*nb_ligne,false));
     }
 

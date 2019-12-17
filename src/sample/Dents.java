@@ -332,23 +332,17 @@ public class Dents extends Forme_Bordure {
     private void gestion_deformation_locale() {
         int signe = rand_signe();
         this.setAngle1(signe * calcul_deformation_locale());
-        /*if (i == 1) {
-            this.setAngle1(signe * calcul_deformation_locale());
-        } else this.setAngle2(signe * calcul_deformation_locale());*/
     }
 
     private double calcul_deformation_locale() {
         double angle = 0;
         double random = new Random().nextDouble();
-        //angle = random *  ANGLE_MIN + (ANGLE_MAX) ;
         angle  = (Math.random()*((ANGLE_MAX-ANGLE_MIN)+1))+ANGLE_MIN;
         return angle;
     }
     private void gestion_decalage() {
         int signe = rand_signe(); // signe == 1 || signe  == -1
         this.decalage = (signe * (calcul_decalage() ));//- marge_decalage));
-        //Main.consumer.accept("Marge de decalage : "+ marge_decalage);
-        //Main.consumer.accept("valeur du coef de decalage : "+ this.decalage);
     }
 
     // calcul la distance de decalage d'un appendice
@@ -460,8 +454,6 @@ public class Dents extends Forme_Bordure {
             this.liste_cercle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + (TAILLE_COTE_PIECE_LONGUEUR * tab_coef_longeur[i - 1]));
             this.liste_cercle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - min_taille * (tab_coef_hauteur[i - 1] - this.MARGE_HAUTEUR));
 
-            //this.liste_cercle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + (TAILLE_COTE_PIECE_LONGUEUR/2) + tab_coef_longueur_appendice[i - 1]* getLongueur_appendice() );
-            //this.liste_cercle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - getHauteur_appendice() * tab_coef_longueur_appendice[i - 1] - this.MARGE_HAUTEUR));
         }
         //coloration des cercles pour nos tests de visualisations
         ajout_couleur_cercle();
@@ -469,14 +461,6 @@ public class Dents extends Forme_Bordure {
 
     // coloris les cercles de lacourbe ---> utile pour nos tests
     private void ajout_couleur_cercle() {
-        /* this.liste_cercle.get(0).setFill(Color.GOLD);
-        this.liste_cercle.get(1).setFill(Color.ORANGE);
-        this.liste_cercle.get(2).setFill(Color.RED);
-        this.liste_cercle.get(3).setFill(Color.PINK);
-        this.liste_cercle.get(4).setFill(Color.PURPLE);
-        this.liste_cercle.get(5).setFill(Color.DARKBLUE);
-        this.liste_cercle.get(6).setFill(Color.GOLD);
-        */
         this.liste_cercle.get(0).setFill(Color.RED);
         this.liste_cercle.get(1).setFill(Color.RED);
         this.liste_cercle.get(2).setFill(Color.RED);
@@ -492,7 +476,6 @@ public class Dents extends Forme_Bordure {
             this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + (TAILLE_COTE_PIECE_LONGUEUR * tab_coef_longeur_controle[i]));
             gestion_x_controle(i);
             if (i == 0 || i == this.liste_cercle_controle.size() - 1) { //premier et dernier point de controle
-                //Main.consumer.accept("dans le if de marge hauteur controle premier et derniner");
                 this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - min_taille * (tab_coef_hauteur_controle[i] - this.MARGE_HAUTEUR_CONTROLE));
             } else {
                 this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - min_taille * (tab_coef_hauteur_controle[i]- this.MARGE_HAUTEUR));
@@ -532,52 +515,12 @@ public class Dents extends Forme_Bordure {
         System.out.println("Y : " + controle2.getLayoutY());
     }
 
-    public void Place_Point_Symetriquement(Circle controle1, Circle point_fixe, Circle controle2, int i) { // permet de placer controle 2 par rapport a point_fixe et de controle 1
-
-        double xC1 = controle1.getLayoutX();
-        double xRef = point_fixe.getLayoutX();
-        double yC1 = controle1.getLayoutY();
-        double yRef = point_fixe.getLayoutY();
-
-        double xC2 = controle2.getLayoutX();
-        double yC2 = controle2.getLayoutY();
-/*
-        double diffX = ( xC1 - xRef) ;
-        double diffY = ( yC1 - yRef) ;
-        double somme1 = Math.sqrt((Math.pow(diffX,2) + Math.pow(diffY,2))) ;
-        diffX/= somme1 ;
-        diffY/= somme1 ;
-        double diffX2 = (xC2 - xRef) ;
-        double diffY2 = (yC2 - yRef) ;
-        double somme2 = Math.sqrt((Math.pow(diffX2,2) + Math.pow(diffY2,2))) ;
-        diffX *= somme2 ;
-        diffY *= somme2 ;
-        controle2.setLayoutX(point_fixe.getLayoutX() + diffX);
-        controle2.setLayoutY(point_fixe.getLayoutY() + diffY);
-        liste_cercle_controle.get(i).setLayoutX(point_fixe.getLayoutX() + diffX);
-        liste_cercle_controle.get(i).setLayoutY(point_fixe.getLayoutX() + diffY);
-
- */
-        double abx = xRef - xC1;
-        double aby = yRef - yC1;
-        double dprim = Math.sqrt(Math.pow(xRef - xC2, 2) + Math.pow(yRef - yC2, 2));
-        abx /= dprim;
-        aby /= dprim;
-        double d = Math.sqrt(Math.pow(xRef - xC1, 2) + Math.pow(yRef - yC1, 2));
-        abx *= d;
-        aby *= d;
-        controle2.setLayoutX(xRef + abx);
-        controle2.setLayoutY(yRef + aby);
-    }
 
     public Dents(Dents d) {
         super(est_plat);
-        //this.liste_cercle = d.liste_cercle;
-        //this.liste_cercle_controle = d.getListe_cercle_controle();
         //affichage_coord_liste(d.getListe_cercle());
         copie_Coordonnee(d.liste_cercle, d.liste_cercle_controle);
         //affichage_coord_liste(d.getListe_cercle());
-        //cercle_Vers_Courbe();
 
     }
 
@@ -586,14 +529,6 @@ public class Dents extends Forme_Bordure {
         inversion_Hauteur(c.liste_cercle, c.liste_cercle_controle);
         //cercle_Vers_Courbe();
 
-    }
-
-    private void affichage_coord_liste(ArrayList<Circle> liste) {
-        int cpt = 0;
-        System.out.println("voy a affichar les coord de position morray");
-        for (Circle circle : liste) {
-            System.out.println("indice : " + cpt++ + " coord X :" + circle.getCenterX() + " coordY : " + circle.getCenterY());
-        }
     }
 
     // on inverse la hauteur de chaque point par rapport a
@@ -619,27 +554,6 @@ public class Dents extends Forme_Bordure {
     }
 
 
-    //cree des courbes a partir des 2 listes de cercles
-    private void cercle_Vers_Courbe() {
-        for (int i = 0; i < this.liste_cubicCurveTo.size(); i++) {
-
-            this.liste_cubicCurveTo.get(i).setX(this.liste_cercle.get(i).getLayoutX());
-            this.liste_cubicCurveTo.get(i).setY(this.liste_cercle.get(i).getLayoutY());
-
-            this.liste_cubicCurveTo.get(i).controlX1Property().bind(this.liste_cercle_controle.get(2 * i + 1).layoutXProperty());
-            this.liste_cubicCurveTo.get(i).controlY1Property().bind(this.liste_cercle_controle.get(2 * i + 1).layoutYProperty());
-
-            this.liste_cubicCurveTo.get(i).controlX2Property().bind(this.liste_cercle_controle.get(2 * i).layoutXProperty());
-            this.liste_cubicCurveTo.get(i).controlY2Property().bind(this.liste_cercle_controle.get(2 * i).layoutYProperty());
-
-            this.liste_Moveto.get(i).setX(this.liste_cercle.get(i + 1).getLayoutX());
-            this.liste_Moveto.get(i).setY(this.liste_cercle.get(i + 1).getLayoutY());
-
-            notre_path.getElements().add(this.liste_Moveto.get(i));
-            notre_path.getElements().add(this.liste_cubicCurveTo.get(i));
-        }
-    }
-
     // affecte aux cercles des listes de cercles de this les memes coordonnees que les
     //cercles des listes passées en parametre
     private void copie_Coordonnee(ArrayList<Circle> liste_cercle, ArrayList<Circle> liste_controleurs) {
@@ -652,7 +566,6 @@ public class Dents extends Forme_Bordure {
             this.liste_cercle_controle.get(i).setLayoutX(liste_controleurs.get(i).getLayoutX());
         }
     }
-
 
     public int getNiveau() {
         return niveau;
