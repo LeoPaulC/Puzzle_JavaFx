@@ -25,16 +25,15 @@ public class Dents extends Forme_Bordure {
     // ceux qui snt de bas en hauteur 0.0 // evite le croisement des lignes entre divers cotee contigu d'une piece
 
     // matrices de positionnement des cercles
-    private static double tab_coef_longeur[] = {0.4, 0.36, 0.50, 0.64, 0.60};
+    private static double tab_coef_longeur[] = {0.4, 0.36, 0.50, 0.64, 0.60}; // cercle de l'appendice // 7-2 = 5
     private static double tab_coef_hauteur[] = {0.08, 0.26, 0.40, 0.26, 0.08};
-    private static double tab_coef_longeur_controle[] = {0.25, 0.34, 0.43, 0.36, 0.36, 0.42, 0.58, 0.64, 0.64, 0.57, 0.66, 0.75};
+    private static double tab_coef_longeur_controle[] = {0.25, 0.34, 0.43, 0.36, 0.36, 0.42, 0.58, 0.64, 0.64, 0.57, 0.66, 0.75};// tout les cercles de controles //12
     private static double tab_coef_hauteur_controle[] = {0.0, 0.0, 0.12, 0.14, 0.34, 0.40, 0.40, 0.34, 0.16, 0.12, 0.0, 0.0};
 
-    private static double tab_coef_longueur_appendice[] = {-0.1, -0.14, 0.0, 0.14, 0.1};
-    private static double tab_coef_hauteur_appendice[] = {0.08, 0.26, 0.40, 0.26, 0.08};
-    private static double tab_coef_longueur_controle_appendice[] = {-0.3, -0.16, -0.07, -0.14, -0.14, -0.08, 0.08, 0.14, 0.14, 0.07, 0.16, 0.3};
-    private static double tab_coef_hauteur_controle_appendice[] =  {0.0, 0.0, 0.12, 0.14, 0.34, 0.40, 0.40, 0.34, 0.16, 0.12, 0.0, 0.0};
-    //matrice de positionnement appendice
+    private double tab_coef_longueur_approx[];
+    private double tab_coef_hauteur_approx[];
+    private double tab_coef_longueur_controle_approx[];
+    private double tab_coef_hauteur_controle_approx[];
 
     Shape c;
     Random rand;
@@ -53,11 +52,7 @@ public class Dents extends Forme_Bordure {
     private boolean est_deformable_localement = false;
     private double min_taille ; //= Math.min(TAILLE_COTE_PIECE_HAUTEUR, TAILLE_COTE_PIECE_LONGUEUR);
     private boolean est_dernier = false; // sert pour deformation de cadre si tte fois on est sur la derniere ligne du plateau
-    /*public Dents(ArrayList<Circle> liste_c , ArrayList<Circle> list_c_c, int hauteur, int largeur) {
-        super(est_plat);
-        setTailleCotePieceHauteur(hauteur);
-        setTailleCotePieceLongueur(longueur);
-    }*/
+    private boolean est_approximable = false; // sert pour la derniere deformation, l'approximation des points d'une bordure
 
     public Dents(int cote, double x, double y, double hauteur, double longueur, int niveau , double angle2) {
         super(est_plat);
@@ -71,9 +66,6 @@ public class Dents extends Forme_Bordure {
         setTailleCotePieceHauteur(hauteur);
         setTailleCotePieceLongueur(longueur);
         init_MinTaille(hauteur,longueur);
-        //Main.consumer.accept("init_MinTaille() : " + min_taille);
-        //setHauteur_appendice(Math.min(hauteur, longueur));
-        //setLongueur_appendice(Math.min(hauteur, longueur));
         gestion_niveau();
         gestion_dimension_bordure();
         fill_liste_cercle();
@@ -85,8 +77,6 @@ public class Dents extends Forme_Bordure {
     private void check_dernier() {
         if (this.cote == Piece.DROITE) {
             double c = this.posY / Plateau.getNb_ligne();
-            //Main.consumer.accept(" c ="+ c);
-            //Main.consumer.accept(" taille hauteur ="+ TAILLE_COTE_PIECE_HAUTEUR);
             if (c == TAILLE_COTE_PIECE_HAUTEUR) {
                 this.est_dernier = true;
             }
@@ -163,9 +153,6 @@ public class Dents extends Forme_Bordure {
         setTailleCotePieceHauteur(hauteur);
         setTailleCotePieceLongueur(longueur);
         init_MinTaille(hauteur,longueur);
-        //Main.consumer.accept("init_MinTaille() : " + min_taille);
-        //setHauteur_appendice(Math.min(hauteur, longueur));
-        //setLongueur_appendice(Math.min(hauteur, longueur));
         gestion_niveau();
         gestion_dimension_bordure();
         fill_liste_cercle();
@@ -186,9 +173,6 @@ public class Dents extends Forme_Bordure {
         setTailleCotePieceHauteur(hauteur);
         setTailleCotePieceLongueur(longueur);
         init_MinTaille(hauteur,longueur);
-        //Main.consumer.accept("init_MinTaille() : " + min_taille);
-        //setHauteur_appendice(Math.min(hauteur, longueur));
-        //setLongueur_appendice(Math.min(hauteur, longueur));
         gestion_niveau();
         gestion_dimension_bordure();
         fill_liste_cercle();
@@ -206,9 +190,6 @@ public class Dents extends Forme_Bordure {
         setTailleCotePieceHauteur(hauteur);
         setTailleCotePieceLongueur(longueur);
         init_MinTaille(hauteur,longueur);
-        //Main.consumer.accept("init_MinTaille() : " + min_taille);
-        //setHauteur_appendice(Math.min(hauteur, longueur));
-        //setLongueur_appendice(Math.min(hauteur, longueur));
         gestion_niveau();
         gestion_dimension_bordure();
         fill_liste_cercle();
@@ -317,16 +298,77 @@ public class Dents extends Forme_Bordure {
             this.MARGE_HAUTEUR = 0;
             this.MARGE_HAUTEUR_CONTROLE = 0;
             est_deformable_localement = true;
-
         } else if (this.niveau == 3) { // niveau 3 -> deportation de l'axe
             est_decalable = true;
             this.MARGE_HAUTEUR = 0;
             this.MARGE_HAUTEUR_CONTROLE = 0;
-        } else if (this.niveau == 4) { // niveau 4 -> approximation de la position des cercles
+        } else if (this.niveau == 4) { // niveau 4 -> 'approximation' de la position des cercles
+            this.MARGE_HAUTEUR = 0;
+            this.MARGE_HAUTEUR_CONTROLE = 0;
+            est_approximable = true;
+            this.tab_coef_longueur_approx = new double[tab_coef_longeur.length];
+            this.tab_coef_hauteur_approx = new double[tab_coef_hauteur.length];
+            this.tab_coef_hauteur_controle_approx = new double[tab_coef_hauteur_controle.length];
+            this.tab_coef_longueur_controle_approx = new double[tab_coef_longeur_controle.length];
+            // on recopie le premier et dernier cercle de controle car on ne fait pas de deformation dessus ni sur les cercle 0 et 6
+            fill_tab_ceof_approx();
+            fill_tab_coef_controle_approx();
+        }
+    }
+    //rempli le tab de longueur approx si on est dans le niveau 4 en fonction du tab de base et d'une approximation
+    private void fill_tab_ceof_approx() {
+        for (int i = 0; i < tab_coef_hauteur.length; i++) {
+            // approximation verticale
+            int signe = new Random().nextInt(2);
+            double res = rand_approx(); // coef d'approximation
+            if (signe == 0) { // alors approx positive
+                tab_coef_hauteur_approx[i] = tab_coef_hauteur[i] + res;
+            } else { // sinon négative
+                tab_coef_hauteur_approx[i] = tab_coef_hauteur[i] - res;
+            }
+            // approximation horizontale
+            signe = new Random().nextInt(2);
+            res = rand_approx(); // coef d'approximation
+            if (signe == 0) { // alors approx positive
+                tab_coef_longueur_approx[i] = tab_coef_longeur[i] + res;
+            } else { // sinon négative
+                tab_coef_longueur_approx[i] = tab_coef_longeur[i] - res;
+            }
+            Main.consumer.accept("valeur de base : h:"+tab_coef_hauteur[i] + " ; l:"+tab_coef_longeur[i]);
+            Main.consumer.accept("valeur d' approximation : h:"+tab_coef_hauteur_approx[i] + " ; l:"+tab_coef_longueur_approx[i]);
+        }
+        Main.consumer.accept("");
+        Main.consumer.accept("");
+    }
 
+    // remplie le tab des coef avec approx pour les cercles de controles en fonction du coef d'approx deja calculé pour les cercles de tab coef approx
+    private void fill_tab_coef_controle_approx() {
+        // pour l'appendice : 10 cc et 5 c (et non 12 et 7)
+        for (int i = 0; i < tab_coef_longeur_controle.length ; i++) {
+            if (i == 0) {
+                tab_coef_hauteur_controle_approx[0] =tab_coef_hauteur_controle[0] ;
+                tab_coef_longueur_controle_approx[0] =tab_coef_longeur_controle[0] ;
+            } else if (i == tab_coef_longeur_controle.length -1 ) {
+                tab_coef_hauteur_controle_approx[tab_coef_longeur_controle.length -1 ] =tab_coef_hauteur_controle[tab_coef_longeur_controle.length -1 ] ;
+                tab_coef_longueur_controle_approx[tab_coef_longeur_controle.length -1 ] =tab_coef_longeur_controle[tab_coef_longeur_controle.length -1 ] ;
+            }else{
+                // division par deux pcq chaque cercle de l'appendice a deuc cercle dde controles
+                double res = tab_coef_hauteur_approx[(i-1)/2] - tab_coef_hauteur[(i-1)/2]; // on recupere le coef d'ap
+                // approximation verticale
+                tab_coef_hauteur_controle_approx[i] = tab_coef_hauteur_controle[i] + res;
+                // approximation horizontale
+                res = tab_coef_longueur_approx[(i-1)/2] - tab_coef_longeur[(i-1)/2]; // on recupere le coef d'ap
+                tab_coef_longueur_controle_approx[i] = tab_coef_longeur_controle[i] + res;
+            }
+            Main.consumer.accept("vaeur de base : h:"+tab_coef_hauteur_controle[i] + " ; l:"+tab_coef_longeur_controle[i]);
+            Main.consumer.accept("vaeur d' approximation : h:"+tab_coef_hauteur_controle_approx[i] + " ; l:"+tab_coef_longueur_controle_approx[i]);
         }
     }
 
+    private double rand_approx() {
+        double res = new Random().nextDouble() * 0.05;
+        return res;
+    }
     // gere le calcul de l'angle 1  de deformation de cadre locale de la bordure
     // il n'y a que l'angle 1 a gere car on ne calcule que l'angle 1 de la bordure DROITE (angle du bas)
     private void gestion_deformation_locale() {
@@ -447,13 +489,15 @@ public class Dents extends Forme_Bordure {
         /**
          * Il nous reste a disposer les 5 points restant , à savoir du 1 à 5 .
          */
-        int a;
         for (int i = 1; i < Forme_Bordure.getNbCercleBordure() - 1; i++) { // on ne s'occcupe ni du cercle 0 ni du 6
             // i - 1 pcq la matrice commencent avec les coef du point 1
-
-            this.liste_cercle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + (TAILLE_COTE_PIECE_LONGUEUR * tab_coef_longeur[i - 1]));
-            this.liste_cercle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - min_taille * (tab_coef_hauteur[i - 1] - this.MARGE_HAUTEUR));
-
+            if (niveau == 4) {
+                this.liste_cercle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + (TAILLE_COTE_PIECE_LONGUEUR * tab_coef_longueur_approx[i - 1]));
+                this.liste_cercle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - min_taille * (tab_coef_hauteur_approx[i - 1] - this.MARGE_HAUTEUR));
+            }else{
+                this.liste_cercle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + (TAILLE_COTE_PIECE_LONGUEUR * tab_coef_longeur[i - 1]));
+                this.liste_cercle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - min_taille * (tab_coef_hauteur[i - 1] - this.MARGE_HAUTEUR));
+            }
         }
         //coloration des cercles pour nos tests de visualisations
         ajout_couleur_cercle();
@@ -473,12 +517,20 @@ public class Dents extends Forme_Bordure {
     //rempli la liste de cercle controle en fonction des cercle de la liste de cercle
     private void fill_list_cercle_controle() {
         for (int i = 0; i < this.liste_cercle_controle.size(); i++) { // car les points de controle sont cree 2 à 2
-            this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + (TAILLE_COTE_PIECE_LONGUEUR * tab_coef_longeur_controle[i]));
+            if (niveau == 4) {
+                this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + (TAILLE_COTE_PIECE_LONGUEUR * tab_coef_longueur_controle_approx[i]));
+            } else {
+                this.liste_cercle_controle.get(i).setLayoutX(this.liste_cercle.get(0).getLayoutX() + (TAILLE_COTE_PIECE_LONGUEUR * tab_coef_longeur_controle[i]));
+            }
             gestion_x_controle(i);
             if (i == 0 || i == this.liste_cercle_controle.size() - 1) { //premier et dernier point de controle
                 this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - min_taille * (tab_coef_hauteur_controle[i] - this.MARGE_HAUTEUR_CONTROLE));
             } else {
-                this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - min_taille * (tab_coef_hauteur_controle[i]- this.MARGE_HAUTEUR));
+                if (niveau == 4) {
+                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - min_taille * (tab_coef_hauteur_controle_approx[i] - this.MARGE_HAUTEUR));
+                } else {
+                    this.liste_cercle_controle.get(i).setLayoutY(this.liste_cercle.get(0).getLayoutY() - min_taille * (tab_coef_hauteur_controle[i] - this.MARGE_HAUTEUR));
+                }
             }
         }
     }

@@ -422,7 +422,7 @@ public class Controller_Fenetre  {
         int maxY = (int) p.getMaxY();
         PixelReader reader = image.getPixelReader();
         for (int i = minX; i < maxX; i++) {
-            for (int j = minX; j < maxY ; j++) {
+            for (int j = minY; j < maxY ; j++) {
                 Color c = reader.getColor(i, j);
                 if (c.getRed() > c.getGreen() && c.getRed() > c.getBlue()) {
                     cpt_red++;

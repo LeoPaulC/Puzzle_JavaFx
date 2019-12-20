@@ -17,7 +17,7 @@
     </padding>
     <children>
         <Label fx:id="txt_titre" style="-fx-background-color: #e4f5b5;" layoutX="70" layoutY="80" underline="true">
-            Choisissez les styles et les parametre de votre puzzle :
+            Choisissez les styles et les parametres de votre puzzle :
             <font>
                 <Font size="20.0"/>
             </font>

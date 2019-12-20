@@ -423,11 +423,10 @@ public class Piece extends Shape {
     }
 
     private Forme_Bordure randoms_Bordure(int i ,double hauteur , double longueur , ArrayList<Forme_Bordure> liste_bordure) {
-        //Main.consumer.accept("dans randoms_bordure");
         Forme_Bordure bordure;
         Random random = new Random();
-        int r =random.nextInt(2+ 1); // random entre
-        if ( r%2 == 0) {
+        int r =random.nextInt(2+ 1); // random entre en 0 et 1
+        if ( r%2 == 0) { // rand = 0 alors on cree une Dents
             if (i == DROITE) {
                 double angle = liste_bordure.get(HAUT).getAngle1();
                 if (liste_bordure.get(HAUT).getClass() == Dents.class) {
@@ -483,7 +482,7 @@ public class Piece extends Shape {
                 bordure = null; // si on arrive ici c'est pas bien
             }
         }
-        else{
+        else{ // rand = 1 alors on cree un Creux
             if (i == DROITE) {
                 double angle = liste_bordure.get(HAUT).getAngle1();
                 if (liste_bordure.get(HAUT).getClass() == Creux.class) {

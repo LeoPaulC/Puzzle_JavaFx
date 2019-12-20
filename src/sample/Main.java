@@ -261,3 +261,7 @@ public class Main extends Application {
     }
 
 }
+// TODO : derniere transformation de piece
+// TODO : collage de pieces
+// TODO : assemblage de pieces collées
+// TODO : chrono pour le temps de confection du puzzle (pas stocké en memoire)
