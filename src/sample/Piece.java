@@ -3,6 +3,7 @@ package sample;
 import javafx.beans.binding.NumberBinding;
 import javafx.event.EventHandler;
 import javafx.geometry.Point3D;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -24,8 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
-import static sample.Main.plateau;
-import static sample.Main.tab_pane;
+import static sample.Main.*;
 
 /**
  * il
@@ -37,7 +37,7 @@ import static sample.Main.tab_pane;
  * depart !!!!!!
  */
 public class Piece extends Shape {
-
+    // TODO : gerer le defaut de placement des bordure dans le cas du niveau 5
     // on calcule toutes les coordonnéées d'une piece par rapport au xC0 et yC0 de la bordure du Haut .
 
     /**
@@ -62,6 +62,8 @@ public class Piece extends Shape {
     private static final boolean DEFAULT_ISMOVABLE = true;
     private double posX = 0;
     private double posY = 0;
+    int i;
+    int j;
     private static final int DEFAULT_NIVEAU = 1;
     private int niveau = DEFAULT_NIVEAU;
 
@@ -79,6 +81,7 @@ public class Piece extends Shape {
     ArrayList<PathElement> liste_shape;
     double hauteur;
     double longueur;
+
 
     private double oldX;
     private double oldY;
@@ -254,6 +257,24 @@ public class Piece extends Shape {
         //Ajouter_evenement();
     }
 
+    public Piece(ArrayList<Forme_Bordure> liste_bordure, double x, double y, double hauteur1,double hauteur2, double longueur1,  double longueur2, int niveau, Pane pane, int i, int j) {
+        posX = x;
+        posY = y;
+        this.i= i;
+        this.j = j;
+        path = new Path();
+        tab_bordure = new Forme_Bordure[NOMBRE_COTE];
+        liste_cercle_controle = new ArrayList<Circle>();
+        liste_cercle = new ArrayList<Circle>();
+        liste_courbe = new ArrayList<CubicCurveTo>();
+        liste_shape = new ArrayList<PathElement>();
+        this.niveau = niveau;
+        this.panneau = pane;
+        fill_tab_bordure(liste_bordure, hauteur1, hauteur2, longueur1, longueur2);
+        fill_liste_cercle();
+        create_shapes();
+        //Ajouter_evenement();
+    }
     //prend en parametre une liste de Forme_Bordure précisant les contraintes de
     //chaque cote de la piece dans un puzzle==Plateau
     // si [ null , null , null, null ] alors aucune contrainte
@@ -273,6 +294,53 @@ public class Piece extends Shape {
         create_shapes();
     }
 
+    private void fill_tab_bordure(ArrayList<Forme_Bordure> liste_bordure, double hauteur1, double hauteur2, double longueur1, double longueur2) {
+        for (int i = 0; i < NOMBRE_COTE; i++) {
+            if (liste_bordure.get(i) == null) {
+                //si pas de contrainte alors on met une dent
+                // ou un creux mais pas de bordure plate --- pcq pas de bord
+                tab_bordure[i] = randoms_Bordure(i, hauteur1, hauteur2, longueur1, longueur2, liste_bordure);
+                if (i == DROITE) {
+                    gestion_placement(tab_bordure[i],i, hauteur2,longueur1);
+                } else if (i == BAS) {
+                    gestion_placement(tab_bordure[i],i, hauteur2,longueur2);
+                }
+            } else if (liste_bordure.get(i).getClass() == Dents.class) {
+                //Main.consumer.accept("listebordure.get(i).class == Dents");
+                ArrayList<Circle> liste1 = liste_bordure.get(i).getListe_cercle();
+                ArrayList<Circle> liste2 = liste_bordure.get(i).getListe_cercle_controle();
+                if (i == BAS || i == HAUT) {
+                    Collections.reverse(liste1);
+                    Collections.reverse(liste2);
+                }
+                tab_bordure[i]= new Creux(liste1,liste2); // pas besoin de la placer normalement
+
+            } else if (liste_bordure.get(i).getClass() == Creux.class) {
+                ArrayList<Circle> liste1 = liste_bordure.get(i).getListe_cercle();
+                ArrayList<Circle> liste2 = liste_bordure.get(i).getListe_cercle_controle();
+                if (i == BAS || i == HAUT) {
+                    Collections.reverse(liste1);
+                    Collections.reverse(liste2);
+                }
+                tab_bordure[i]= new Dents(liste1, liste2);
+            } else if (liste_bordure.get(i).getClass() == Bordure_Plate.class) {
+                if (i == HAUT) {
+                    tab_bordure[i] = new Bordure_Plate(i, posX ,posY, 0.0, longueur1);
+                    gestion_placement(tab_bordure[i],i,longueur1,0.0);
+                } else if (i == DROITE) {
+                    tab_bordure[i] = new Bordure_Plate(i, posX, posY, hauteur2, 0.0);
+                    gestion_placement(tab_bordure[i],i,hauteur2,0.0);
+                } else if (i == BAS) {
+                    tab_bordure[i] = new Bordure_Plate(i, posX, posY, hauteur1, longueur2);
+                    gestion_placement(tab_bordure[i],i, 0.0,longueur2);
+                }else{ // i == GAUCHE
+                    tab_bordure[i] = new Bordure_Plate(i, posX ,posY, hauteur1, 0.0);
+                    gestion_placement(tab_bordure[i],i,hauteur1,0.0);
+                }
+                //true pcq la bordure est plate
+            }
+        }
+    }
 
     /** Gerer la prise en compte des bordure de contraintes !!!! */
     private void fill_tab_bordure(ArrayList<Forme_Bordure> liste_bordure, double hauteur, double longueur) {
@@ -398,6 +466,36 @@ public class Piece extends Shape {
             setListControleOnList(forme_bordure);
         }
     }
+    private void setListOnListNFL(Forme_Bordure forme_bordure) { // No First and Last
+        ArrayList<Circle> listC = new ArrayList<Circle>(forme_bordure.getListe_cercle());
+        //liste cercle
+        for (int i = 1; i < listC.size() -1 ; i++) { //on ne met ni le emier ni le dernier point
+            this.liste_cercle.add(listC.get(i));
+        }
+        if (!forme_bordure.getEst_plat()) {
+            setListControleOnList(forme_bordure);
+        }
+    }
+    private void setListOnListAll(Forme_Bordure forme_bordure) {
+        ArrayList<Circle> listC = new ArrayList<Circle>(forme_bordure.getListe_cercle());
+        //liste cercle
+        for (int i = 0; i < listC.size() ; i++) { //on met tout les points
+            this.liste_cercle.add(listC.get(i));
+        }
+        if (!forme_bordure.getEst_plat()) {
+            setListControleOnList(forme_bordure);
+        }
+    }
+    private void setListOnListByFirst(Forme_Bordure forme_bordure) {
+        ArrayList<Circle> listC = new ArrayList<Circle>(forme_bordure.getListe_cercle());
+        //liste cercle
+        for (int i = 1; i < listC.size() ; i++) { //on ne met pas le premier point pour eviter les doublons
+            this.liste_cercle.add(listC.get(i));
+        }
+        if (!forme_bordure.getEst_plat()) {
+            setListControleOnList(forme_bordure);
+        }
+    }
 
     private void setListControleOnList(Forme_Bordure forme_bordure) {
         ArrayList<Circle> listCC = new ArrayList<Circle>(forme_bordure.getListe_cercle_controle());
@@ -416,10 +514,131 @@ public class Piece extends Shape {
                     Collections.reverse(tab_bordure[i].liste_cercle_controle);
                 }
             }
-            setListOnList(tab_bordure[i]);
+            if (niveau == 5) {
+                if (i % 2 == 0) { // HAUT et BAS -> 0 et 2
+                    setListOnListAll(tab_bordure[i]);
+                }else{
+                    setListOnListNFL(tab_bordure[i]);
+                }
+            }else{
+                setListOnList(tab_bordure[i]);
+            }
         }
         //dernier point == premier point donc ajoute le tout premier point en plus
         this.liste_cercle.add(this.liste_cercle.get(0));
+    }
+
+    private Forme_Bordure randoms_Bordure(int i, double hauteur1, double hauteur2, double longueur1, double longueur2, ArrayList<Forme_Bordure> liste_bordure) {
+        Forme_Bordure bordure;
+        Random random = new Random();
+        double min = getMin(hauteur1, hauteur2, longueur1, longueur2);
+        int r = random.nextInt(2 + 1); // random entre en 0 et 1
+        if (r % 2 == 0) { // rand = 0 alors on cree une Dents
+            if (i == DROITE) {
+                double angle = liste_bordure.get(HAUT).getAngle1();
+                if (liste_bordure.get(HAUT).getClass() == Dents.class) {
+                    bordure = new Dents(i, posX, posY, hauteur2, min, niveau, bordure_Plate_Possede(liste_bordure), -angle);
+                } else {
+                    bordure = new Dents(i, posX, posY, hauteur2, min, niveau, bordure_Plate_Possede(liste_bordure), angle);
+                }
+            } else if (i == BAS) {
+                if (tab_bordure[DROITE].getClass() == Creux.class && liste_bordure.get(GAUCHE).getClass() == Creux.class) {
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    bordure = new Dents(i, posX, posY, min, longueur2, niveau, bordure_Plate_Possede(liste_bordure), angle1, angle2);
+                } else if (tab_bordure[DROITE].getClass() == Creux.class && liste_bordure.get(GAUCHE).getClass() == Dents.class) {
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    bordure = new Dents(i, posX, posY, min, longueur2, niveau, bordure_Plate_Possede(liste_bordure), angle1, -angle2);
+                } else if (tab_bordure[DROITE].getClass() == Dents.class && liste_bordure.get(GAUCHE).getClass() == Dents.class) {
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    bordure = new Dents(i, posX, posY, min, longueur2, niveau, bordure_Plate_Possede(liste_bordure), -angle1, -angle2);
+                } else if (tab_bordure[DROITE].getClass() == Dents.class && liste_bordure.get(GAUCHE).getClass() == Creux.class) {
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    bordure = new Dents(i, posX, posY, min, longueur2, niveau, bordure_Plate_Possede(liste_bordure), -angle1, angle2);
+                } else if (tab_bordure[DROITE].getClass() == Bordure_Plate.class) {
+                    double angle1 = 0.0;
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    if (liste_bordure.get(GAUCHE).getClass() == Creux.class) { // dents Bordure_plate
+                        bordure = new Dents(i, posX, posY, min, longueur2, niveau, bordure_Plate_Possede(liste_bordure), angle1, angle2);
+                    } else { //GAUCHE == Dents
+                        bordure = new Dents(i, posX, posY, min, longueur2, niveau, bordure_Plate_Possede(liste_bordure), angle1, -angle2);
+                    }
+                } else if (liste_bordure.get(GAUCHE).getClass() == Bordure_Plate.class) {
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = 0.0;
+                    if (tab_bordure[DROITE].getClass() == Creux.class) { // dents Bordure_plate
+                        bordure = new Dents(i, posX, posY, min, longueur2, niveau, bordure_Plate_Possede(liste_bordure), angle1, angle2);
+                    } else { //GAUCHE == Dents
+                        bordure = new Dents(i, posX, posY, min, longueur2, niveau, bordure_Plate_Possede(liste_bordure), -angle1, -angle2);
+                    }
+                } else { //CAS TERMINAL !!! // faut pas arriver ici chef // soit GAUCHE soit HAUT
+                    double angle1 = 0.0;
+                    double angle2 = 0.0;
+                    bordure = new Dents(i, posX, posY, hauteur1, longueur1, niveau, bordure_Plate_Possede(liste_bordure), angle1, angle2);
+                }
+            } else {
+                bordure = null; // si on arrive ici c'est pas bien
+            }
+        } else { // rand = 1 alors on cree un Creux
+            if (i == DROITE) {
+                double angle = liste_bordure.get(HAUT).getAngle1();
+                if (liste_bordure.get(HAUT).getClass() == Creux.class) {
+                    bordure = new Creux(new Dents(i, posX, posY, hauteur2, min, niveau, bordure_Plate_Possede(liste_bordure), -angle));
+                } else {
+                    bordure = new Creux(new Dents(i, posX, posY, hauteur2, min, niveau, bordure_Plate_Possede(liste_bordure), angle));
+                }
+            } else if (i == BAS) {
+                if (tab_bordure[DROITE].getClass() == Creux.class && liste_bordure.get(GAUCHE).getClass() == Creux.class) {
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    bordure = new Creux(new Dents(i, posX, posY, min, longueur2, niveau, bordure_Plate_Possede(liste_bordure), -angle1, -angle2));
+                } else if (tab_bordure[DROITE].getClass() == Creux.class && liste_bordure.get(GAUCHE).getClass() == Dents.class) {
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    bordure = new Creux(new Dents(i, posX, posY, min, longueur2, niveau, bordure_Plate_Possede(liste_bordure), -angle1, angle2));
+                } else if (tab_bordure[DROITE].getClass() == Dents.class && liste_bordure.get(GAUCHE).getClass() == Dents.class) {
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    bordure = new Creux(new Dents(i, posX, posY, min, longueur2, niveau, bordure_Plate_Possede(liste_bordure), angle1, angle2));
+                } else if (tab_bordure[DROITE].getClass() == Dents.class && liste_bordure.get(GAUCHE).getClass() == Creux.class) {
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    bordure = new Creux(new Dents(i, posX, posY, min, longueur2, niveau, bordure_Plate_Possede(liste_bordure), angle1, -angle2));
+                } else if (tab_bordure[DROITE].getClass() == Bordure_Plate.class) {
+                    double angle1 = 0.0;
+                    double angle2 = liste_bordure.get(GAUCHE).getAngle1();
+                    if (liste_bordure.get(GAUCHE).getClass() == Creux.class) { // dents Bordure_plate
+                        bordure = new Creux(new Dents(i, posX, posY, min, longueur2, niveau, bordure_Plate_Possede(liste_bordure), angle1, -angle2));
+                    } else { //GAUCHE == Dents
+                        bordure = new Creux(new Dents(i, posX, posY, min, longueur2, niveau, bordure_Plate_Possede(liste_bordure), angle1, angle2));
+                    }
+                } else if (liste_bordure.get(GAUCHE).getClass() == Bordure_Plate.class) {
+                    double angle1 = tab_bordure[DROITE].getAngle1();
+                    double angle2 = 0.0;
+                    if (tab_bordure[DROITE].getClass() == Creux.class) { // dents Bordure_plate
+                        bordure = new Creux(new Dents(i, posX, posY, min, longueur2, niveau, bordure_Plate_Possede(liste_bordure), -angle1, angle2));
+                    } else { //GAUCHE == Dents
+                        bordure = new Creux(new Dents(i, posX, posY, min, longueur2, niveau, bordure_Plate_Possede(liste_bordure), angle1, angle2));
+                    }
+                } else { // CAS TERMINAL !!!! // faut pas arriver ici chef // SOIT HAUT SOIT GAUCHE
+                    double angle1 = 0.0;
+                    double angle2 = 0.0;
+                    bordure = new Creux(new Dents(i, posX, posY, hauteur1, longueur1, niveau, bordure_Plate_Possede(liste_bordure), angle1, angle2));
+                }
+            } else {
+                bordure = null; // si on arrive ici c'est pas bien
+            }
+        }
+        return bordure;
+    }
+
+    private double getMin(double hauteur1, double hauteur2, double longueur1, double longueur2) {
+        double min1 = Math.min(hauteur1, hauteur2);
+        double min2 = Math.min(longueur1, longueur2);
+        return Math.min(min1, min2);
     }
 
     private Forme_Bordure randoms_Bordure(int i ,double hauteur , double longueur , ArrayList<Forme_Bordure> liste_bordure) {
@@ -541,7 +760,6 @@ public class Piece extends Shape {
         return bordure;
     }
 
-    // TODO: gerer cette fonction pour quelle renvoie true ssi bordurePlate a droite ou en Bas
     private boolean bordure_Plate_Possede(ArrayList<Forme_Bordure> liste_bordure) {
         boolean res = false;
         /*for (Forme_Bordure bordure : liste_bordure) {
@@ -565,6 +783,9 @@ public class Piece extends Shape {
         }
     }
 
+    private void gestion_placement(Forme_Bordure forme_bordure, int cote, double longueur) {
+
+    }
     // s'occupe de placer une Formes_Bordure sur la piece en fonction du cote
     private void gestion_placement(Forme_Bordure forme_bordure, int cote) {
         if (!forme_bordure.getEst_plat()) {
@@ -575,6 +796,90 @@ public class Piece extends Shape {
             int coefficient_y_translation = recup_Coefficient_Translation(false,cote, forme_bordure.getEst_plat());
             translation(forme_bordure, coefficient_x_translation, coefficient_y_translation);
         }
+    }
+
+    private void gestion_placement(Forme_Bordure forme_bordure, int cote, double h, double l) {
+
+        consumer.accept("layout de forme bordure :" + forme_bordure.liste_cercle.get(0).getLayoutX());
+        consumer.accept("piece: " + i + "," + j);
+        if (!forme_bordure.getEst_plat()) {
+            int angle = recup_Angle_Rotation(cote);
+            Circle pivot = recup_Indice_Pivot(cote);
+            rotation(forme_bordure, angle, pivot);
+            int coefficient_x_translation = recup_Coefficient_Translation(true,cote, forme_bordure.getEst_plat());
+            int coefficient_y_translation = recup_Coefficient_Translation(false,cote, forme_bordure.getEst_plat());
+            if (cote == BAS  ) {
+                double posBas = getPosX(false);
+                consumer.accept("voy a decalure");
+                decalageBordureX(forme_bordure, posBas);
+                consumer.accept("!!!!! pos point 0 apres decalage : " + forme_bordure.liste_cercle.get(0).getLayoutX());
+            }
+            translation(forme_bordure, coefficient_x_translation, coefficient_y_translation,h,l);
+        }else{
+            if (cote == BAS) {
+                double posBas = getPosX(false);
+                decalageBordureX(forme_bordure,posBas);
+                int coefficient_x_translation = recup_Coefficient_Translation(true,cote, forme_bordure.getEst_plat());
+                int coefficient_y_translation = recup_Coefficient_Translation(false,cote, forme_bordure.getEst_plat());
+                translation(forme_bordure, coefficient_x_translation, coefficient_y_translation,h,l);
+            }
+        }
+    }
+
+    //decale la bordure en posx
+    private void decalageBordureX(Forme_Bordure forme_bordure, double pos_x) {
+        if (forme_bordure.getEst_plat()) {
+            double diff = pos_x  - forme_bordure.liste_cercle.get(0).getLayoutX();
+            for (int i = 0; i < forme_bordure.liste_cercle.size(); i++) {
+                forme_bordure.liste_cercle.get(i).setLayoutX(forme_bordure.liste_cercle.get(i).getLayoutX()+diff);
+            }
+        }
+        consumer.accept("pos x :"+pos_x);
+        consumer.accept("layout:"+forme_bordure.liste_cercle.get(0).getLayoutX());
+        double diff = pos_x  - forme_bordure.liste_cercle.get(0).getLayoutX();
+        consumer.accept("pos x - layout:"+diff);
+        for (int i = 0; i < forme_bordure.liste_cercle.size(); i++) {
+            forme_bordure.liste_cercle.get(i).setLayoutX(forme_bordure.liste_cercle.get(i).getLayoutX()+diff);
+        }
+        if (!forme_bordure.getEst_plat()) {
+            for (int i = 0; i < forme_bordure.liste_cercle_controle.size(); i++) {
+                forme_bordure.liste_cercle_controle.get(i).setLayoutX(forme_bordure.liste_cercle_controle.get(i).getLayoutX() +diff);
+            }
+        }
+
+    }
+
+    private double getPosY(boolean premier) {
+        double res = 0.0;
+        int target = j;
+        if( !premier) target++;
+        for (int m = 0; m < Plateau.tab_hauteur[0].length; m++) {
+            for (int k = 0; k < Plateau.tab_hauteur.length; k++) {
+                if (k == i && m == target) {
+                    break;
+                }
+                if (m == target) {
+                    res += Plateau.tab_hauteur[k][m];
+                }
+            }
+        }
+        return res;
+    }
+    private double getPosX(boolean premier) {
+        double res = 0.0;
+        int target = i;
+        if( !premier) target++;
+        for (int k = 0; k < Plateau.tab_longueur.length; k++) {
+            for (int m = 0; m < Plateau.tab_longueur[0].length; m++) {
+                if (k == target && m == j) {
+                    return res;
+                }
+                if (k == target) {
+                    res += Plateau.tab_longueur[k][m];
+                }
+            }
+        }
+        return res;
     }
 
 
@@ -617,19 +922,40 @@ public class Piece extends Shape {
         y = xm * Math.sin(rot) + ym * Math.cos(rot) + o.getLayoutY();
         return new Point((int) x, (int) y);
     }
-
-    //effectue une translation verticale et/ou horizontale
-    private void translation(Forme_Bordure forme_bordure, int coefficient_X, int coefficient_Y) {
+    private void translation(Forme_Bordure forme_bordure, int coefficient_X, int coefficient_Y,double h, double l) {
         for (int i = 0; i < forme_bordure.liste_cercle.size(); i++) {
-            Point p = calcul_translation(forme_bordure.liste_cercle.get(i), coefficient_X, coefficient_Y);
-            forme_bordure.liste_cercle.get(i).setLayoutX(p.x);
-            forme_bordure.liste_cercle.get(i).setLayoutY(p.y);
+            //Point p = calcul_translation(forme_bordure.liste_cercle.get(i), coefficient_X, coefficient_Y);
+            double x = calcul_translation_X(forme_bordure.liste_cercle.get(i), coefficient_X,l);
+            double y = calcul_translation_Y(forme_bordure.liste_cercle.get(i), coefficient_Y,h);
+            forme_bordure.liste_cercle.get(i).setLayoutX(x);
+            forme_bordure.liste_cercle.get(i).setLayoutY(y);
         }
         if (!forme_bordure.getEst_plat()) {
             for (int i = 0; i < forme_bordure.liste_cercle_controle.size(); i++) {
-                Point p = calcul_translation(forme_bordure.liste_cercle_controle.get(i), coefficient_X, coefficient_Y);
-                forme_bordure.liste_cercle_controle.get(i).setLayoutX(p.x);
-                forme_bordure.liste_cercle_controle.get(i).setLayoutY(p.y);
+                //Point p = calcul_translation(forme_bordure.liste_cercle_controle.get(i), coefficient_X, coefficient_Y);
+                double x = calcul_translation_X(forme_bordure.liste_cercle_controle.get(i), coefficient_X,l);
+                double y = calcul_translation_Y(forme_bordure.liste_cercle_controle.get(i), coefficient_Y,h);
+                forme_bordure.liste_cercle_controle.get(i).setLayoutX(x);
+                forme_bordure.liste_cercle_controle.get(i).setLayoutY(y);
+            }
+        }
+    }
+    //effectue une translation verticale et/ou horizontale
+    private void translation(Forme_Bordure forme_bordure, int coefficient_X, int coefficient_Y) {
+        for (int i = 0; i < forme_bordure.liste_cercle.size(); i++) {
+            //Point p = calcul_translation(forme_bordure.liste_cercle.get(i), coefficient_X, coefficient_Y);
+            double x = calcul_translation_X(forme_bordure.liste_cercle.get(i), coefficient_X);
+            double y = calcul_translation_Y(forme_bordure.liste_cercle.get(i), coefficient_Y);
+            forme_bordure.liste_cercle.get(i).setLayoutX(x);
+            forme_bordure.liste_cercle.get(i).setLayoutY(y);
+        }
+        if (!forme_bordure.getEst_plat()) {
+            for (int i = 0; i < forme_bordure.liste_cercle_controle.size(); i++) {
+                //Point p = calcul_translation(forme_bordure.liste_cercle_controle.get(i), coefficient_X, coefficient_Y);
+                double x = calcul_translation_X(forme_bordure.liste_cercle_controle.get(i), coefficient_X);
+                double y = calcul_translation_Y(forme_bordure.liste_cercle_controle.get(i), coefficient_Y);
+                forme_bordure.liste_cercle_controle.get(i).setLayoutX(x);
+                forme_bordure.liste_cercle_controle.get(i).setLayoutY(y);
             }
         }
     }
@@ -640,6 +966,26 @@ public class Piece extends Shape {
         x = c.getLayoutX() + (coef_x * longueur);
         y = c.getLayoutY() + (coef_y * hauteur);
         return new Point((int) x, (int) y);
+    }
+    private double calcul_translation_X(Circle c, int coef_x) {
+        double x;/**ne pas utiliser la  hauteur de la bordure mais de la piece MORRAY !!!! */
+        x = c.getLayoutX() + (coef_x * longueur);
+        return x;
+    }
+    private double calcul_translation_X(Circle c, int coef_x, double l) {
+        double x;/**ne pas utiliser la  hauteur de la bordure mais de la piece MORRAY !!!! */
+        x = c.getLayoutX() + (coef_x * l);
+        return x;
+    }
+    private double calcul_translation_Y(Circle c, int coef_y) {
+        double y;/**ne pas utiliser la  hauteur de la bordure mais de la piece MORRAY !!!! */
+        y = c.getLayoutY() + (coef_y * hauteur);
+        return y;
+    }
+    private double calcul_translation_Y(Circle c, int coef_y, double h) {
+        double y;/**ne pas utiliser la  hauteur de la bordure mais de la piece MORRAY !!!! */
+        y = c.getLayoutY() + (coef_y * h);
+        return y;
     }
 
     //renvoie la valeur du coef de translation horizontal x du cote POSITION

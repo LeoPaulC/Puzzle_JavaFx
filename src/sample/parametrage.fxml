@@ -74,6 +74,11 @@
                         <Insets left="30.0"/>
                     </HBox.margin>
                 </RadioButton>
+                <RadioButton fx:id="radioButton5" text="5" toggleGroup="$group"  onAction="#on_radio">
+                    <HBox.margin>
+                        <Insets left="30.0"/>
+                    </HBox.margin>
+                </RadioButton>
             </children>
         </HBox>
 

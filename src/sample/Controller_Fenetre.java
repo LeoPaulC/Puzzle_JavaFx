@@ -91,6 +91,7 @@ public class Controller_Fenetre  {
     @FXML private RadioButton radioButton2;
     @FXML private RadioButton radioButton3;
     @FXML private RadioButton radioButton4;
+    @FXML private RadioButton radioButton5;
 
     public Controller_Fenetre() {
         this.stage = Main.getPrimary_Stage();
@@ -775,6 +776,9 @@ public class Controller_Fenetre  {
             niveau = 3;
         } else if(radioButton4.isSelected()) {
             niveau = 4;
+        }
+        else if(radioButton5.isSelected()) {
+            niveau = 5;
         }
         txt_niveau.setText(String.valueOf(niveau));
     }

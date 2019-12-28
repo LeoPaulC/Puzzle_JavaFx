@@ -43,8 +43,7 @@ public class Forme_Bordure extends Shape {
     static double TAILLE_COTE_PIECE_LONGUEUR = 50;
     static double MIN_TAILLE = 20 ; // taille minimale entre
 
-    private double longueur_appendice;
-    private double hauteur_appendice;
+
 
 
     // angle de rotation des cercles de controle pour deformation de cadre (locale)
@@ -196,6 +195,7 @@ public class Forme_Bordure extends Shape {
     public static int getNbCercleControleBordure() {
         return NB_CERCLE_CONTROLE_BORDURE;
     }
+
 
 
 }

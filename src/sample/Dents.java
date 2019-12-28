@@ -54,6 +54,7 @@ public class Dents extends Forme_Bordure {
     private boolean est_dernier = false; // sert pour deformation de cadre si tte fois on est sur la derniere ligne du plateau
     private boolean est_approximable = false; // sert pour la derniere deformation, l'approximation des points d'une bordure
 
+
     public Dents(int cote, double x, double y, double hauteur, double longueur, int niveau , double angle2) {
         super(est_plat);
         //Main.consumer.accept("dans Dents avec niveau");
@@ -73,6 +74,8 @@ public class Dents extends Forme_Bordure {
         ajout_decalage();
         ajout_deformation_cadre_locale();
     }
+
+
     // determine si la bordure se trouve a la derniere ligne du plateau
     private void check_dernier() {
         if (this.cote == Piece.DROITE) {
@@ -112,8 +115,6 @@ public class Dents extends Forme_Bordure {
         setTailleCotePieceHauteur(hauteur);
         setTailleCotePieceLongueur(longueur);
         init_MinTaille(hauteur,longueur);
-        //setHauteur_appendice(Math.min(hauteur, longueur));
-        //setLongueur_appendice(Math.min(hauteur, longueur));
         gestion_dimension_bordure();
         fill_liste_cercle();
         fill_list_cercle_controle();
@@ -153,6 +154,24 @@ public class Dents extends Forme_Bordure {
         setTailleCotePieceHauteur(hauteur);
         setTailleCotePieceLongueur(longueur);
         init_MinTaille(hauteur,longueur);
+        gestion_niveau();
+        gestion_dimension_bordure();
+        fill_liste_cercle();
+        fill_list_cercle_controle();
+        ajout_decalage();
+        ajout_deformation_cadre_locale();
+    }
+
+    public Dents(int cote, double x, double y, double hauteur1, double hauteur2, double longueur1, double longueur2, int niveau, boolean dernier, double angle2) {
+        super(est_plat);
+        Main.consumer.accept("dans Dents avec hauteur 1 2 et longueur 1 2 et angle 2");
+        posY = y;
+        posX = x;
+        this.cote = cote;
+        this.niveau = niveau;
+        check_dernier();
+        this.setAngle2(angle2);
+        init_MinTaille(hauteur1, hauteur2, longueur1, longueur2);
         gestion_niveau();
         gestion_dimension_bordure();
         fill_liste_cercle();
@@ -243,6 +262,11 @@ public class Dents extends Forme_Bordure {
         this.min_taille =Math.min(hauteur, longueur);
     }
 
+    private void init_MinTaille(double hauteur1, double hauteur2, double longueur1, double longueur2) {
+        double min1 = Math.min(hauteur1, longueur1);
+        double min2 = Math.min(hauteur2, longueur2);
+        this.min_taille = Math.min(min1, min2);
+    }
     private void ajout_decalage(){
         if (!est_decalable) {
             return;
@@ -306,14 +330,21 @@ public class Dents extends Forme_Bordure {
             this.MARGE_HAUTEUR = 0;
             this.MARGE_HAUTEUR_CONTROLE = 0;
             est_approximable = true;
-            this.tab_coef_longueur_approx = new double[tab_coef_longeur.length];
-            this.tab_coef_hauteur_approx = new double[tab_coef_hauteur.length];
-            this.tab_coef_hauteur_controle_approx = new double[tab_coef_hauteur_controle.length];
-            this.tab_coef_longueur_controle_approx = new double[tab_coef_longeur_controle.length];
-            // on recopie le premier et dernier cercle de controle car on ne fait pas de deformation dessus ni sur les cercle 0 et 6
-            fill_tab_ceof_approx();
-            fill_tab_coef_controle_approx();
+            gestion_niveau4();
+        } else if (this.niveau == 5) {
+            this.MARGE_HAUTEUR = 0;
+            this.MARGE_HAUTEUR_CONTROLE = 0;
         }
+    }
+
+    private void gestion_niveau4() {
+        this.tab_coef_longueur_approx = new double[tab_coef_longeur.length];
+        this.tab_coef_hauteur_approx = new double[tab_coef_hauteur.length];
+        this.tab_coef_hauteur_controle_approx = new double[tab_coef_hauteur_controle.length];
+        this.tab_coef_longueur_controle_approx = new double[tab_coef_longeur_controle.length];
+        // on recopie le premier et dernier cercle de controle car on ne fait pas de deformation dessus ni sur les cercle 0 et 6
+        fill_tab_ceof_approx();
+        fill_tab_coef_controle_approx();
     }
     //rempli le tab de longueur approx si on est dans le niveau 4 en fonction du tab de base et d'une approximation
     private void fill_tab_ceof_approx() {
@@ -462,6 +493,23 @@ public class Dents extends Forme_Bordure {
     private void gestion_dimension_bordure() {
         if (this.cote == Piece.HAUT || this.cote == Piece.BAS) {
             // pas de changemetn pour largeur_bordure ni hauteur_bordure
+        } else if (this.cote == Piece.GAUCHE || this.cote == Piece.DROITE) {
+            //notre bordure est a la verticale et on doit s'occuper de l'axe des x pour l'inversion
+
+            double hauteur = Forme_Bordure.getTailleCotePieceHauteur();
+            double longueur = Forme_Bordure.getTailleCotePieceLongueur();
+            // on passe la hauteur en longueur
+            setTailleCotePieceLongueur(hauteur);
+            // et inversemement
+            setTailleCotePieceHauteur(longueur);
+        }
+    }
+    // gerer les dimension des bordure dans le cas du niveau 5
+    private void gestion_dimension_bordure_niveau5() {
+        if (this.cote == Piece.HAUT ) {
+
+        } else if (this.cote == Piece.BAS) {
+
         } else if (this.cote == Piece.GAUCHE || this.cote == Piece.DROITE) {
             //notre bordure est a la verticale et on doit s'occuper de l'axe des x pour l'inversion
 
