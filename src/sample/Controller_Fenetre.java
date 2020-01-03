@@ -657,7 +657,6 @@ public class Controller_Fenetre  {
                 consumer.accept("Layout de la piece posé : "+p.path.getLayoutX()+";"+p.path.getLayoutY());
                 if (p.panneau == tab_pane[0] || p.panneau == pane_assemblage) { // null si normale
                     consumer.accept("piece du panneau principal");
-                    // TODO : gestion du collage de piece
 
                     if (p.path.getLayoutX() <= MARGE_ASSEMBLAGE && p.path.getLayoutX() >= -MARGE_ASSEMBLAGE) {
                         if (p.path.getLayoutY() <= MARGE_ASSEMBLAGE && p.path.getLayoutY() >= -MARGE_ASSEMBLAGE) {
@@ -670,14 +669,22 @@ public class Controller_Fenetre  {
                         }
                     }
                     if (p.isMovable) { // si la piece n'a pas ete place dans son emplacement
-                        //a alorss on regarde si on doit la groupe avec d'autre piece
+                        //a alors on regarde si on doit la grouper avec d'autre piece
+                        // TODO : gestion du collage de piece avec un groupe deja existant
 
                         consumer.accept("i "+ p.i +"  j "+p.j);
                         consumer.accept(" verfication du collage externe");
-                        Piece p_match = checkMatchPiece(p);
-                        if (p_match != null) {
-                            consumer.accept("une piece a ete matché ");
-                            createGroup(p, p_match);
+                        Group group = checkMatchGroup(p);
+                        if (group != null) {
+                            consumer.accept(" un group a ete matche");
+                            createGroup(p, group);
+                        }
+                        else{
+                            Piece p_match = checkMatchPiece(p);
+                            if (p_match != null) {
+                                consumer.accept("une piece a ete matché ");
+                                createGroup(p, p_match);
+                            }
                         }
                     }
                 }else if(p.panneau == tab_pane[1] || p.panneau == tab_pane[2] || p.panneau == tab_pane[3] || p.panneau == tab_pane[4]){ // gestion du drag and drop
@@ -716,6 +723,8 @@ public class Controller_Fenetre  {
 
     private void creatGroup(Group g1, Group g2) {
         consumer.accept("creation de groupe par 2 groupes ");
+        consumer.accept("g1 size "+g1.getChildren().size());
+        consumer.accept("g2 size "+g2.getChildren().size());
         Group group = new Group();
         g1.setLayoutX(g2.getLayoutY());
         g1.setLayoutY(g2.getLayoutY());
@@ -744,6 +753,23 @@ public class Controller_Fenetre  {
         g1 = null;
         g2 = null;
         // ajout du nouveau groupe
+        pane_assemblage.getChildren().add(group);
+        list_group.add(group);
+    }
+
+    // on ajoute une piece a un group
+    private void createGroup(Piece p, Group group) {
+        consumer.accept("dans create group (g,g)");
+        Piece piece_copy = new Piece(p);
+        piece_copy.path.setFill(p.path.getFill());
+        piece_copy.i = p.i;
+        piece_copy.j = p.j;
+        pane_assemblage.getChildren().remove(group);
+        list_group.remove(group);
+        group.getChildren().add(piece_copy.path);
+        list_piece_group.add(piece_copy);
+        list_piece.remove(p);
+        pane_assemblage.getChildren().remove(p.path);
         pane_assemblage.getChildren().add(group);
         list_group.add(group);
     }
@@ -782,24 +808,10 @@ public class Controller_Fenetre  {
             }
         }
         consumer.accept("ajout des handler au group");
-        //list_piece_group.add(plateau.tab[r1.i][r1.j]);list_piece_group.add(plateau.tab[r2.i][r2.j]);
         list_piece_group.add(rect_copy1);list_piece_group.add(rect_copy2);
         list_piece.remove(r1);list_piece.remove(r2);
         pane_assemblage.getChildren().remove(r1.path);
         pane_assemblage.getChildren().remove(r2.path);
-        /*rect_copy1.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent mouseEvent) {
-                consumer.accept("piece 1 ");
-            }
-        });
-        rect_copy2.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent mouseEvent) {
-                consumer.accept("piece 2");
-            }
-        });
-         */
         list_group.add(group);
         pane_assemblage.getChildren().add(group);
     }
@@ -833,8 +845,10 @@ public class Controller_Fenetre  {
                 consumer.accept("layout group x: "+group.getLayoutX());
                 consumer.accept("layout group y: "+group.getLayoutY());
                 checkPlacemetnGroup(group);
-                checkCollageGroup(group);
                 gestion_fin_jeu();
+                if (!isFinished()) {
+                    checkCollageGroup(group);
+                }
             }
         });
     }
@@ -906,11 +920,7 @@ public class Controller_Fenetre  {
     private boolean isAdjacentGroup(Group g1, Group g2) {
         consumer.accept("dans is adjacent group");
         for (Piece piece : list_piece_group) {
-            consumer.accept("unepiece");
             for (int k = 0; k < g2.getChildren().size(); k++) {
-                consumer.accept("unchild");
-                //if (g2.getChildren().get(k).getClass() == Piece.class) {
-                  //  consumer.accept("child=piece");
                     if (piece.path == g2.getChildren().get(k)) {
                         consumer.accept("on a recup une piece du groupe");
                         if (isPieceVoisine(g1, piece)) {
@@ -918,10 +928,6 @@ public class Controller_Fenetre  {
                             return true;
                         }
                     }
-                    //if (isPieceVoisine(g1, (Piece) g2.getChildren().get(k))) {
-                    //   return true;
-                    //}
-               // }
             }
         }
         return false;
@@ -935,8 +941,8 @@ public class Controller_Fenetre  {
                 if (g.getChildren().get(k) == piece.path) {
                     int i = piece.i;
                     int j = piece.j;
-                    consumer.accept(" i,j piece_g" + i + "," + j);
-                    consumer.accept(" i,j piece  p" + p.i + "," + p.j);
+                    //consumer.accept(" i,j piece_g" + i + "," + j);
+                    //consumer.accept(" i,j piece  p" + p.i + "," + p.j);
                     if ((p.i == i - 1 && p.j == j) || (p.i == i + 1 && p.j == j) || (p.i == i && p.j == j - 1) || (p.i == i && p.j == j + 1)) {
                         //piece du dessus/dessous/gauche/droite
                         consumer.accept(" on a trouvé deux pieces voisines");
@@ -949,6 +955,23 @@ public class Controller_Fenetre  {
         return false;
     }
 
+    private Group checkMatchGroup(Piece p) {
+        int i = p.i;
+        int j = p.j;
+        //on regarde si la translation de la piece correspond a celle d'un group
+        for (Group group : list_group) {
+            if (p.path.getLayoutX() - 10 < group.getLayoutX() && group.getLayoutX() < p.path.getLayoutX() + 10) {
+                if (p.path.getLayoutY() - 10 < group.getLayoutY() && group.getLayoutY() < p.path.getLayoutY() + 10) {
+                    // alors la piece et le group ont la meme translation
+                    //aimantation
+                    p.path.setLayoutX(group.getLayoutX());
+                    p.path.setLayoutY(group.getLayoutY());
+                    return group;
+                }
+            }
+        }
+        return null;
+    }
 
     //regarde si p est place pres d'une de ses 4 piece adjacentes
     private Piece checkMatchPiece(Piece p) {
